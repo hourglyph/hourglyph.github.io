@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import Heatmap from '../components/Heatmap.astro';
+import LoadViews from '../components/LoadViews.astro';
 import Insights from '../components/Insights.astro';
 import ZoneList from '../components/ZoneList.astro';
 import I18nData from '../components/I18nData.astro';
@@ -51,7 +51,7 @@ const shape =
   </p>
 
   <h2>{ru ? `Карта нагрузки ${zone.ru.by}` : `Claude Code heatmap in ${zone.en.name}`}</h2>
-  <div class="card"><Heatmap lang={lang} cells={snap.all} tz={zone.tz} zoneLabel={`${zone[lang].name} · ${abbr} · ${fmtOffset(offset)}`} /></div>
+  <LoadViews lang={lang} cells={snap.all} countries={snap.countries} tz={zone.tz} zoneLabel={`${zone[lang].name} · ${abbr} · ${fmtOffset(offset)}`} />
 
   <h2>{ru ? `Пиковые и спокойные часы ${zone.ru.by}` : `Peak and quiet hours in ${zone.en.name}`}</h2>
   <Insights lang={lang} cells={snap.all} tz={zone.tz} zonePhrase={phrase} />

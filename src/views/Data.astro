@@ -14,7 +14,7 @@ const ru = lang === 'ru';
 const meta = page('data');
 const snap = await getSnapshot();
 const curl = `curl '${SUPABASE_URL}/rest/v1/heatmap?select=*' \\\n  -H 'apikey: ${SUPABASE_KEY}'`;
-const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0', weekday: '0=Sunday … 6=Saturday, UTC', stats: { total: snap.stats.total }, all: [{ utc_weekday: 2, utc_hour: 14, total: 0 }], last_30d: ['…'] }, null, 2);
+const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0', weekday: '0=Sunday … 6=Saturday, UTC', stats: { total: snap.stats.total }, all: [{ utc_weekday: 2, utc_hour: 14, total: 0 }], last_30d: ['…'], countries: [{ country: 'DE', total: 0 }] }, null, 2);
 ---
 <Base lang={lang} page={meta} jsonLd={[datasetJsonLd(lang, snap.stats)]} crumbs={[{ name: ru ? 'Данные' : 'Data', path: meta.path }]}>
   <h1>{ru ? 'Открытые данные' : 'Open data'}</h1>
@@ -29,6 +29,7 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
   <p style="display:flex;gap:10px;flex-wrap:wrap">
     <a class="btn btn-primary" href="/data/heatmap.json" download>heatmap.json</a>
     <a class="btn btn-ghost" href="/data/heatmap.csv" download>heatmap.csv</a>
+    <a class="btn btn-ghost" href="/data/countries.csv" download>countries.csv</a>
   </p>
   <p class="small muted">{ru ? 'Файлы пересобираются вместе с сайтом каждые 6 часов.' : 'Files are rebuilt with the site every 6 hours.'}</p>
 
@@ -37,11 +38,12 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
     <li><code>utc_weekday</code> — {ru ? 'день недели по UTC, 0 = воскресенье … 6 = суббота' : 'UTC weekday, 0 = Sunday … 6 = Saturday'}</li>
     <li><code>utc_hour</code> — {ru ? 'час по UTC, 0–23' : 'UTC hour, 0–23'}</li>
     <li><code>total</code> / <code>total_all</code> — {ru ? 'число отметок за всё время' : 'check-ins, all time'}; <code>total_30d</code> — {ru ? 'за последние 30 дней' : 'last 30 days'}</li>
+    <li><code>country</code> — {ru ? 'код страны ISO 3166-1 alpha-2 (определяется сетью по соединению; IP не хранится)' : 'ISO 3166-1 alpha-2 country code (derived by the network from the connection; no IPs stored)'}</li>
   </ul>
   <pre><code>{sample}</code></pre>
 
   <h2>{ru ? 'Живой API' : 'Live API'}</h2>
-  <p>{ru ? 'Представления heatmap, heatmap_30d и stats доступны напрямую через REST (только чтение):' : 'The heatmap, heatmap_30d and stats views are readable directly over REST:'}</p>
+  <p>{ru ? 'Представления heatmap, heatmap_30d, countries, countries_30d и stats доступны напрямую через REST (только чтение):' : 'The heatmap, heatmap_30d, countries, countries_30d and stats views are readable directly over REST:'}</p>
   <pre><code>{curl}</code></pre>
 
   <h2>{ru ? 'Ограничения данных' : 'Caveats'}</h2>

@@ -8,7 +8,7 @@ export const GET: APIRoute = async () => {
   const lines = [
     '# Hourglyph — Claude Code peak hours',
     '',
-    '> Unofficial, community-sourced heatmap of when developers use Claude Code, by UTC weekday and hour. Data comes from an opt-in SessionStart hook; only the hour and weekday of each session start are stored.',
+    '> Unofficial, community-sourced heatmap of when developers use Claude Code, by UTC weekday, hour and country. Its purpose: help people save Claude Code usage limits by starting work in off-peak hours. Data comes from an opt-in SessionStart hook; only the hour, weekday and country code of each session start are stored (no IPs).',
     '',
     `Snapshot ${s.builtAt}: ${s.stats.total} check-ins total, ${s.stats.last_24h} in the last 24 h.`,
     'Anthropic has named weekdays 5–11 AM Pacific as its peak window; since May 6, 2026 Claude Code Pro/Max limits no longer drain faster during it.',
@@ -19,6 +19,7 @@ export const GET: APIRoute = async () => {
     '## Data',
     `- [heatmap.json](${SITE}/data/heatmap.json): aggregates, CC BY 4.0`,
     `- [heatmap.csv](${SITE}/data/heatmap.csv): same as CSV`,
+    `- [countries.csv](${SITE}/data/countries.csv): check-ins by country (ISO 3166-1 alpha-2)`,
     '',
     '## Russian',
     `- [Русская версия](${SITE}/ru/)`,

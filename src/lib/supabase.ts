@@ -1,6 +1,7 @@
 import { SUPABASE_KEY, SUPABASE_URL } from '../config';
 
 export interface Cell { utc_weekday: number; utc_hour: number; total: number }
+export interface CountryRow { country: string; total: number }
 export interface Stats {
   total: number; last_hour: number; last_24h: number; last_30d: number;
   first_at: string | null; last_at: string | null; generated_at: string;
@@ -16,6 +17,9 @@ async function get<T>(path: string): Promise<T> {
 
 export const fetchCells = (window: 'all' | '30d') =>
   get<Cell[]>(`${window === 'all' ? 'heatmap' : 'heatmap_30d'}?select=*`);
+
+export const fetchCountries = (window: 'all' | '30d') =>
+  get<CountryRow[]>(`${window === 'all' ? 'countries' : 'countries_30d'}?select=*`);
 
 export const fetchStats = async () => (await get<Stats[]>('stats?select=*'))[0];
 

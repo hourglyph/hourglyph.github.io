@@ -6,16 +6,24 @@
 
 <h1 align="center">Hourglyph — Claude Code peak hours</h1>
 
+<p align="center"><b>Save your Claude Code limits: start work in off-peak hours.</b><br>
+Экономьте лимиты Claude Code — запускайте работу в ненагруженные часы.</p>
+
 <p align="center">
   <b><a href="https://hourglyph.github.io">hourglyph.github.io</a></b> · <a href="https://hourglyph.github.io/ru/">Русская версия</a> · <a href="https://hourglyph.github.io/data/">Open data</a>
 </p>
 
-A live, community-sourced heatmap of when developers use Claude Code, by weekday and hour, shown in your time zone.
+A live, community-sourced map of when and where developers use Claude Code — by hour, weekday and country, shown in
+your time zone — so you can **start heavy work in off-peak hours and make your limits go further**.
 Unofficial project, not affiliated with Anthropic.
 
-## Why
+- 🗺️ Heatmap, hour-of-day and weekday charts, and a world map of check-ins
+- 🕐 18 time-zone pages with the peak converted to local time (EN + RU)
+- 💡 [How to save Claude Code limits](https://hourglyph.github.io/save-claude-code-limits/) · [по-русски](https://hourglyph.github.io/ru/save-claude-code-limits/)
 
-**To know when to work so your limits go further.**
+## Why: save your limits
+
+**Start work in off-peak hours and your Claude Code limits go further.**
 
 - **Limits have depended on the clock.** In March 2026 Anthropic made 5-hour limits drain faster during the weekday
   peak (5–11 AM Pacific). On May 6, 2026 that was lifted only for Claude Code on Pro and Max
@@ -86,7 +94,8 @@ Add this to `~/.claude/settings.json` (merge with any existing `hooks`):
 ```
 
 **What it does:** on each *new* session (not resume/clear/compact) it sends one empty POST in the background.
-The server stamps the UTC hour and weekday itself. No prompts, code, file names, user IDs or IPs are stored
+The server stamps the UTC hour and weekday itself and records the two-letter country code that Cloudflare attaches to
+the request (for the world map). No prompts, code, file names, user IDs or IPs are stored
 (a salted, daily-rotating IP hash is kept only for 10-minute rate limiting). The key is Supabase's public
 *publishable* key: it can only call the check-in function, not read raw rows.
 
@@ -95,8 +104,9 @@ The server stamps the UTC hour and weekday itself. No prompts, code, file names,
 ## Data
 
 Aggregates are CC BY 4.0: [`/data/heatmap.json`](https://hourglyph.github.io/data/heatmap.json),
-[`/data/heatmap.csv`](https://hourglyph.github.io/data/heatmap.csv), or live via the `heatmap`, `heatmap_30d`
-and `stats` REST views.
+[`/data/heatmap.csv`](https://hourglyph.github.io/data/heatmap.csv),
+[`/data/countries.csv`](https://hourglyph.github.io/data/countries.csv), or live via the `heatmap`, `heatmap_30d`,
+`countries`, `countries_30d` and `stats` REST views.
 
 ## Development
 

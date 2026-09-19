@@ -14,9 +14,11 @@ const L = (p: string) => localize(lang, p);
   <h1>{ru ? 'О проекте и приватность' : 'About and privacy'}</h1>
   {ru ? (
     <div class="prose">
-      <p class="lead">Hourglyph — открытый проект сообщества, который показывает, когда разработчики по всему миру работают в Claude Code. Проект независимый и не связан с Anthropic.</p>
+      <p class="lead">Hourglyph — открытый проект сообщества, который помогает экономить лимиты Claude Code: он показывает, когда разработчики по всему миру работают в Claude Code, чтобы вы могли запускать работу в ненагруженные часы. Проект независимый и не связан с Anthropic.</p>
       <h2>Что хранится</h2>
-      <p>Одна строка на отметку: время записи, час и день недели по UTC и источник (<code>hook</code> или <code>manual</code>). Больше ничего: ни промптов, ни кода, ни имён файлов, ни идентификаторов пользователя.</p>
+      <p>Одна строка на отметку: время записи, час и день недели по UTC, источник (<code>hook</code> или <code>manual</code>) и двухбуквенный код страны. Больше ничего: ни промптов, ни кода, ни имён файлов, ни идентификаторов пользователя.</p>
+      <h2>Страна</h2>
+      <p>Код страны (например, <code>DE</code>) определяет сетевая инфраструктура Supabase/Cloudflare по соединению и передаёт в заголовке запроса. Мы сохраняем только этот код — не IP и не город. Если вы работаете через VPN, будет записана страна VPN-сервера. Публично видны только суммы по странам за день.</p>
       <h2>IP-адреса</h2>
       <p>Чтобы защититься от накрутки, сервер ограничивает одну отметку на сеть за 10 минут. Для этого хранится только необратимый хэш IP-адреса с секретной солью, который меняется каждый день; устаревшие хэши удаляются. Сам IP нигде не сохраняется и не связывается с отметками.</p>
       <h2>Публичный доступ</h2>
@@ -28,9 +30,11 @@ const L = (p: string) => localize(lang, p);
     </div>
   ) : (
     <div class="prose">
-      <p class="lead">Hourglyph is an open community project that shows when developers around the world use Claude Code. It is independent and not affiliated with Anthropic.</p>
+      <p class="lead">Hourglyph is an open community project that helps you save Claude Code limits: it shows when developers around the world use Claude Code, so you can start work in off-peak hours. It is independent and not affiliated with Anthropic.</p>
       <h2>What is stored</h2>
-      <p>One row per check-in: the insert time, the UTC hour and weekday, and the source (<code>hook</code> or <code>manual</code>). Nothing else — no prompts, code, file names or user identifiers.</p>
+      <p>One row per check-in: the insert time, the UTC hour and weekday, the source (<code>hook</code> or <code>manual</code>) and a two-letter country code. Nothing else — no prompts, code, file names or user identifiers.</p>
+      <h2>Country</h2>
+      <p>The country code (e.g. <code>DE</code>) is determined by Supabase/Cloudflare’s network from the connection and passed in a request header. We keep only that code — not the IP, not the city. Behind a VPN, the VPN server’s country is recorded. Only per-day totals by country are public.</p>
       <h2>IP addresses</h2>
       <p>To prevent spam, the server allows one check-in per network every 10 minutes. For that it keeps only a one-way hash of the IP address with a secret salt that rotates daily; stale hashes are deleted. The IP itself is never stored or linked to check-ins.</p>
       <h2>Public access</h2>

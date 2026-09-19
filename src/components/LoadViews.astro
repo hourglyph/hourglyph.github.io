@@ -1,0 +1,111 @@
+---
+// One card, four views of the same data: heatmap, hour-of-day bars, weekday bars, world map.
+// Everything is server-rendered for crawlers; src/scripts/live.ts switches tabs, re-renders in the
+// visitor's zone and lazy-loads the map SVG on first open.
+import Heatmap from './Heatmap.astro';
+import { UI, type Lang } from '../i18n';
+import { WEEK_ORDER, analyze, fromCells, level, offsetMinutes, toZone, type CellLike } from '../lib/heatmap';
+import { countryName, flag } from '../lib/countries';
+import type { CountryRow } from '../lib/supabase';
+
+interface Props {
+  lang: Lang;
+  cells: CellLike[];
+  countries: CountryRow[];
+  /** IANA zone, or 'auto' = visitor's zone (SSR falls back to UTC). */
+  tz: string;
+  zoneLabel?: string;
+}
+const { lang, cells, countries, tz, zoneLabel } = Astro.props;
+const t = UI[lang];
+const id = `v${Math.random().toString(36).slice(2, 7)}`;
+
+const { grid, minute } = toZone(fromCells(cells), tz === 'auto' ? 0 : offsetMinutes(tz));
+const a = analyze(grid);
+const hourMax = Math.max(1, ...a.hourTotals);
+const dayMax = Math.max(1, ...a.dayTotals);
+const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
+
+const sorted = [...countries].sort((x, y) => y.total - x.total);
+const countryMax = Math.max(1, ...sorted.map((c) => c.total));
+const top = sorted.slice(0, 10);
+
+const tabs = [
+  { key: 'heat', label: t.views.heat },
+  { key: 'hours', label: t.views.hours },
+  { key: 'days', label: t.views.days },
+  { key: 'map', label: t.views.map },
+] as const;
+---
+<section class="card views" data-views>
+  <div class="tabs" role="tablist" aria-label={t.viewsLabel}>
+    {tabs.map((tab, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`${id}-t-${tab.key}`}
+        aria-controls={`${id}-p-${tab.key}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-tab={tab.key}
+      >{tab.label}</button>
+    ))}
+  </div>
+
+  <div role="tabpanel" id={`${id}-p-heat`} aria-labelledby={`${id}-t-heat`} data-panel="heat">
+    <Heatmap lang={lang} cells={cells} tz={tz} zoneLabel={zoneLabel} />
+  </div>
+
+  <div role="tabpanel" id={`${id}-p-hours`} aria-labelledby={`${id}-t-hours`} data-panel="hours" hidden>
+    <figure class="bars-v" data-bars="hours" data-tz={tz}>
+      <div class="bars-v-plot">
+        {a.hourTotals.map((v, h) => (
+          <div class="bar-col" data-i={h} title={`${hh(h)} · ${t.checkins(v)}`}>
+            <span class="bar" style={`--v:${v / hourMax}`}></span>
+          </div>
+        ))}
+      </div>
+      <div class="bars-v-axis" aria-hidden="true">
+        {Array.from({ length: 24 }, (_, h) => <span data-i={h}>{h % 3 === 0 ? hh(h) : ''}</span>)}
+      </div>
+      <figcaption class="hm-foot"><span>{t.hoursCaption} · <span data-zone-label>{zoneLabel ?? t.utc}</span></span></figcaption>
+    </figure>
+  </div>
+
+  <div role="tabpanel" id={`${id}-p-days`} aria-labelledby={`${id}-t-days`} data-panel="days" hidden>
+    <figure class="bars-h" data-bars="days" data-tz={tz}>
+      {WEEK_ORDER.map((d) => (
+        <div class="bar-row" data-i={d}>
+          <span class="bar-label">{t.daysLong[d]}</span>
+          <span class="bar-track"><span class="bar" style={`--v:${a.dayTotals[d] / dayMax}`}></span></span>
+          <span class="bar-value" data-value>{a.dayTotals[d].toLocaleString(t.locale)}</span>
+        </div>
+      ))}
+      <figcaption class="hm-foot"><span>{t.daysCaption} · <span data-zone-label>{zoneLabel ?? t.utc}</span></span></figcaption>
+    </figure>
+  </div>
+
+  <div role="tabpanel" id={`${id}-p-map`} aria-labelledby={`${id}-t-map`} data-panel="map" hidden>
+    <div class="map-layout">
+      <div class="world" data-world data-src={`/geo/world-${lang}.svg`} role="img" aria-label={t.mapCaption}></div>
+      <div>
+        <p class="eyebrow" style="margin-bottom:8px">{t.topCountries} · <span data-countries-count>{t.countriesCount(sorted.length)}</span></p>
+        <ol class="country-list" data-countries>
+          {top.map((c) => (
+            <li data-cc={c.country}>
+              <span class="cl-name">{flag(c.country)} {countryName(c.country, t.locale)}</span>
+              <span class="cl-bar"><span class="bar" data-l={level(c.total, countryMax)} style={`--v:${c.total / countryMax}`}></span></span>
+              <span class="cl-value">{c.total.toLocaleString(t.locale)}</span>
+            </li>
+          ))}
+        </ol>
+        <p class="small muted" data-countries-empty hidden={top.length > 0}>{t.noCountries}</p>
+      </div>
+    </div>
+    <p class="hm-foot" style="justify-content:space-between">
+      <span>{t.mapCaption} · {t.window.all}</span>
+      <span class="legend" aria-hidden="true">{t.less}{[0, 1, 2, 3, 4, 5].map((l) => <i style={`background:var(--hm-${l})`}></i>)}{t.more}</span>
+    </p>
+    <p class="small muted" style="margin:6px 0 0">{t.mapNote}</p>
+  </div>
+</section>

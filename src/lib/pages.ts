@@ -7,18 +7,26 @@ export interface PageMeta { key: string; path: string; title: Record<Lang, strin
 export const PAGES = {
   home: {
     path: '/',
-    title: { en: 'Claude Code Peak Hours — Live Usage Heatmap', ru: 'Пиковые часы Claude Code — живая карта нагрузки' },
+    title: { en: 'Claude Code Peak Hours — Live Heatmap to Save Your Limits', ru: 'Пиковые часы Claude Code — карта нагрузки для экономии лимитов' },
     description: {
-      en: 'When is Claude Code busiest? A live heatmap of sessions by hour and weekday in your time zone — find the quiet hours when your limits go further.',
-      ru: 'Когда Claude Code загружен сильнее всего? Живая карта сессий по часам и дням недели в вашем поясе — работайте в спокойные часы и тратьте лимиты медленнее.',
+      en: 'Save Claude Code limits by working off-peak. A live heatmap of sessions by hour, weekday and country in your time zone shows the quiet hours to start work.',
+      ru: 'Экономьте лимиты Claude Code: запускайте работу в ненагруженные часы. Живая карта сессий по часам, дням и странам в вашем часовом поясе.',
+    },
+  },
+  save: {
+    path: '/save-claude-code-limits/',
+    title: { en: 'How to Save Claude Code Limits: Work in Off-Peak Hours', ru: 'Как экономить лимиты Claude Code: работайте в ненагруженные часы' },
+    description: {
+      en: 'Make your Claude Code limits last longer: start heavy work in off-peak hours, time your 5-hour window, avoid wasted re-runs and keep context lean.',
+      ru: 'Как тратить лимиты Claude Code медленнее: запускайте тяжёлые задачи в ненагруженные часы, планируйте 5-часовое окно и не тратьте лимит на повторы.',
     },
   },
   best: {
     path: '/best-time-to-use-claude-code/',
-    title: { en: 'Best Time to Use Claude Code: Quiet Hours by Time Zone', ru: 'Лучшее время для Claude Code: когда нагрузка меньше' },
+    title: { en: 'Best Time to Use Claude Code: Off-Peak Hours That Save Limits', ru: 'Лучшее время для Claude Code: ненагруженные часы для экономии лимитов' },
     description: {
-      en: 'The best hours to use Claude Code and Claude, based on real session data: quiet windows, busy weekdays and how to plan heavy agent runs around peak hours.',
-      ru: 'Когда лучше работать в Claude Code и Claude: спокойные окна, загруженные дни недели и как планировать тяжёлые задачи агента вне пиковых часов — по реальным данным.',
+      en: 'The best hours to use Claude Code, from real session data: off-peak windows that save your limits, busy weekdays, and how to plan heavy agent runs.',
+      ru: 'Когда лучше работать в Claude Code: ненагруженные окна, в которых лимиты тратятся экономнее, загруженные дни и как планировать тяжёлые задачи агента.',
     },
   },
   zones: {

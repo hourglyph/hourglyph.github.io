@@ -12,6 +12,7 @@ export const GET: APIRoute = async () => {
     stats: s.stats,
     all: s.all,
     last_30d: s.recent,
+    countries: s.countries, // ISO 3166-1 alpha-2, all time
   };
   return new Response(JSON.stringify(body, null, 2), { headers: { 'Content-Type': 'application/json' } });
 };

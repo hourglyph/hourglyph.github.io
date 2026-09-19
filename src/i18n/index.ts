@@ -10,7 +10,7 @@ export const UI = {
   en: {
     locale: 'en-US',
     skip: 'Skip to content',
-    nav: { home: 'Heatmap', best: 'Best time', zones: 'Time zones', limits: 'Limits', setup: 'Add your sessions' },
+    nav: { home: 'Heatmap', save: 'Save limits', best: 'Best time', zones: 'Time zones', limits: 'Limits', setup: 'Add your sessions' },
     langName: 'English',
     switchTo: 'Русский',
     theme: 'Toggle dark mode',
@@ -37,11 +37,20 @@ export const UI = {
     footerSource: 'Source on GitHub',
     breadcrumbsHome: 'Home',
     copy: 'Copy', copied: 'Copied',
+    views: { heat: 'Heatmap', hours: 'By hour', days: 'By weekday', map: 'World map' },
+    viewsLabel: 'Chart type',
+    hoursCaption: 'Check-ins by hour of day, all weekdays combined',
+    daysCaption: 'Check-ins by day of week',
+    mapCaption: 'Check-ins by country',
+    topCountries: 'Top countries',
+    noCountries: 'No country data yet — the map fills in as new check-ins arrive.',
+    countriesCount: (n: number) => `${n} ${n === 1 ? 'country' : 'countries'}`,
+    mapNote: 'Country is detected by the network from the connection; the IP address itself is not stored.',
   },
   ru: {
     locale: 'ru-RU',
     skip: 'К содержимому',
-    nav: { home: 'Карта', best: 'Лучшее время', zones: 'Часовые пояса', limits: 'Лимиты', setup: 'Добавить свои сессии' },
+    nav: { home: 'Карта', save: 'Экономия лимитов', best: 'Лучшее время', zones: 'Часовые пояса', limits: 'Лимиты', setup: 'Добавить свои сессии' },
     langName: 'Русский',
     switchTo: 'English',
     theme: 'Переключить тёмную тему',
@@ -72,6 +81,18 @@ export const UI = {
     footerSource: 'Исходный код на GitHub',
     breadcrumbsHome: 'Главная',
     copy: 'Копировать', copied: 'Скопировано',
+    views: { heat: 'Тепловая карта', hours: 'По часам', days: 'По дням', map: 'Карта мира' },
+    viewsLabel: 'Вид графика',
+    hoursCaption: 'Отметки по часам суток, все дни недели вместе',
+    daysCaption: 'Отметки по дням недели',
+    mapCaption: 'Отметки по странам',
+    topCountries: 'Топ стран',
+    noCountries: 'Данных о странах пока нет — карта заполнится по мере новых отметок.',
+    countriesCount: (n: number) => {
+      const m10 = n % 10, m100 = n % 100;
+      return `${n} ${m10 === 1 && m100 !== 11 ? 'страна' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'страны' : 'стран'}`;
+    },
+    mapNote: 'Страну определяет сеть по соединению; сам IP-адрес не сохраняется.',
   },
 } as const;
 

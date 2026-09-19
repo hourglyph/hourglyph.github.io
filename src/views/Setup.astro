@@ -43,14 +43,14 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
       <>
         <li>Срабатывает только при <b>запуске новой сессии</b> (<code>matcher: "startup"</code>) — не при <code>/resume</code>, <code>/clear</code> или сжатии контекста.</li>
         <li>Выполняется <b>в фоне</b> (<code>async: true</code>) с таймаутом 5 секунд и не задерживает запуск Claude Code. Вывод подавлен, так что в контекст модели ничего не попадает.</li>
-        <li>Отправляет POST без данных о вас на <code>{SUPABASE_URL}/rest/v1/rpc/checkin</code>. Час и день недели сервер берёт из собственных часов.</li>
+        <li>Отправляет POST без данных о вас на <code>{SUPABASE_URL}/rest/v1/rpc/checkin</code>. Час и день недели сервер берёт из собственных часов, а страну — из заголовка, который сеть добавляет по соединению (IP не сохраняется).</li>
         <li>Ключ в команде — публичный (publishable) ключ Supabase: с ним можно только вызвать функцию отметки, прочитать сырые данные нельзя.</li>
       </>
     ) : (
       <>
         <li>Fires only when a <b>new session starts</b> (<code>matcher: "startup"</code>) — not on <code>/resume</code>, <code>/clear</code> or compaction.</li>
         <li>Runs <b>in the background</b> (<code>async: true</code>) with a 5-second timeout, so it never delays Claude Code. Output is discarded, so nothing enters the model’s context.</li>
-        <li>Sends a POST with no data about you to <code>{SUPABASE_URL}/rest/v1/rpc/checkin</code>. The server takes the hour and weekday from its own clock.</li>
+        <li>Sends a POST with no data about you to <code>{SUPABASE_URL}/rest/v1/rpc/checkin</code>. The server takes the hour and weekday from its own clock, and the country from a header the network adds from the connection (the IP isn’t stored).</li>
         <li>The key in the command is Supabase’s public (publishable) key: it can only call the check-in function and cannot read raw data.</li>
       </>
     )}
