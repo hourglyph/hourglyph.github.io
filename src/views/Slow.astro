@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Heatmap from '../components/Heatmap.astro';
 import NowStatus from '../components/NowStatus.astro';
+import StatusPanel from '../components/StatusPanel.astro';
 import I18nData from '../components/I18nData.astro';
 import { localize, type Lang } from '../i18n';
 import { page } from '../lib/pages';
@@ -23,6 +24,7 @@ const L = (p: string) => localize(lang, p);
       : 'Compare the current hour with a normal week: if it’s peak time, slower responses are expected. If it isn’t, check Anthropic’s status page.'}
   </p>
   <div style="margin-top:28px"><NowStatus lang={lang} stats={snap.stats} /></div>
+  <div style="margin-top:16px"><StatusPanel lang={lang} incidents={snap.incidents} /></div>
 
   <h2>{ru ? 'Что делать по шагам' : 'What to do, step by step'}</h2>
   <ol class="prose">

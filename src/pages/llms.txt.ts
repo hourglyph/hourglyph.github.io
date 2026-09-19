@@ -11,6 +11,7 @@ export const GET: APIRoute = async () => {
     '> Unofficial, community-sourced heatmap of when developers use Claude Code, by UTC weekday, hour and country. Its purpose: help people save Claude Code usage limits by starting work in off-peak hours. Data comes from opt-in Claude Code hooks: session starts, messages sent (no text) and per-turn token counts computed locally; the server adds hour, weekday and country code (no IPs).',
     '',
     `Snapshot ${s.builtAt}: ${s.stats.messages_total} messages, ${s.stats.tokens_total} tokens and ${s.stats.total} sessions recorded; ${s.stats.messages_24h} messages in the last 24 h.`,
+    'Incident hours from Anthropic’s status page (status.claude.com) are synced hourly and shown as a separate metric.',
     'Anthropic has named weekdays 5–11 AM Pacific as its peak window; since May 6, 2026 Claude Code Pro/Max limits no longer drain faster during it.',
     '',
     '## Pages',

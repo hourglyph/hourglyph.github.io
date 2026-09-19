@@ -2,10 +2,13 @@
 // A Grid is always [weekday 0=Sunday..6][hour 0..23].
 
 export type Grid = number[][];
-/** What a chart counts: sessions (`total`), messages sent, or tokens processed. */
-export type Metric = 'total' | 'messages' | 'tokens';
-export const METRICS: Metric[] = ['messages', 'tokens', 'total'];
-export interface CellLike { utc_weekday: number; utc_hour: number; total: number; messages?: number; tokens?: number }
+/** What a chart counts: sessions (`total`), messages sent, tokens processed, or incident hours. */
+export type Metric = 'total' | 'messages' | 'tokens' | 'incidents';
+export const METRICS: Metric[] = ['messages', 'tokens', 'total', 'incidents'];
+export interface CellLike {
+  utc_weekday: number; utc_hour: number; total: number;
+  messages?: number; tokens?: number; incidents?: number;
+}
 
 export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // display Monday-first
 export const LEVELS = 5;

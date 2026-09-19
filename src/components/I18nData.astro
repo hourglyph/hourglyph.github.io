@@ -18,6 +18,9 @@ const data = {
   countryForms: [1, 2, 5].map((n) => t.countriesCount(n).split(' ').slice(1).join(' ')),
   metricUnits: t.metricUnits,
   metricNote: t.metricNote,
+  mapNoIncidents: t.mapNoIncidents,
+  statusComp: t.status.comp,
+  statusIndicator: t.status.indicator,
 };
 ---
 <script type="application/json" id="hg-i18n" set:html={JSON.stringify(data)} />

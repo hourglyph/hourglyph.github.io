@@ -1,5 +1,5 @@
 ---
-import { UI, type Lang } from '../i18n';
+import { UI, localize, type Lang } from '../i18n';
 import type { Stats } from '../lib/supabase';
 import { fmtNum } from '../lib/heatmap';
 
@@ -13,6 +13,10 @@ const keys = ['messages_hour', 'messages_24h', 'tokens_24h', 'last_24h'] as cons
     <div>
       <p class="eyebrow" id="now-h">{t.now} <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">· <span data-now-time>{t.nowIn}</span></span></p>
       <p class="band" data-now-band data-band="normal" style="margin:0">…</p>
+      <p class="small muted" style="margin:6px 0 0">
+        <a href={localize(lang, '/is-claude-slow-right-now/')} style="color:inherit">{t.status.line}</a>:
+        <span class="status-line" data-status-line data-band="normal">{t.status.loading}</span>
+      </p>
     </div>
     {showButton && (
       <div style="margin-left:auto">

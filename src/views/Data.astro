@@ -38,12 +38,13 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
     <li><code>utc_weekday</code> — {ru ? 'день недели по UTC, 0 = воскресенье … 6 = суббота' : 'UTC weekday, 0 = Sunday … 6 = Saturday'}</li>
     <li><code>utc_hour</code> — {ru ? 'час по UTC, 0–23' : 'UTC hour, 0–23'}</li>
     <li><code>total</code> / <code>sessions_*</code> — {ru ? 'запуски сессий' : 'session starts'}; <code>messages</code> — {ru ? 'отправленные сообщения' : 'messages sent'}; <code>tokens</code> — {ru ? 'все обработанные токены (вход, выход, запись и чтение кэша)' : 'all tokens processed (input, output, cache write and read)'}; {ru ? 'суффиксы' : 'suffixes'} <code>_all</code> / <code>_30d</code> — {ru ? 'за всё время / за 30 дней' : 'all time / last 30 days'}</li>
+    <li><code>incidents</code> / <code>incident_hours_*</code> — {ru ? 'часы с открытым инцидентом Anthropic по Claude, API или Claude Code (status.claude.com, синхронизация раз в час)' : 'hours with an open Anthropic incident for Claude, the API or Claude Code (status.claude.com, synced hourly)'}</li>
     <li><code>country</code> — {ru ? 'код страны ISO 3166-1 alpha-2 (определяется сетью по соединению; IP не хранится)' : 'ISO 3166-1 alpha-2 country code (derived by the network from the connection; no IPs stored)'}</li>
   </ul>
   <pre><code>{sample}</code></pre>
 
   <h2>{ru ? 'Живой API' : 'Live API'}</h2>
-  <p>{ru ? 'Представления heatmap, heatmap_30d, countries, countries_30d и stats доступны напрямую через REST (только чтение):' : 'The heatmap, heatmap_30d, countries, countries_30d and stats views are readable directly over REST:'}</p>
+  <p>{ru ? 'Представления heatmap, heatmap_30d, countries, countries_30d, claude_incidents и stats доступны напрямую через REST (только чтение):' : 'The heatmap, heatmap_30d, countries, countries_30d, claude_incidents and stats views are readable directly over REST:'}</p>
   <pre><code>{curl}</code></pre>
 
   <h2>{ru ? 'Ограничения данных' : 'Caveats'}</h2>

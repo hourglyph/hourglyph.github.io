@@ -7,7 +7,7 @@ import {
   analyze, fmtNum, fmtOffset, fromCells, level, loadBand, loadMetric, offsetMinutes, plural, toZone,
   type Metric,
 } from '../lib/heatmap';
-import { countryName, flag } from '../lib/countries';
+import { countryName, countryValue, flag } from '../lib/countries';
 
 const i18n = JSON.parse(document.getElementById('hg-i18n')?.textContent || '{}');
 const lang: string = i18n.lang;
@@ -100,32 +100,36 @@ async function renderCountries() {
   if (!lists.length && !maps.length) return;
   const all = await countries();
   const rank = (metric: Metric) => {
-    const rows = all.filter((r) => r[metric] > 0).sort((x, y) => y[metric] - x[metric]);
-    return { rows, max: Math.max(1, ...rows.map((r) => r[metric])) };
+    const rows = all.filter((r) => countryValue(r, metric) > 0).sort((x, y) => countryValue(y, metric) - countryValue(x, metric));
+    return { rows, max: Math.max(1, ...rows.map((r) => countryValue(r, metric))) };
   };
 
   lists.forEach((list) => {
     const metric = metricOf(list);
-    const { rows, max } = rank(metric);
+    const { rows, max } = metric === 'incidents' ? { rows: [], max: 1 } : rank(metric);
     list.innerHTML = rows
       .slice(0, 10)
       .map((r) =>
         `<li data-cc="${r.country}"><span class="cl-name">${flag(r.country)} ${countryName(r.country, i18n.locale)}</span>` +
-        `<span class="cl-bar"><span class="bar" style="--v:${r[metric] / max}"></span></span>` +
-        `<span class="cl-value">${fmtNum(r[metric], metric, i18n.locale)}</span></li>`,
+        `<span class="cl-bar"><span class="bar" style="--v:${countryValue(r, metric) / max}"></span></span>` +
+        `<span class="cl-value">${fmtNum(countryValue(r, metric), metric, i18n.locale)}</span></li>`,
       )
       .join('');
     const panel = list.parentElement;
     const empty = panel?.querySelector<HTMLElement>('[data-countries-empty]');
-    if (empty) empty.hidden = rows.length > 0;
+    if (empty) {
+      empty.dataset.default ??= empty.textContent ?? '';
+      empty.textContent = metric === 'incidents' ? i18n.mapNoIncidents : empty.dataset.default;
+      empty.hidden = rows.length > 0;
+    }
     const count = panel?.querySelector('[data-countries-count]');
     if (count) count.textContent = countriesCount(rows.length);
   });
 
   maps.forEach((svg) => {
     const metric = metricOf(svg);
-    const { rows, max } = rank(metric);
-    const byCc = new Map(rows.map((r) => [r.country, r[metric]]));
+    const { rows, max } = metric === 'incidents' ? { rows: [], max: 1 } : rank(metric);
+    const byCc = new Map(rows.map((r) => [r.country, countryValue(r, metric)]));
     svg.querySelectorAll<SVGPathElement>('path[data-cc]').forEach((p) => {
       const v = byCc.get(p.dataset.cc!) ?? 0;
       p.dataset.l = String(level(v, max));
@@ -169,6 +173,29 @@ async function renderStats() {
   });
 }
 
+// Live Anthropic status (status.claude.com allows cross-origin reads).
+async function renderStatus() {
+  const panels = document.querySelectorAll<HTMLElement>('[data-status-panel]');
+  const lines = document.querySelectorAll<HTMLElement>('[data-status-line]');
+  if (!panels.length && !lines.length) return;
+  const res = await fetch('https://status.claude.com/api/v2/summary.json');
+  if (!res.ok) return;
+  const s = await res.json();
+  const indicator: string = s.status?.indicator ?? 'none';
+  const band = indicator === 'none' ? 'ok' : indicator === 'minor' || indicator === 'maintenance' ? 'busy' : 'peak';
+  const text = i18n.statusIndicator?.[indicator] ?? s.status?.description ?? '';
+  panels.forEach((p) => {
+    const ind = p.querySelector<HTMLElement>('[data-status-indicator]');
+    if (ind) { ind.textContent = text; ind.dataset.band = band; }
+    p.querySelectorAll<HTMLElement>('[data-comp]').forEach((li) => {
+      const c = (s.components ?? []).find((x: { name: string }) => x.name === li.dataset.comp);
+      const b = li.querySelector<HTMLElement>('[data-comp-state]');
+      if (c && b) { b.dataset.state = c.status; b.textContent = i18n.statusComp?.[c.status] ?? c.status; }
+    });
+  });
+  lines.forEach((l) => { l.textContent = text; l.dataset.band = band; });
+}
+
 const renderCharts = () => Promise.all([renderHeatmaps(), renderBars(), renderCountries()]);
 
 /** Until the visitor picks a metric, follow the live data (the build-time default may be stale). */
@@ -186,7 +213,7 @@ async function refresh() {
   countriesP = undefined;
   try {
     await autoMetric();
-    await Promise.all([renderCharts(), renderNow(), renderStats()]);
+    await Promise.all([renderCharts(), renderNow(), renderStats(), renderStatus().catch(() => {})]);
   } catch (err) {
     console.warn('[hourglyph] live refresh failed', err);
   }

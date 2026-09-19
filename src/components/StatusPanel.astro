@@ -1,0 +1,45 @@
+---
+// Anthropic's status: live component states (fetched in the browser from status.claude.com,
+// which allows CORS) plus recent incidents synced hourly into our database.
+import { UI, type Lang } from '../i18n';
+import type { Incident } from '../lib/supabase';
+
+interface Props { lang: Lang; incidents: Incident[] }
+const { lang, incidents } = Astro.props;
+const t = UI[lang];
+const COMPONENTS = ['Claude Code', 'Claude API (api.anthropic.com)', 'claude.ai'];
+
+const fmtDate = (iso: string) =>
+  new Intl.DateTimeFormat(t.locale, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }).format(new Date(iso)) + ' UTC';
+const fmtDuration = (a: string, b: string | null) => {
+  if (!b) return t.status.ongoing;
+  const min = Math.max(1, Math.round((+new Date(b) - +new Date(a)) / 60000));
+  const h = Math.floor(min / 60), m = min % 60;
+  return lang === 'ru' ? (h ? `${h} ч ${m} мин` : `${m} мин`) : h ? `${h} h ${m} min` : `${m} min`;
+};
+---
+<section class="card status-panel" data-status-panel>
+  <div class="status-head">
+    <p class="eyebrow" style="margin:0">{t.status.title}</p>
+    <a class="small muted" href="https://status.claude.com" rel="nofollow" target="_blank">{t.status.source} ↗</a>
+  </div>
+  <p class="band" data-status-indicator data-band="normal" style="margin:10px 0 14px">{t.status.loading}</p>
+  <ul class="status-comps">
+    {COMPONENTS.map((c) => (
+      <li data-comp={c}><span>{c.replace(' (api.anthropic.com)', '')}</span><b data-comp-state>—</b></li>
+    ))}
+  </ul>
+
+  <h3>{t.status.recent}</h3>
+  {incidents.length ? (
+    <ol class="incident-list">
+      {incidents.map((i) => (
+        <li>
+          <span class={`impact impact-${i.impact}`}>{t.status.impact[i.impact as keyof typeof t.status.impact] ?? i.impact}</span>
+          <span class="incident-name">{i.shortlink ? <a href={i.shortlink} rel="nofollow" target="_blank">{i.name}</a> : i.name}</span>
+          <span class="small muted">{fmtDate(i.started_at)} · {fmtDuration(i.started_at, i.resolved_at)}</span>
+        </li>
+      ))}
+    </ol>
+  ) : <p class="small muted">{t.status.none}</p>}
+</section>

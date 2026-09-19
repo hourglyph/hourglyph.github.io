@@ -5,7 +5,7 @@
 import Heatmap from './Heatmap.astro';
 import { UI, type Lang } from '../i18n';
 import { METRICS, WEEK_ORDER, analyze, fmtNum, fromCells, level, loadMetric, offsetMinutes, plural, toZone, type CellLike } from '../lib/heatmap';
-import { countryName, flag } from '../lib/countries';
+import { countryName, countryValue, flag } from '../lib/countries';
 import type { CountryRow } from '../lib/supabase';
 
 interface Props {
@@ -28,8 +28,8 @@ const hourMax = Math.max(1, ...a.hourTotals);
 const dayMax = Math.max(1, ...a.dayTotals);
 const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
 
-const sorted = countries.filter((c) => c[metric] > 0).sort((x, y) => y[metric] - x[metric]);
-const countryMax = Math.max(1, ...sorted.map((c) => c[metric]));
+const sorted = countries.filter((c) => countryValue(c, metric) > 0).sort((x, y) => countryValue(y, metric) - countryValue(x, metric));
+const countryMax = Math.max(1, ...sorted.map((c) => countryValue(c, metric)));
 const top = sorted.slice(0, 10);
 
 const tabs = [
@@ -104,8 +104,8 @@ const tabs = [
           {top.map((c) => (
             <li data-cc={c.country}>
               <span class="cl-name">{flag(c.country)} {countryName(c.country, t.locale)}</span>
-              <span class="cl-bar"><span class="bar" data-l={level(c[metric], countryMax)} style={`--v:${c[metric] / countryMax}`}></span></span>
-              <span class="cl-value">{fmtNum(c[metric], metric, t.locale)}</span>
+              <span class="cl-bar"><span class="bar" data-l={level(countryValue(c, metric), countryMax)} style={`--v:${countryValue(c, metric) / countryMax}`}></span></span>
+              <span class="cl-value">{fmtNum(countryValue(c, metric), metric, t.locale)}</span>
             </li>
           ))}
         </ol>

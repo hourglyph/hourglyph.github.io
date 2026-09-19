@@ -12,3 +12,7 @@ export function countryName(code: string, locale: string): string {
 /** Regional-indicator flag emoji for an alpha-2 code. */
 export const flag = (code: string) =>
   /^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map((c) => 0x1f1a5 + c.charCodeAt(0))) : '';
+
+/** A country's value for a metric; incidents aren't per-country, so they read as 0. */
+export const countryValue = (r: { total: number; messages: number; tokens: number }, metric: string): number =>
+  metric === 'total' || metric === 'messages' || metric === 'tokens' ? r[metric] : 0;

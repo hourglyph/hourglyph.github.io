@@ -271,3 +271,28 @@ details p:first-of-type { margin-top: 10px; }
 .segmented button[aria-checked='true'] { background: var(--accent-soft); color: var(--accent-strong); }
 .metric-note { margin: 0 0 16px; }
 .data-table code { overflow-wrap: normal; white-space: nowrap; font-size: 0.82em; }
+
+/* Anthropic status panel */
+.status-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.status-head a { text-decoration: none; }
+.status-comps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.status-comps li { background: var(--surface); display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; font-size: 0.92rem; }
+.status-comps b { font-weight: 500; color: var(--muted); }
+.status-comps b[data-state='operational'] { color: #4d8a4d; }
+.status-comps b[data-state='degraded_performance'], .status-comps b[data-state='partial_outage'] { color: var(--accent-strong); }
+.status-comps b[data-state='major_outage'] { color: #b3261e; }
+.incident-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.incident-list li { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: baseline; }
+.incident-list li > .small { grid-column: 2; }
+.incident-name a { color: var(--text); text-decoration: none; }
+.incident-name a:hover { text-decoration: underline; }
+.impact { font: 600 0.7rem/1 var(--sans); letter-spacing: 0.03em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; background: var(--bg-sunk); color: var(--muted); white-space: nowrap; }
+.impact-minor { background: var(--hm-1); color: var(--text); }
+.impact-major { background: var(--hm-3); color: var(--text); }
+.impact-critical { background: #b3261e; color: #fff; }
+.band[data-band='ok']::before { background: #6a9b6a; }
+.status-line { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+.status-line::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.status-line[data-band='ok']::before { background: #6a9b6a; }
+.status-line[data-band='busy']::before { background: var(--hm-4); }
+.status-line[data-band='peak']::before { background: #b3261e; }
