@@ -296,3 +296,4 @@ details p:first-of-type { margin-top: 10px; }
 .status-line[data-band='ok']::before { background: #6a9b6a; }
 .status-line[data-band='busy']::before { background: var(--hm-4); }
 .status-line[data-band='peak']::before { background: #b3261e; }
+.snippet pre { padding-top: 48px; }

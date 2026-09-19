@@ -14,6 +14,11 @@ export const HOOK_SCRIPT_URL = `${SITE}/hook/hourglyph.sh`;
 /** Human-readable source on GitHub (the site serves the raw file for downloading). */
 export const HOOK_SCRIPT_SOURCE = `${REPO_URL}/blob/main/public/hook/hourglyph.sh`;
 export const HOOK_SCRIPT_PATH = '~/.claude/hooks/hourglyph.sh';
+
+/** Uninstaller: removes only Hourglyph entries from settings.json (with a backup) and the script. */
+export const UNINSTALL_URL = `${SITE}/hook/uninstall.sh`;
+export const UNINSTALL_SOURCE = `${REPO_URL}/blob/main/public/hook/uninstall.sh`;
+export const UNINSTALL_CMD = `curl -fsSL ${UNINSTALL_URL} | sh`;
 export const HOOK_INSTALL = `mkdir -p ~/.claude/hooks && curl -fsSL ${HOOK_SCRIPT_URL} -o ${HOOK_SCRIPT_PATH}`;
 
 const hookCmd = (event: string) => ({ type: 'command', command: `sh "$HOME/.claude/hooks/hourglyph.sh" ${event}`, async: true });

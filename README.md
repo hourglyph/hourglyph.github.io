@@ -109,7 +109,7 @@ Steps:
 
 5. Write the file back as valid JSON and re-read it to confirm it parses.
 6. Check that curl and awk are available (command -v curl awk).
-7. Show me the diff and tell me how to remove everything: delete those three entries from settings.json and the file ~/.claude/hooks/hourglyph.sh.
+7. Show me the diff and tell me how to remove everything: delete those three entries from settings.json and the file ~/.claude/hooks/hourglyph.sh — or in one command: curl -fsSL https://hourglyph.github.io/hook/uninstall.sh | sh
 
 Don't change anything else. Data starts flowing with the next new session.
 ````
@@ -163,7 +163,14 @@ Then merge this into `~/.claude/settings.json` (remove an older entry with `rpc/
 }
 ```
 
-**To stop:** delete the three entries mentioning `hourglyph.sh` and the script file.
+**To stop:** run the [uninstaller](public/hook/uninstall.sh) — it removes only the Hourglyph entries from
+`~/.claude/settings.json` (backup: `settings.json.hourglyph-bak`) and deletes the script:
+
+```sh
+curl -fsSL https://hourglyph.github.io/hook/uninstall.sh | sh
+```
+
+Or delete the three entries mentioning `hourglyph.sh` and the script file by hand.
 More: [setup page](https://hourglyph.github.io/setup/) · [privacy](https://hourglyph.github.io/about/).
 
 ## Data

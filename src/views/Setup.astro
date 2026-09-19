@@ -5,8 +5,8 @@ import I18nData from '../components/I18nData.astro';
 import { localize, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { articleJsonLd } from '../lib/jsonld';
-import { setupPrompt } from '../lib/setupPrompt';
-import { HOOK_INSTALL, HOOK_JSON, HOOK_SCRIPT_PATH, HOOK_SCRIPT_SOURCE } from '../config';
+import { setupPrompt, uninstallPrompt } from '../lib/setupPrompt';
+import { HOOK_INSTALL, HOOK_JSON, HOOK_SCRIPT_PATH, HOOK_SCRIPT_SOURCE, UNINSTALL_CMD, UNINSTALL_SOURCE } from '../config';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -72,6 +72,14 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
   <p>{ru ? <>Запустите <code>claude</code> в новом терминале, отправьте сообщение, подождите минуту и откройте <a href={L('/')}>карту</a> — вырастут счётчики сообщений и токенов. Список активных hooks показывает команда <code>/hooks</code>.</> : <>Start <code>claude</code> in a new terminal, send a message, wait a minute and open <a href={L('/')}>the map</a> — the message and token counters go up. The <code>/hooks</code> command lists active hooks.</>}</p>
 
   <h2>{ru ? 'Как отключить' : 'How to turn it off'}</h2>
+  <p>{ru ? <>Одна команда удалит из <code>~/.claude/settings.json</code> только записи Hourglyph (с резервной копией <code>settings.json.hourglyph-bak</code>) и сам скрипт. Остальные ваши hooks и настройки не меняются. <a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">Посмотреть исходник на GitHub</a>.</> : <>One command removes only the Hourglyph entries from <code>~/.claude/settings.json</code> (keeping a backup at <code>settings.json.hourglyph-bak</code>) and deletes the script. Your other hooks and settings stay as they are. <a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">Read the source on GitHub</a>.</>}</p>
+  <CopyBlock lang={lang} text={UNINSTALL_CMD} />
+  <p class="small muted" style="margin-top:8px">{ru ? <>Нужен <code>python3</code> или <code>node</code>; если их нет, скрипт ничего не изменит и подскажет, что удалить вручную.</> : <>Needs <code>python3</code> or <code>node</code>; without them it changes nothing and tells you what to remove by hand.</>}</p>
+
+  <h3>{ru ? 'Или попросите Claude Code' : 'Or ask Claude Code'}</h3>
+  <CopyBlock lang={lang} text={uninstallPrompt(lang)} wrap />
+
+  <h3>{ru ? 'Вручную' : 'By hand'}</h3>
   <p>{ru ? <>Удалите три записи с <code>hourglyph.sh</code> из <code>~/.claude/settings.json</code> и файл <code>{HOOK_SCRIPT_PATH}</code>. Ранее отправленные данные обезличены и не связаны с вами.</> : <>Delete the three entries mentioning <code>hourglyph.sh</code> from <code>~/.claude/settings.json</code> and the file <code>{HOOK_SCRIPT_PATH}</code>. Data already sent is anonymous and not linked to you.</>}</p>
 
   <h2>{ru ? 'Примечания' : 'Notes'}</h2>

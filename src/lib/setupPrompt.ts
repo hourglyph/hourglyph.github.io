@@ -1,6 +1,6 @@
 // A prompt users paste into Claude Code so the agent installs the hooks itself.
 // It must be safe on any existing settings file: back up, merge, never clobber, show the diff.
-import { HOOK_ENTRIES, HOOK_INSTALL, HOOK_MARKERS, HOOK_SCRIPT_PATH, HOOK_SCRIPT_SOURCE, SITE } from '../config';
+import { HOOK_ENTRIES, HOOK_INSTALL, HOOK_MARKERS, HOOK_SCRIPT_PATH, HOOK_SCRIPT_SOURCE, SITE, UNINSTALL_CMD } from '../config';
 import type { Lang } from '../i18n';
 
 const entries = JSON.stringify(HOOK_ENTRIES, null, 2);
@@ -24,7 +24,7 @@ ${entries}
 
 5. Запиши файл как валидный JSON и перечитай его, чтобы убедиться, что он парсится.
 6. Проверь, что доступны curl и awk (command -v curl awk).
-7. Покажи мне diff и объясни, как всё удалить: убрать эти три записи из settings.json и файл ${HOOK_SCRIPT_PATH}.
+7. Покажи мне diff и объясни, как всё удалить: убрать эти три записи из settings.json и файл ${HOOK_SCRIPT_PATH} — или одной командой: ${UNINSTALL_CMD}
 
 Больше ничего не меняй. Данные начнут приходить со следующей новой сессии.`;
   }
@@ -44,7 +44,26 @@ ${entries}
 
 5. Write the file back as valid JSON and re-read it to confirm it parses.
 6. Check that curl and awk are available (command -v curl awk).
-7. Show me the diff and tell me how to remove everything: delete those three entries from settings.json and the file ${HOOK_SCRIPT_PATH}.
+7. Show me the diff and tell me how to remove everything: delete those three entries from settings.json and the file ${HOOK_SCRIPT_PATH} — or in one command: ${UNINSTALL_CMD}
 
 Don't change anything else. Data starts flowing with the next new session.`;
+}
+
+export function uninstallPrompt(lang: Lang): string {
+  if (lang === 'ru') {
+    return `Удали у меня hooks Hourglyph для Claude Code (${SITE}/ru/setup/).
+
+1. Сделай резервную копию ~/.claude/settings.json в ~/.claude/settings.json.hourglyph-bak.
+2. Удали из hooks только записи Hourglyph — команды, содержащие ${markers}. Все остальные hooks и настройки оставь как есть; пустые группы и события удали.
+3. Запиши файл как валидный JSON и перечитай его, чтобы убедиться, что он парсится.
+4. Удали файл ${HOOK_SCRIPT_PATH}.
+5. Покажи мне diff.`;
+  }
+  return `Remove the Hourglyph hooks for Claude Code on this machine (${SITE}/setup/).
+
+1. Back up ~/.claude/settings.json to ~/.claude/settings.json.hourglyph-bak.
+2. Remove only the Hourglyph entries from hooks — commands containing ${markers}. Keep every other hook and setting as is; drop groups and events left empty.
+3. Write the file back as valid JSON and re-read it to confirm it parses.
+4. Delete ${HOOK_SCRIPT_PATH}.
+5. Show me the diff.`;
 }
