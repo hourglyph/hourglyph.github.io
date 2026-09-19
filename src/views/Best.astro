@@ -48,8 +48,6 @@ const L = (p: string) => localize(lang, p);
           <p>Reviewing a diff, targeted edits and questions about code tolerate latency better. If a reply is slow, don’t resend the prompt — it only lengthens the queue and burns your limit.</p>
           <h3>Unattended runs at night</h3>
           <p>Jobs that don’t need you can run headless with <code>claude -p "…"</code> from a script or on a schedule (cron, CI) during quiet hours.</p>
-          <h3>Watch your limit window, not just the clock</h3>
-          <p>The 5-hour limit window starts with your first message. Starting in a quiet period means your window also resets before the next peak. More in <a href={L('/claude-code-usage-limits/')}>Claude Code usage limits explained</a>.</p>
         </>
       ),
       ru: (
@@ -60,8 +58,6 @@ const L = (p: string) => localize(lang, p);
           <p>Ревью диффа, точечные правки и вопросы по коду переносят задержки легче. Если ответ задерживается, не отправляйте запрос повторно — это только увеличивает очередь и расход лимита.</p>
           <h3>Неинтерактивные запуски — ночью</h3>
           <p>Задачи, не требующие вашего участия, можно запускать через <code>claude -p "…"</code> из скрипта или по расписанию (cron, CI) на спокойные часы.</p>
-          <h3>Следите за лимитами, а не только за часами</h3>
-          <p>5-часовое окно лимита начинается с первого сообщения. Начав работу в спокойное время, вы и обновление лимита получите раньше пика. Подробнее — в разделе <a href={L('/claude-code-usage-limits/')}>о лимитах Claude Code</a>.</p>
         </>
       ),
       zh: (
@@ -72,8 +68,6 @@ const L = (p: string) => localize(lang, p);
           <p>审阅 diff、定点修改、询问代码问题，这类工作对延迟更宽容。如果回复变慢，不要重复发送提示——这只会让队列更长，还会白白消耗额度。</p>
           <h3>无人值守的任务放在夜间</h3>
           <p>不需要你参与的任务，可以用 <code>claude -p "…"</code> 以无界面模式从脚本或定时任务（cron、CI）在空闲时段运行。</p>
-          <h3>关注额度窗口，而不只是时钟</h3>
-          <p>5 小时额度窗口从你发送第一条消息开始计时。在空闲时段开工，额度也会在下一个高峰到来之前重置。详见 <a href={L('/claude-code-usage-limits/')}>Claude Code 用量限制详解</a>。</p>
         </>
       ),
       ja: (
@@ -84,8 +78,6 @@ const L = (p: string) => localize(lang, p);
           <p>差分のレビュー、ピンポイントの修正、コードについての質問は、多少の遅延があっても支障が少ない作業です。返答が遅くてもプロンプトを再送しないでください。キューが長くなり、上限を無駄に消費するだけです。</p>
           <h3>無人で回す作業は夜間に</h3>
           <p>あなたの操作が不要な作業は、<code>claude -p "…"</code> を使ってスクリプトやスケジュール（cron、CI）から空いている時間にヘッドレスで実行できます。</p>
-          <h3>時計だけでなく上限のウィンドウを意識する</h3>
-          <p>5時間の上限ウィンドウは最初のメッセージから始まります。空いている時間に作業を始めれば、次のピーク前にリセットされます。詳しくは <a href={L('/claude-code-usage-limits/')}>Claude Code の利用上限の解説</a> をご覧ください。</p>
         </>
       ),
     })}

@@ -30,8 +30,6 @@ Unofficial project, not affiliated with Anthropic.
   ([announcement](https://www.anthropic.com/news/higher-limits-spacex)). The map shows where the peak falls in your zone.
 - **Fewer wasted re-runs.** Peak hours bring slower replies and `overloaded` errors; an interrupted agent task has to
   be run again, and your limit pays for the retry.
-- **Time your window.** The 5-hour window starts with your first message — start in a quiet hour and it resets
-  before the rush, not in the middle of it.
 
 > **RU:** Hourglyph помогает понять, когда лучше работать с Claude Code, чтобы лимиты уходили медленнее: карта
 > показывает пиковые и спокойные часы в вашем часовом поясе.

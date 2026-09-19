@@ -5,7 +5,7 @@ export interface QA { q: string; a: string } // `a` is trusted HTML authored her
 export const FAQ: Record<Lang, QA[]> = {
   en: [
     { q: 'What is Hourglyph for?',
-      a: 'It helps you save Claude Code limits by starting work in off-peak hours. Anthropic has tied limits to the time of day before, peak hours bring more slow replies and failed runs you end up repeating, and your 5-hour window starts with your first message. The <a href="/">heatmap</a> shows when the load peaks in your time zone so you can plan heavy work around it. More tips: <a href="/save-claude-code-limits/">how to save Claude Code limits</a>.' },
+      a: 'It helps you save Claude Code limits by starting work in off-peak hours. Anthropic has tied limits to the time of day before, peak hours bring more slow replies and failed runs you end up repeating. The <a href="/">heatmap</a> shows when the load peaks in your time zone so you can plan heavy work around it. More tips: <a href="/save-claude-code-limits/">how to save Claude Code limits</a>.' },
     { q: 'When are Claude Code’s peak hours?',
       a: 'Anthropic has described weekdays from 5 to 11 AM Pacific Time (8 AM–2 PM Eastern, 13:00–19:00 UK in summer) as its peak window. That is when US mornings overlap with the European afternoon. The live heatmap on the <a href="/">home page</a> shows how real Claude Code sessions are distributed across the week, converted to your time zone.' },
     { q: 'What is the best time to use Claude Code?',
@@ -31,7 +31,7 @@ export const FAQ: Record<Lang, QA[]> = {
   ],
   ru: [
     { q: 'Зачем нужен Hourglyph?',
-      a: 'Hourglyph помогает экономить лимиты Claude Code: запускайте работу в ненагруженные часы. Anthropic уже привязывала расход лимитов ко времени суток; в часы пик чаще бывают медленные ответы и сбои, из-за которых задачу приходится перезапускать; а 5-часовое окно лимита начинается с первого сообщения. <a href="/ru/">Карта</a> показывает, когда нагрузка максимальна в вашем поясе, чтобы планировать тяжёлую работу в обход пика. Другие советы: <a href="/ru/save-claude-code-limits/">как экономить лимиты Claude Code</a>.' },
+      a: 'Hourglyph помогает экономить лимиты Claude Code: запускайте работу в ненагруженные часы. Anthropic уже привязывала расход лимитов ко времени суток; в часы пик чаще бывают медленные ответы и сбои, из-за которых задачу приходится перезапускать. <a href="/ru/">Карта</a> показывает, когда нагрузка максимальна в вашем поясе, чтобы планировать тяжёлую работу в обход пика. Другие советы: <a href="/ru/save-claude-code-limits/">как экономить лимиты Claude Code</a>.' },
     { q: 'Когда у Claude Code пиковые часы?',
       a: 'Anthropic называла пиковым окном будни с 5:00 до 11:00 по тихоокеанскому времени — это 15:00–21:00 по Москве с марта по ноябрь и 16:00–22:00 зимой, когда в США действует стандартное время. В это время утро в США совпадает со второй половиной дня в Европе. Живая карта на <a href="/ru/">главной</a> показывает, как распределены реальные сессии Claude Code по неделе в вашем часовом поясе.' },
     { q: 'Когда лучше всего работать в Claude Code?',
@@ -57,7 +57,7 @@ export const FAQ: Record<Lang, QA[]> = {
   ],
   zh: [
     { q: 'Hourglyph 是做什么的？',
-      a: '它帮你把工作安排在非高峰时段，从而节省 Claude Code 额度。Anthropic 曾把额度消耗与时段挂钩；高峰时段响应更慢、失败更多，任务常常要重跑；而 5 小时额度窗口从你的第一条消息开始计时。<a href="/zh/">热力图</a>显示你所在时区的负载高峰，方便你把繁重工作避开高峰。更多技巧：<a href="/zh/save-claude-code-limits/">如何节省 Claude Code 额度</a>。' },
+      a: '它帮你把工作安排在非高峰时段，从而节省 Claude Code 额度。Anthropic 曾把额度消耗与时段挂钩；高峰时段响应更慢、失败更多，任务常常要重跑。<a href="/zh/">热力图</a>显示你所在时区的负载高峰，方便你把繁重工作避开高峰。更多技巧：<a href="/zh/save-claude-code-limits/">如何节省 Claude Code 额度</a>。' },
     { q: 'Claude Code 的高峰时段是什么时候？',
       a: 'Anthropic 公布的高峰窗口是工作日太平洋时间 5:00–11:00，即北京时间 20:00–次日 02:00（美国冬令时期间为 21:00–03:00）。这是美国上午与欧洲下午重叠的时段。<a href="/zh/">首页</a>的实时热力图按你的时区显示真实 Claude Code 会话在一周中的分布。' },
     { q: '什么时候使用 Claude Code 最好？',
@@ -83,7 +83,7 @@ export const FAQ: Record<Lang, QA[]> = {
   ],
   ja: [
     { q: 'Hourglyph は何のためのツールですか？',
-      a: '空いている時間に作業を始めることで、Claude Code の利用上限を節約するためのツールです。Anthropic は以前、上限の消費を時間帯と結びつけたことがあります。ピーク時間は応答が遅く失敗も多いため、やり直しが増えます。また5時間のウィンドウは最初のメッセージから始まります。<a href="/ja/">ヒートマップ</a>を見れば、あなたのタイムゾーンで負荷がピークになる時間がわかり、重い作業をずらせます。ほかのコツ：<a href="/ja/save-claude-code-limits/">Claude Code の利用上限を節約する方法</a>。' },
+      a: '空いている時間に作業を始めることで、Claude Code の利用上限を節約するためのツールです。Anthropic は以前、上限の消費を時間帯と結びつけたことがあります。ピーク時間は応答が遅く失敗も多いため、やり直しが増えます。<a href="/ja/">ヒートマップ</a>を見れば、あなたのタイムゾーンで負荷がピークになる時間がわかり、重い作業をずらせます。ほかのコツ：<a href="/ja/save-claude-code-limits/">Claude Code の利用上限を節約する方法</a>。' },
     { q: 'Claude Code のピーク時間はいつですか？',
       a: 'Anthropic はピーク時間として平日の太平洋時間 5:00〜11:00 を示しています。日本時間では 21:00〜翌 03:00（米国の冬時間中は 22:00〜翌 04:00）です。米国の午前とヨーロッパの午後が重なる時間帯です。<a href="/ja/">トップページ</a>のライブヒートマップでは、実際の Claude Code セッションの1週間の分布をあなたのタイムゾーンで確認できます。' },
     { q: 'Claude Code を使うのに最適な時間は？',

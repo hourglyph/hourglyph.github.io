@@ -44,7 +44,7 @@ const L = (p: string) => localize(lang, p);
   <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={tr(lang, { en: 'in UTC', ru: 'по UTC', zh: 'UTC 时间', ja: 'UTC' })} />
 
   <h2>{tr(lang, { en: 'How Hourglyph helps you save limits', ru: 'Как Hourglyph помогает экономить лимиты', zh: 'Hourglyph 如何帮你节省额度', ja: 'Hourglyph で利用上限を節約できる理由' })}</h2>
-  <div class="grid-3">
+  <div class="grid-2">
     {tr(lang, {
       en: (
         <>
@@ -55,10 +55,6 @@ const L = (p: string) => localize(lang, p);
           <div class="card">
             <h3 style="margin-top:0">Fewer wasted re-runs</h3>
             <p class="muted" style="margin:0">Peak hours bring slower replies and <code>overloaded</code> errors. An interrupted agent task has to be started again, and your limit goes on the retry instead of the work.</p>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">Time your limit window</h3>
-            <p class="muted" style="margin:0">The 5-hour window starts with your first message. Start in a quiet hour and it resets before the rush, not in the middle of it. <a href={L('/best-time-to-use-claude-code/')}>Best time to work</a>.</p>
           </div>
         </>
       ),
@@ -72,10 +68,6 @@ const L = (p: string) => localize(lang, p);
             <h3 style="margin-top:0">Меньше повторных запусков</h3>
             <p class="muted" style="margin:0">В часы пик чаще бывают медленные ответы и ошибки <code>overloaded</code>. Прерванную задачу агента приходится запускать заново — и лимит уходит на повтор, а не на работу.</p>
           </div>
-          <div class="card">
-            <h3 style="margin-top:0">Окно лимита — в удобное время</h3>
-            <p class="muted" style="margin:0">5-часовое окно начинается с первого сообщения. Начните в спокойный час, и лимит сбросится до пика, а не посреди него. <a href={L('/best-time-to-use-claude-code/')}>Когда лучше работать</a>.</p>
-          </div>
         </>
       ),
       zh: (
@@ -88,10 +80,6 @@ const L = (p: string) => localize(lang, p);
             <h3 style="margin-top:0">减少无谓的重跑</h3>
             <p class="muted" style="margin:0">高峰时段回复更慢，也更容易出现 <code>overloaded</code> 错误。被中断的智能体任务只能重新开始，额度花在了重试上，而不是真正的工作上。</p>
           </div>
-          <div class="card">
-            <h3 style="margin-top:0">规划好额度窗口</h3>
-            <p class="muted" style="margin:0">5 小时窗口从你发出第一条消息时开始计算。在空闲时段开工，额度会在高峰到来前重置，而不是在高峰中途。<a href={L('/best-time-to-use-claude-code/')}>最佳工作时间</a>。</p>
-          </div>
         </>
       ),
       ja: (
@@ -103,10 +91,6 @@ const L = (p: string) => localize(lang, p);
           <div class="card">
             <h3 style="margin-top:0">無駄な再実行を減らす</h3>
             <p class="muted" style="margin:0">ピーク時間は応答が遅くなり、<code>overloaded</code> エラーも増えます。中断したエージェントのタスクはやり直しになり、上限が作業ではなく再実行に消えてしまいます。</p>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">上限のウィンドウを計画する</h3>
-            <p class="muted" style="margin:0">5時間ウィンドウは最初のメッセージから始まります。空いている時間に始めれば、ピークの最中ではなくピーク前にリセットされます。<a href={L('/best-time-to-use-claude-code/')}>おすすめの作業時間</a>。</p>
           </div>
         </>
       ),

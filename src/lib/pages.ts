@@ -19,10 +19,10 @@ export const PAGES = {
     path: '/save-claude-code-limits/',
     title: { en: 'How to Save Claude Code Limits: Work in Off-Peak Hours', ru: 'Как экономить лимиты Claude Code: работайте в ненагруженные часы', zh: '如何节省 Claude Code 额度：错开高峰时段工作', ja: 'Claude Code の利用上限を節約する方法：ピークを避けて作業する' },
     description: {
-      en: 'Make your Claude Code limits last longer: start heavy work in off-peak hours, time your 5-hour window, avoid wasted re-runs and keep context lean.',
-      ru: 'Как тратить лимиты Claude Code медленнее: запускайте тяжёлые задачи в ненагруженные часы, планируйте 5-часовое окно и не тратьте лимит на повторы.',
-      zh: '让 Claude Code 额度用得更久：把繁重任务放在非高峰时段，规划好 5 小时窗口，避免无谓的重跑，保持上下文精简。',
-      ja: 'Claude Code の上限を長持ちさせるコツ：重い作業は空いている時間に回し、5時間ウィンドウを計画的に使い、無駄な再実行を避け、コンテキストを軽く保つ。',
+      en: 'Make your Claude Code limits last longer: start heavy work in off-peak hours, avoid wasted re-runs and keep context lean.',
+      ru: 'Как тратить лимиты Claude Code медленнее: запускайте тяжёлые задачи в ненагруженные часы, не тратьте лимит на повторы.',
+      zh: '让 Claude Code 额度用得更久：把繁重任务放在非高峰时段，避免无谓的重跑，保持上下文精简。',
+      ja: 'Claude Code の上限を長持ちさせるコツ：重い作業は空いている時間に回し、無駄な再実行を避け、コンテキストを軽く保つ。',
     },
   },
   best: {
