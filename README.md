@@ -65,7 +65,7 @@ Goal: anonymously send session starts, the times I send messages, and token coun
 Steps:
 1. Download the script and show me its full contents before continuing:
    mkdir -p ~/.claude/hooks && curl -fsSL https://hourglyph.github.io/hook/hourglyph.sh -o ~/.claude/hooks/hourglyph.sh
-   (source: https://hourglyph.github.io/hook/hourglyph.sh). Check that it does nothing but send an event name and four token counts.
+   (source on GitHub: https://github.com/hourglyph/hourglyph.github.io/blob/main/public/hook/hourglyph.sh). Check that it does nothing but send an event name and four token counts.
 2. Read ~/.claude/settings.json (treat a missing file as {}). If it exists, back it up to ~/.claude/settings.json.bak first.
 3. Remove any old Hourglyph entries from hooks — commands containing "hourglyph.sh" / "rpc/checkin" — so nothing is duplicated.
 4. Merge, don't overwrite: keep every other setting and hook, and append exactly these elements to hooks.SessionStart, hooks.UserPromptSubmit and hooks.Stop (create them if missing):

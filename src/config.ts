@@ -11,6 +11,8 @@ export const MIN_SAMPLE = 150;
 
 /** The hook script, served by the site and kept in the repo at public/hook/hourglyph.sh. */
 export const HOOK_SCRIPT_URL = `${SITE}/hook/hourglyph.sh`;
+/** Human-readable source on GitHub (the site serves the raw file for downloading). */
+export const HOOK_SCRIPT_SOURCE = `${REPO_URL}/blob/main/public/hook/hourglyph.sh`;
 export const HOOK_SCRIPT_PATH = '~/.claude/hooks/hourglyph.sh';
 export const HOOK_INSTALL = `mkdir -p ~/.claude/hooks && curl -fsSL ${HOOK_SCRIPT_URL} -o ${HOOK_SCRIPT_PATH}`;
 

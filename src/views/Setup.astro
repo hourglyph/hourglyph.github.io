@@ -6,7 +6,7 @@ import { localize, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { articleJsonLd } from '../lib/jsonld';
 import { setupPrompt } from '../lib/setupPrompt';
-import { HOOK_INSTALL, HOOK_JSON, HOOK_SCRIPT_PATH, HOOK_SCRIPT_URL } from '../config';
+import { HOOK_INSTALL, HOOK_JSON, HOOK_SCRIPT_PATH, HOOK_SCRIPT_SOURCE } from '../config';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -34,7 +34,7 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
   <CopyBlock lang={lang} text={setupPrompt(lang)} wrap />
 
   <h3>{ru ? 'Вариант Б: вручную' : 'Option B: by hand'}</h3>
-  <p>{ru ? <>Скачайте скрипт (<a href={HOOK_SCRIPT_URL}>посмотреть исходник</a>, 65 строк на <code>sh</code> + <code>awk</code>):</> : <>Download the script (<a href={HOOK_SCRIPT_URL}>read the source</a>, 65 lines of <code>sh</code> + <code>awk</code>):</>}</p>
+  <p>{ru ? <>Скачайте скрипт (<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">посмотреть исходник на GitHub</a>, 65 строк на <code>sh</code> + <code>awk</code>):</> : <>Download the script (<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">read the source on GitHub</a>, 65 lines of <code>sh</code> + <code>awk</code>):</>}</p>
   <CopyBlock lang={lang} text={HOOK_INSTALL} />
   <p style="margin-top:16px">{ru ? <>Затем добавьте блок <code>hooks</code> в <code>~/.claude/settings.json</code> (или объедините с существующим). Если у вас был старый hook с <code>rpc/checkin</code>, удалите его.</> : <>Then add the <code>hooks</code> block to <code>~/.claude/settings.json</code> (or merge it into an existing one). If you had the older hook with <code>rpc/checkin</code>, remove it.</>}</p>
   <CopyBlock lang={lang} text={HOOK_JSON} />
