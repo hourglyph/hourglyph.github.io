@@ -2,18 +2,25 @@
 // A Grid is always [weekday 0=Sunday..6][hour 0..23].
 
 export type Grid = number[][];
-export interface CellLike { utc_weekday: number; utc_hour: number; total: number }
+/** What a chart counts: sessions (`total`), messages sent, or tokens processed. */
+export type Metric = 'total' | 'messages' | 'tokens';
+export const METRICS: Metric[] = ['messages', 'tokens', 'total'];
+export interface CellLike { utc_weekday: number; utc_hour: number; total: number; messages?: number; tokens?: number }
 
 export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // display Monday-first
 export const LEVELS = 5;
 
 export const emptyGrid = (): Grid => Array.from({ length: 7 }, () => Array(24).fill(0));
 
-export function fromCells(cells: CellLike[]): Grid {
+export function fromCells(cells: CellLike[], metric: Metric = 'total'): Grid {
   const g = emptyGrid();
-  for (const c of cells) g[c.utc_weekday][c.utc_hour] += c.total;
+  for (const c of cells) g[c.utc_weekday][c.utc_hour] += Number(c[metric] ?? 0);
   return g;
 }
+
+/** Messages are the best load signal once there are any; before that, fall back to sessions. */
+export const loadMetric = (cells: CellLike[]): Metric =>
+  cells.some((c) => (c.messages ?? 0) > 0) ? 'messages' : 'total';
 
 /** UTC offset of `timeZone` in minutes at instant `at` (DST-aware). */
 export function offsetMinutes(timeZone: string, at = new Date()): number {
@@ -114,6 +121,21 @@ export function loadBand(v: number, g: Grid): 'quiet' | 'normal' | 'busy' | 'pea
 }
 
 // ── Formatting ────────────────────────────────────────────────────────────
+/** Russian-style plural pick; English just uses one/many. */
+export function plural(n: number, lang: string, [one, few, many]: readonly string[]): string {
+  if (lang === 'ru') {
+    const m10 = n % 10, m100 = n % 100;
+    return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
+  }
+  return n === 1 ? one : many;
+}
+
+/** Tokens get compact notation (1.2M); counts stay exact. */
+export const fmtNum = (v: number, metric: Metric, locale: string) =>
+  metric === 'tokens'
+    ? new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(v)
+    : v.toLocaleString(locale);
+
 export function fmtHour(h: number, minute: number, lang: string): string {
   h = ((h % 24) + 24) % 24;
   const mm = String(minute).padStart(2, '0');

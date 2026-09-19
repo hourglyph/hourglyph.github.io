@@ -16,7 +16,10 @@ export function getSnapshot(): Promise<Snapshot> {
     } catch (err) {
       // Never fail the build because the API hiccuped; the live script fills data in on the client.
       console.warn('[hourglyph] snapshot fetch failed:', err);
-      const stats: Stats = { total: 0, last_hour: 0, last_24h: 0, last_30d: 0, first_at: null, last_at: null, generated_at: builtAt };
+      const stats: Stats = {
+        total: 0, last_hour: 0, last_24h: 0, last_30d: 0, first_at: null, last_at: null, generated_at: builtAt,
+        messages_total: 0, messages_hour: 0, messages_24h: 0, tokens_total: 0, tokens_24h: 0, turns_total: 0,
+      };
       return { all: [], recent: [], countries: [], stats, builtAt, ok: false };
     }
   })();

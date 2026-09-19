@@ -1,7 +1,7 @@
 ---
 import { MIN_SAMPLE } from '../config';
 import { UI, type Lang } from '../i18n';
-import { analyze, fmtHour, fmtWindow, fromCells, offsetMinutes, officialPeakIn, toZone, type CellLike } from '../lib/heatmap';
+import { analyze, fmtHour, fmtWindow, fromCells, loadMetric, offsetMinutes, officialPeakIn, plural, toZone, type CellLike } from '../lib/heatmap';
 
 interface Props {
   lang: Lang;
@@ -13,7 +13,9 @@ interface Props {
 const { lang, cells, tz, zonePhrase } = Astro.props;
 const t = UI[lang];
 const ru = lang === 'ru';
-const { grid, minute } = toZone(fromCells(cells), offsetMinutes(tz));
+const metric = loadMetric(cells);
+const { grid, minute } = toZone(fromCells(cells, metric), offsetMinutes(tz));
+const count = (n: number) => `${n.toLocaleString(t.locale)} ${plural(n, lang, t.metricUnits[metric])}`;
 const a = analyze(grid);
 const enough = a.total >= MIN_SAMPLE;
 const off = officialPeakIn(tz);
@@ -33,14 +35,14 @@ const pct = (x: number) => `${Math.round(x * 100)}%`;
     ) : (
       <p class="notice">
         {ru
-          ? <>Карта только начала собирать данные: {t.checkins(a.total)} из {MIN_SAMPLE} нужных для надёжных выводов. Как только выборка вырастет, здесь автоматически появятся пиковые и спокойные часы {zonePhrase}. Ускорить можно, <a href="/ru/setup/">подключив hook</a>.</>
-          : <>The map has just started collecting data: {t.checkins(a.total)} of the {MIN_SAMPLE} needed for reliable conclusions. Peak and quiet hours {zonePhrase} will appear here automatically as the sample grows. You can speed it up by <a href="/setup/">adding the hook</a>.</>}
+          ? <>Карта только начала собирать данные: {count(a.total)} из {MIN_SAMPLE} нужных для надёжных выводов. Как только выборка вырастет, здесь автоматически появятся пиковые и спокойные часы {zonePhrase}. Ускорить можно, <a href="/ru/setup/">подключив hook</a>.</>
+          : <>The map has just started collecting data: {count(a.total)} of the {MIN_SAMPLE} needed for reliable conclusions. Peak and quiet hours {zonePhrase} will appear here automatically as the sample grows. You can speed it up by <a href="/setup/">adding the hook</a>.</>}
       </p>
     )}
     <p class="small muted" style="margin-top:12px">
       {ru
-        ? <>Выводы — по данным сообщества ({t.checkins(a.total)}), окна по {3} часа, {zonePhrase}.</>
-        : <>Based on community data ({t.checkins(a.total)}), 3-hour windows, {zonePhrase}.</>}
+        ? <>Выводы — по данным сообщества ({count(a.total)}), окна по {3} часа, {zonePhrase}.</>
+        : <>Based on community data ({count(a.total)}), 3-hour windows, {zonePhrase}.</>}
     </p>
   </div>
   <div class="card" style="padding:20px">

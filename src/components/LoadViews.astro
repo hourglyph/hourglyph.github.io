@@ -1,10 +1,10 @@
 ---
-// One card, four views of the same data: heatmap, hour-of-day bars, weekday bars, world map.
-// Everything is server-rendered for crawlers; src/scripts/live.ts switches tabs, re-renders in the
-// visitor's zone and lazy-loads the map SVG on first open.
+// One card, four views (heatmap, hour-of-day bars, weekday bars, world map) of one metric
+// (messages, tokens or sessions). Everything is server-rendered for crawlers; src/scripts/live.ts
+// switches tabs and metrics, re-renders in the visitor's zone and lazy-loads the map SVG.
 import Heatmap from './Heatmap.astro';
 import { UI, type Lang } from '../i18n';
-import { WEEK_ORDER, analyze, fromCells, level, offsetMinutes, toZone, type CellLike } from '../lib/heatmap';
+import { METRICS, WEEK_ORDER, analyze, fmtNum, fromCells, level, loadMetric, offsetMinutes, plural, toZone, type CellLike } from '../lib/heatmap';
 import { countryName, flag } from '../lib/countries';
 import type { CountryRow } from '../lib/supabase';
 
@@ -19,15 +19,17 @@ interface Props {
 const { lang, cells, countries, tz, zoneLabel } = Astro.props;
 const t = UI[lang];
 const id = `v${Math.random().toString(36).slice(2, 7)}`;
+const metric = loadMetric(cells);
+const unit = (v: number) => `${fmtNum(v, metric, t.locale)} ${plural(v, lang, t.metricUnits[metric])}`;
 
-const { grid, minute } = toZone(fromCells(cells), tz === 'auto' ? 0 : offsetMinutes(tz));
+const { grid, minute } = toZone(fromCells(cells, metric), tz === 'auto' ? 0 : offsetMinutes(tz));
 const a = analyze(grid);
 const hourMax = Math.max(1, ...a.hourTotals);
 const dayMax = Math.max(1, ...a.dayTotals);
 const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
 
-const sorted = [...countries].sort((x, y) => y.total - x.total);
-const countryMax = Math.max(1, ...sorted.map((c) => c.total));
+const sorted = countries.filter((c) => c[metric] > 0).sort((x, y) => y[metric] - x[metric]);
+const countryMax = Math.max(1, ...sorted.map((c) => c[metric]));
 const top = sorted.slice(0, 10);
 
 const tabs = [
@@ -37,7 +39,8 @@ const tabs = [
   { key: 'map', label: t.views.map },
 ] as const;
 ---
-<section class="card views" data-views>
+<section class="card views" data-views data-metric={metric}>
+  <div class="views-bar">
   <div class="tabs" role="tablist" aria-label={t.viewsLabel}>
     {tabs.map((tab, i) => (
       <button
@@ -51,16 +54,23 @@ const tabs = [
       >{tab.label}</button>
     ))}
   </div>
+  <div class="segmented" role="radiogroup" aria-label={t.metricLabel}>
+    {METRICS.map((m) => (
+      <button type="button" role="radio" aria-checked={m === metric ? 'true' : 'false'} data-metric-btn={m}>{t.metrics[m]}</button>
+    ))}
+  </div>
+  </div>
+  <p class="small muted metric-note" data-metric-note>{t.metricNote[metric]}</p>
 
   <div role="tabpanel" id={`${id}-p-heat`} aria-labelledby={`${id}-t-heat`} data-panel="heat">
-    <Heatmap lang={lang} cells={cells} tz={tz} zoneLabel={zoneLabel} />
+    <Heatmap lang={lang} cells={cells} tz={tz} zoneLabel={zoneLabel} metric={metric} />
   </div>
 
   <div role="tabpanel" id={`${id}-p-hours`} aria-labelledby={`${id}-t-hours`} data-panel="hours" hidden>
     <figure class="bars-v" data-bars="hours" data-tz={tz}>
       <div class="bars-v-plot">
         {a.hourTotals.map((v, h) => (
-          <div class="bar-col" data-i={h} title={`${hh(h)} · ${t.checkins(v)}`}>
+          <div class="bar-col" data-i={h} title={`${hh(h)} · ${unit(v)}`}>
             <span class="bar" style={`--v:${v / hourMax}`}></span>
           </div>
         ))}
@@ -78,7 +88,7 @@ const tabs = [
         <div class="bar-row" data-i={d}>
           <span class="bar-label">{t.daysLong[d]}</span>
           <span class="bar-track"><span class="bar" style={`--v:${a.dayTotals[d] / dayMax}`}></span></span>
-          <span class="bar-value" data-value>{a.dayTotals[d].toLocaleString(t.locale)}</span>
+          <span class="bar-value" data-value>{fmtNum(a.dayTotals[d], metric, t.locale)}</span>
         </div>
       ))}
       <figcaption class="hm-foot"><span>{t.daysCaption} · <span data-zone-label>{zoneLabel ?? t.utc}</span></span></figcaption>
@@ -94,8 +104,8 @@ const tabs = [
           {top.map((c) => (
             <li data-cc={c.country}>
               <span class="cl-name">{flag(c.country)} {countryName(c.country, t.locale)}</span>
-              <span class="cl-bar"><span class="bar" data-l={level(c.total, countryMax)} style={`--v:${c.total / countryMax}`}></span></span>
-              <span class="cl-value">{c.total.toLocaleString(t.locale)}</span>
+              <span class="cl-bar"><span class="bar" data-l={level(c[metric], countryMax)} style={`--v:${c[metric] / countryMax}`}></span></span>
+              <span class="cl-value">{fmtNum(c[metric], metric, t.locale)}</span>
             </li>
           ))}
         </ol>

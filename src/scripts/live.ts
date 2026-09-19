@@ -1,51 +1,48 @@
-// Live layer: re-renders heatmaps and bar charts in the visitor's (or page's) time zone,
-// refreshes stats and the country map, switches chart tabs, and handles the manual check-in
-// and copy buttons.
+// Live layer: re-renders heatmaps, bar charts and the country map in the visitor's (or page's)
+// time zone and chosen metric, refreshes stats, switches chart tabs and metrics, and handles the
+// manual check-in and copy buttons.
 import { checkin, fetchCells, fetchCountries, fetchStats, type Cell, type CountryRow } from '../lib/supabase';
 import { MIN_SAMPLE } from '../config';
-import { WEEK_ORDER, analyze, fromCells, level, loadBand, offsetMinutes, toZone, fmtOffset } from '../lib/heatmap';
+import {
+  analyze, fmtNum, fmtOffset, fromCells, level, loadBand, loadMetric, offsetMinutes, plural, toZone,
+  type Metric,
+} from '../lib/heatmap';
 import { countryName, flag } from '../lib/countries';
 
 const i18n = JSON.parse(document.getElementById('hg-i18n')?.textContent || '{}');
+const lang: string = i18n.lang;
 const visitorTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-function plural(n: number, [one, few, many]: string[]) {
-  if (i18n.lang === 'ru') {
-    const m10 = n % 10, m100 = n % 100;
-    return m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many;
-  }
-  return n === 1 ? one : many;
-}
-const unit = (n: number) => plural(n, i18n.unitForms);
-const countriesCount = (n: number) => `${n} ${plural(n, i18n.countryForms)}`;
 
-const cache = new Map<string, Promise<Cell[]>>();
+const valueText = (v: number, m: Metric) => `${fmtNum(v, m, i18n.locale)} ${plural(v, lang, i18n.metricUnits[m])}`;
+const countriesCount = (n: number) => `${n} ${plural(n, lang, i18n.countryForms)}`;
+
+// ── Data (cached per refresh) ────────────────────────────────────────────
+const cellCache = new Map<string, Promise<Cell[]>>();
 const cells = (w: 'all' | '30d') => {
-  if (!cache.has(w)) cache.set(w, fetchCells(w));
-  return cache.get(w)!;
+  if (!cellCache.has(w)) cellCache.set(w, fetchCells(w));
+  return cellCache.get(w)!;
 };
 let countriesP: Promise<CountryRow[]> | undefined;
 const countries = () => (countriesP ??= fetchCountries('all'));
 
 const resolveTz = (tz?: string) => (!tz || tz === 'auto' ? visitorTz : tz);
 const zoneText = (offset: number) => `${visitorTz.replace(/_/g, ' ')} (${fmtOffset(offset)})`;
+const metricOf = (el: Element): Metric =>
+  ((el.closest<HTMLElement>('[data-views]')?.dataset.metric || (el as HTMLElement).dataset?.metric || 'total') as Metric);
 
 /** Current time shifted so getUTCDay/getUTCHours give the grid cell (matches toZone's whole-hour shift). */
 const zonedNow = (offset: number) => new Date(Date.now() + Math.floor(offset / 60) * 3_600_000);
+const hhFor = (minute: number) => (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
 
+// ── Renderers ────────────────────────────────────────────────────────────
 async function renderHeatmaps() {
-  const figs = document.querySelectorAll<HTMLElement>('[data-heatmap]');
-  let visitorGrid: number[][] | undefined;
-  for (const fig of figs) {
-    const tz = fig.dataset.tz === 'auto' ? visitorTz : fig.dataset.tz!;
-    const w = (fig.dataset.window as 'all' | '30d') || 'all';
-    const offset = offsetMinutes(tz);
-    const { grid, minute } = toZone(fromCells(await cells(w)), offset);
+  for (const fig of document.querySelectorAll<HTMLElement>('[data-heatmap]')) {
+    const offset = offsetMinutes(resolveTz(fig.dataset.tz));
+    const metric = metricOf(fig);
+    const { grid, minute } = toZone(fromCells(await cells((fig.dataset.window as 'all' | '30d') || 'all'), metric), offset);
     const max = Math.max(0, ...grid.flat());
-    const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
-
-    const local = zonedNow(offset);
-    const nowD = local.getUTCDay();
-    const nowH = local.getUTCHours();
+    const hh = hhFor(minute);
+    const now = zonedNow(offset);
 
     fig.querySelectorAll<HTMLElement>('thead th[data-h]').forEach((th) => {
       const h = Number(th.dataset.h);
@@ -54,30 +51,12 @@ async function renderHeatmaps() {
     fig.querySelectorAll<HTMLTableCellElement>('td[data-d]').forEach((td) => {
       const d = Number(td.dataset.d), h = Number(td.dataset.h), v = grid[d][h];
       td.dataset.l = String(level(v, max));
-      td.title = `${i18n.daysShort[d]} ${hh(h)} · ${v.toLocaleString(i18n.locale)} ${unit(v)}`;
-      td.classList.toggle('is-now', d === nowD && h === nowH);
+      td.title = `${i18n.daysShort[d]} ${hh(h)} · ${valueText(v, metric)}`;
+      td.classList.toggle('is-now', d === now.getUTCDay() && h === now.getUTCHours());
     });
     if (fig.dataset.tz === 'auto') {
       const label = fig.querySelector('[data-zone-label]');
       if (label) label.textContent = zoneText(offset);
-      visitorGrid ??= grid;
-    }
-  }
-
-  // "Right now" band, always relative to the visitor's own zone and the all-time pattern.
-  const band = document.querySelector<HTMLElement>('[data-now-band]');
-  if (band) {
-    const offset = offsetMinutes(visitorTz);
-    const grid = visitorGrid ?? toZone(fromCells(await cells('all')), offset).grid;
-    const local = zonedNow(offset);
-    // With a tiny sample every non-empty hour looks like a "peak"; don't claim anything yet.
-    const total = grid.flat().reduce((a, v) => a + v, 0);
-    const b = total < MIN_SAMPLE ? 'collecting' : loadBand(grid[local.getUTCDay()][local.getUTCHours()], grid);
-    band.dataset.band = b;
-    band.textContent = i18n.bands[b];
-    const time = document.querySelector('[data-now-time]');
-    if (time) {
-      time.textContent = new Intl.DateTimeFormat(i18n.locale, { weekday: 'long', hour: 'numeric', minute: '2-digit' }).format(new Date()) + ` · ${i18n.yourTz}`;
     }
   }
 }
@@ -85,9 +64,10 @@ async function renderHeatmaps() {
 async function renderBars() {
   for (const el of document.querySelectorAll<HTMLElement>('[data-bars]')) {
     const offset = offsetMinutes(resolveTz(el.dataset.tz));
-    const { grid, minute } = toZone(fromCells(await cells('all')), offset);
+    const metric = metricOf(el);
+    const { grid, minute } = toZone(fromCells(await cells('all'), metric), offset);
     const a = analyze(grid);
-    const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
+    const hh = hhFor(minute);
     const hours = el.dataset.bars === 'hours';
     const vals = hours ? a.hourTotals : a.dayTotals;
     const max = Math.max(1, ...vals);
@@ -96,11 +76,10 @@ async function renderBars() {
     el.querySelectorAll<HTMLElement>(hours ? '.bar-col' : '.bar-row').forEach((row) => {
       const i = Number(row.dataset.i), v = vals[i];
       row.querySelector<HTMLElement>('.bar')?.style.setProperty('--v', String(v / max));
-      const label = hours ? hh(i) : i18n.daysShort[i];
-      row.title = `${label} · ${v.toLocaleString(i18n.locale)} ${unit(v)}`;
+      row.title = `${hours ? hh(i) : i18n.daysShort[i]} · ${valueText(v, metric)}`;
       row.classList.toggle('is-now', hours ? i === now.getUTCHours() : i === now.getUTCDay());
       const value = row.querySelector('[data-value]');
-      if (value) value.textContent = v.toLocaleString(i18n.locale);
+      if (value) value.textContent = fmtNum(v, metric, i18n.locale);
     });
     if (hours) {
       el.querySelectorAll<HTMLElement>('.bars-v-axis [data-i]').forEach((s) => {
@@ -117,19 +96,23 @@ async function renderBars() {
 
 async function renderCountries() {
   const lists = document.querySelectorAll<HTMLElement>('[data-countries]');
-  const maps = document.querySelectorAll<HTMLElement>('[data-world] svg');
+  const maps = document.querySelectorAll<SVGSVGElement>('[data-world] svg');
   if (!lists.length && !maps.length) return;
-  const rows = [...(await countries())].sort((x, y) => y.total - x.total);
-  const max = Math.max(1, ...rows.map((r) => r.total));
-  const byCc = new Map(rows.map((r) => [r.country, r.total]));
+  const all = await countries();
+  const rank = (metric: Metric) => {
+    const rows = all.filter((r) => r[metric] > 0).sort((x, y) => y[metric] - x[metric]);
+    return { rows, max: Math.max(1, ...rows.map((r) => r[metric])) };
+  };
 
   lists.forEach((list) => {
+    const metric = metricOf(list);
+    const { rows, max } = rank(metric);
     list.innerHTML = rows
       .slice(0, 10)
       .map((r) =>
         `<li data-cc="${r.country}"><span class="cl-name">${flag(r.country)} ${countryName(r.country, i18n.locale)}</span>` +
-        `<span class="cl-bar"><span class="bar" style="--v:${r.total / max}"></span></span>` +
-        `<span class="cl-value">${r.total.toLocaleString(i18n.locale)}</span></li>`,
+        `<span class="cl-bar"><span class="bar" style="--v:${r[metric] / max}"></span></span>` +
+        `<span class="cl-value">${fmtNum(r[metric], metric, i18n.locale)}</span></li>`,
       )
       .join('');
     const panel = list.parentElement;
@@ -140,25 +123,70 @@ async function renderCountries() {
   });
 
   maps.forEach((svg) => {
+    const metric = metricOf(svg);
+    const { rows, max } = rank(metric);
+    const byCc = new Map(rows.map((r) => [r.country, r[metric]]));
     svg.querySelectorAll<SVGPathElement>('path[data-cc]').forEach((p) => {
       const v = byCc.get(p.dataset.cc!) ?? 0;
       p.dataset.l = String(level(v, max));
       const t = p.querySelector('title');
-      const name = t?.dataset.name ?? t?.textContent ?? '';
       if (t) {
-        t.dataset.name = name;
-        t.textContent = `${name} · ${v.toLocaleString(i18n.locale)} ${unit(v)}`;
+        t.dataset.name ??= t.textContent ?? '';
+        t.textContent = `${t.dataset.name} · ${valueText(v, metric)}`;
       }
     });
   });
 }
 
+async function renderNow() {
+  const band = document.querySelector<HTMLElement>('[data-now-band]');
+  if (!band) return;
+  const all = await cells('all');
+  const metric = loadMetric(all);
+  const offset = offsetMinutes(visitorTz);
+  const { grid } = toZone(fromCells(all, metric), offset);
+  const now = zonedNow(offset);
+  // With a tiny sample every non-empty hour looks like a "peak"; don't claim anything yet.
+  const total = grid.flat().reduce((s, v) => s + v, 0);
+  const b = total < MIN_SAMPLE ? 'collecting' : loadBand(grid[now.getUTCDay()][now.getUTCHours()], grid);
+  band.dataset.band = b;
+  band.textContent = i18n.bands[b];
+  const time = document.querySelector('[data-now-time]');
+  if (time) {
+    time.textContent =
+      new Intl.DateTimeFormat(i18n.locale, { weekday: 'long', hour: 'numeric', minute: '2-digit' }).format(new Date()) +
+      ` · ${i18n.yourTz}`;
+  }
+}
+
+async function renderStats() {
+  const els = document.querySelectorAll<HTMLElement>('[data-stat]');
+  if (!els.length) return;
+  const s = (await fetchStats()) as unknown as Record<string, number>;
+  els.forEach((el) => {
+    const key = el.dataset.stat!;
+    if (typeof s[key] === 'number') el.textContent = fmtNum(s[key], key.startsWith('tokens') ? 'tokens' : 'total', i18n.locale);
+  });
+}
+
+const renderCharts = () => Promise.all([renderHeatmaps(), renderBars(), renderCountries()]);
+
+async function refresh() {
+  cellCache.clear();
+  countriesP = undefined;
+  try {
+    await Promise.all([renderCharts(), renderNow(), renderStats()]);
+  } catch (err) {
+    console.warn('[hourglyph] live refresh failed', err);
+  }
+}
+
+// ── World map (lazy) ─────────────────────────────────────────────────────
 async function loadWorld(el: HTMLElement) {
   if (el.dataset.loaded) return;
   el.dataset.loaded = '1';
   try {
-    const res = await fetch(el.dataset.src!);
-    el.innerHTML = await res.text();
+    el.innerHTML = await (await fetch(el.dataset.src!)).text();
     await renderCountries();
   } catch (err) {
     delete el.dataset.loaded;
@@ -166,28 +194,12 @@ async function loadWorld(el: HTMLElement) {
   }
 }
 
-async function renderStats() {
-  const els = document.querySelectorAll<HTMLElement>('[data-stat]');
-  if (!els.length) return;
-  const s = await fetchStats();
-  els.forEach((el) => {
-    const v = (s as unknown as Record<string, number>)[el.dataset.stat!];
-    if (typeof v === 'number') el.textContent = v.toLocaleString(i18n.locale);
-  });
-}
-
-async function refresh() {
-  cache.clear();
-  try {
-    countriesP = undefined;
-    await Promise.all([renderHeatmaps(), renderBars(), renderStats(), renderCountries()]);
-  } catch (err) {
-    console.warn('[hourglyph] live refresh failed', err);
-  }
-}
-
-// ── Chart tabs ──────────────────────────────────────────────────────────
+// ── Chart tabs and metric switch ─────────────────────────────────────────
 const VIEW_KEY = 'hg-view';
+const METRIC_KEY = 'hg-metric';
+const remember = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} };
+const recall = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
+
 function selectView(root: HTMLElement, key: string, focus = false) {
   const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
   if (!tabs.some((t) => t.dataset.tab === key)) return;
@@ -201,12 +213,22 @@ function selectView(root: HTMLElement, key: string, focus = false) {
   if (key === 'map') root.querySelectorAll<HTMLElement>('[data-world]').forEach(loadWorld);
 }
 
+function selectMetric(root: HTMLElement, metric: string) {
+  if (!i18n.metricNote?.[metric]) return;
+  root.dataset.metric = metric;
+  root.querySelectorAll<HTMLButtonElement>('[data-metric-btn]').forEach((b) =>
+    b.setAttribute('aria-checked', String(b.dataset.metricBtn === metric)),
+  );
+  const note = root.querySelector('[data-metric-note]');
+  if (note) note.textContent = i18n.metricNote[metric];
+}
+
 document.querySelectorAll<HTMLElement>('[data-views]').forEach((root) => {
   const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
   tabs.forEach((tab, i) => {
     tab.addEventListener('click', () => {
       selectView(root, tab.dataset.tab!);
-      try { localStorage.setItem(VIEW_KEY, tab.dataset.tab!); } catch {}
+      remember(VIEW_KEY, tab.dataset.tab!);
     });
     tab.addEventListener('keydown', (e) => {
       const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
@@ -215,17 +237,26 @@ document.querySelectorAll<HTMLElement>('[data-views]').forEach((root) => {
       e.preventDefault();
       const next = tabs[jump >= 0 ? jump : (i + step + tabs.length) % tabs.length];
       selectView(root, next.dataset.tab!, true);
-      try { localStorage.setItem(VIEW_KEY, next.dataset.tab!); } catch {}
+      remember(VIEW_KEY, next.dataset.tab!);
     });
   });
-  let saved: string | null = null;
-  try { saved = localStorage.getItem(VIEW_KEY); } catch {}
-  if (saved) selectView(root, saved);
+  root.querySelectorAll<HTMLButtonElement>('[data-metric-btn]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selectMetric(root, btn.dataset.metricBtn!);
+      remember(METRIC_KEY, btn.dataset.metricBtn!);
+      renderCharts().catch((err) => console.warn('[hourglyph] re-render failed', err));
+    });
+  });
+  const view = recall(VIEW_KEY);
+  if (view) selectView(root, view);
+  const metric = recall(METRIC_KEY);
+  if (metric) selectMetric(root, metric);
 });
 
 refresh();
 setInterval(() => { if (document.visibilityState === 'visible') refresh(); }, 60_000);
 
+// ── Buttons ──────────────────────────────────────────────────────────────
 document.querySelectorAll<HTMLButtonElement>('[data-checkin]').forEach((btn) => {
   btn.addEventListener('click', async () => {
     const msg = document.querySelector('[data-checkin-msg]');

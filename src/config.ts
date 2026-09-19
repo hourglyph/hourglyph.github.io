@@ -9,15 +9,21 @@ export const REPO_URL = 'https://github.com/hourglyph/hourglyph.github.io';
 /** Below this many check-ins we don't state conclusions about peaks. */
 export const MIN_SAMPLE = 150;
 
-export const HOOK_COMMAND =
-  `curl -s -m 5 -X POST '${SUPABASE_URL}/rest/v1/rpc/checkin' ` +
-  `-H 'apikey: ${SUPABASE_KEY}' -H 'Content-Type: application/json' ` +
-  `-d '{"p_source":"hook"}' >/dev/null 2>&1 || true`;
+/** The hook script, served by the site and kept in the repo at public/hook/hourglyph.sh. */
+export const HOOK_SCRIPT_URL = `${SITE}/hook/hourglyph.sh`;
+export const HOOK_SCRIPT_PATH = '~/.claude/hooks/hourglyph.sh';
+export const HOOK_INSTALL = `mkdir -p ~/.claude/hooks && curl -fsSL ${HOOK_SCRIPT_URL} -o ${HOOK_SCRIPT_PATH}`;
 
-/** One element of `hooks.SessionStart`. */
-export const HOOK_ENTRY = { matcher: 'startup', hooks: [{ type: 'command', command: HOOK_COMMAND, async: true }] };
+const hookCmd = (event: string) => ({ type: 'command', command: `sh "$HOME/.claude/hooks/hourglyph.sh" ${event}`, async: true });
 
-export const HOOK_JSON = JSON.stringify({ hooks: { SessionStart: [HOOK_ENTRY] } }, null, 2);
+/** Entries to add under `hooks` in ~/.claude/settings.json. */
+export const HOOK_ENTRIES = {
+  SessionStart: [{ matcher: 'startup', hooks: [hookCmd('session')] }],
+  UserPromptSubmit: [{ hooks: [hookCmd('message')] }],
+  Stop: [{ hooks: [hookCmd('stop')] }],
+};
 
-/** Marker an agent can use to detect an existing Hourglyph hook. */
-export const HOOK_MARKER = 'rpc/checkin';
+export const HOOK_JSON = JSON.stringify({ hooks: HOOK_ENTRIES }, null, 2);
+
+/** Commands containing this belong to Hourglyph (new script, or the old inline rpc/checkin curl). */
+export const HOOK_MARKERS = ['hourglyph.sh', 'rpc/checkin'];

@@ -1,43 +1,50 @@
-// A prompt users paste into Claude Code so the agent installs the hook itself.
-// It must be safe to run on any existing settings file: back up, merge, never clobber.
-import { HOOK_ENTRY, HOOK_MARKER, SITE } from '../config';
+// A prompt users paste into Claude Code so the agent installs the hooks itself.
+// It must be safe on any existing settings file: back up, merge, never clobber, show the diff.
+import { HOOK_ENTRIES, HOOK_INSTALL, HOOK_MARKERS, HOOK_SCRIPT_PATH, HOOK_SCRIPT_URL, SITE } from '../config';
 import type { Lang } from '../i18n';
 
-const entry = JSON.stringify(HOOK_ENTRY, null, 2);
+const entries = JSON.stringify(HOOK_ENTRIES, null, 2);
+const markers = HOOK_MARKERS.map((m) => `"${m}"`).join(' / ');
 
 export function setupPrompt(lang: Lang): string {
   if (lang === 'ru') {
-    return `Настрой у меня hook Hourglyph для Claude Code (${SITE}/ru/setup/).
+    return `Подключи у меня hooks Hourglyph для Claude Code (${SITE}/ru/setup/).
 
-Цель: добавить в мои пользовательские настройки ~/.claude/settings.json один SessionStart hook, который при запуске каждой новой сессии анонимно отправляет одну отметку на карту пиковых часов. Никаких данных обо мне он не передаёт.
+Цель: анонимно отправлять на карту пиковых часов время начала сессий, время отправки сообщений и число токенов за ход. Текст сообщений, ответы, код и пути не отправляются.
 
 Шаги:
-1. Прочитай ~/.claude/settings.json. Если файла нет — считай, что там {}. Если файл есть, сначала сделай резервную копию ~/.claude/settings.json.bak.
-2. Если в hooks.SessionStart уже есть команда, содержащая "${HOOK_MARKER}", ничего не меняй и сообщи, что hook уже установлен.
-3. Иначе объедини, а не перезаписывай: сохрани все существующие настройки и hooks и добавь в массив hooks.SessionStart (создай hooks и SessionStart, если их нет) ровно этот элемент:
+1. Скачай скрипт и покажи мне его содержимое целиком, прежде чем продолжать:
+   ${HOOK_INSTALL}
+   (исходник: ${HOOK_SCRIPT_URL}). Проверь, что в нём нет ничего, кроме отправки события и четырёх чисел токенов.
+2. Прочитай ~/.claude/settings.json (если файла нет — считай, что там {}). Если файл есть, сделай резервную копию ~/.claude/settings.json.bak.
+3. Удали из hooks все старые записи Hourglyph — команды, содержащие ${markers}, — чтобы не было дублей.
+4. Объедини, а не перезаписывай: сохрани все остальные настройки и hooks и добавь в соответствующие массивы hooks.SessionStart, hooks.UserPromptSubmit и hooks.Stop (создай их, если их нет) ровно эти элементы:
 
-${entry}
+${entries}
 
-4. Запиши файл как валидный JSON и перечитай его, чтобы убедиться, что он парсится.
-5. Проверь, что доступен curl (command -v curl).
-6. Покажи мне diff и объясни, как удалить hook позже.
+5. Запиши файл как валидный JSON и перечитай его, чтобы убедиться, что он парсится.
+6. Проверь, что доступны curl и awk (command -v curl awk).
+7. Покажи мне diff и объясни, как всё удалить: убрать эти три записи из settings.json и файл ${HOOK_SCRIPT_PATH}.
 
-Больше ничего не меняй. Отметки начнут приходить со следующей новой сессии.`;
+Больше ничего не меняй. Данные начнут приходить со следующей новой сессии.`;
   }
-  return `Set up the Hourglyph hook for Claude Code on this machine (${SITE}/setup/).
+  return `Set up the Hourglyph hooks for Claude Code on this machine (${SITE}/setup/).
 
-Goal: add one SessionStart hook to my user settings in ~/.claude/settings.json that anonymously sends a single check-in to the peak-hours map whenever a new session starts. It sends no data about me.
+Goal: anonymously send session starts, the times I send messages, and token counts per turn to the peak-hours map. Message text, answers, code and paths are never sent.
 
 Steps:
-1. Read ~/.claude/settings.json. If it doesn't exist, treat it as {}. If it exists, back it up to ~/.claude/settings.json.bak first.
-2. If hooks.SessionStart already contains a command with "${HOOK_MARKER}", change nothing and tell me the hook is already installed.
-3. Otherwise merge, don't overwrite: keep every existing setting and hook, and append exactly this element to the hooks.SessionStart array (create hooks and SessionStart if missing):
+1. Download the script and show me its full contents before continuing:
+   ${HOOK_INSTALL}
+   (source: ${HOOK_SCRIPT_URL}). Check that it does nothing but send an event name and four token counts.
+2. Read ~/.claude/settings.json (treat a missing file as {}). If it exists, back it up to ~/.claude/settings.json.bak first.
+3. Remove any old Hourglyph entries from hooks — commands containing ${markers} — so nothing is duplicated.
+4. Merge, don't overwrite: keep every other setting and hook, and append exactly these elements to hooks.SessionStart, hooks.UserPromptSubmit and hooks.Stop (create them if missing):
 
-${entry}
+${entries}
 
-4. Write the file back as valid JSON and re-read it to confirm it parses.
-5. Check that curl is available (command -v curl).
-6. Show me the diff and tell me how to remove the hook later.
+5. Write the file back as valid JSON and re-read it to confirm it parses.
+6. Check that curl and awk are available (command -v curl awk).
+7. Show me the diff and tell me how to remove everything: delete those three entries from settings.json and the file ${HOOK_SCRIPT_PATH}.
 
-Don't change anything else. Check-ins start with the next new session.`;
+Don't change anything else. Data starts flowing with the next new session.`;
 }

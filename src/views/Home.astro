@@ -78,19 +78,19 @@ const L = (p: string) => localize(lang, p);
   <h2>{ru ? 'Как это работает' : 'How it works'}</h2>
   <div class="grid-2">
     <div class="card">
-      <h3 style="margin-top:0">{ru ? '1. Hook отмечает начало сессии' : '1. A hook marks each session start'}</h3>
+      <h3 style="margin-top:0">{ru ? '1. Hooks отмечают сессии, сообщения и токены' : '1. Hooks record sessions, messages and tokens'}</h3>
       <p class="muted" style="margin:0">
         {ru
-          ? <>Одна строка в <code>~/.claude/settings.json</code>: при запуске новой сессии Claude Code отправляет анонимный пинг. Час и день недели сервер определяет сам, поэтому подделать их нельзя. <a href={L('/setup/')}>Подключить</a>.</>
-          : <>One entry in <code>~/.claude/settings.json</code>: when a new Claude Code session starts it sends an anonymous ping. The server stamps the hour and weekday itself, so they can’t be faked. <a href={L('/setup/')}>Set it up</a>.</>}
+          ? <>Три hook’а в <code>~/.claude/settings.json</code> анонимно отмечают запуск сессии, каждое отправленное сообщение и число токенов за ход — так видна нагрузка и внутри долгих сессий. Час и день недели сервер определяет сам. <a href={L('/setup/')}>Подключить</a>.</>
+          : <>Three hooks in <code>~/.claude/settings.json</code> anonymously record session starts, every message you send and the tokens used per turn — so load inside long sessions shows up too. The server stamps the hour and weekday itself. <a href={L('/setup/')}>Set it up</a>.</>}
       </p>
     </div>
     <div class="card">
       <h3 style="margin-top:0">{ru ? '2. Карта собирается из всех отметок' : '2. The map aggregates everyone'}</h3>
       <p class="muted" style="margin:0">
         {ru
-          ? <>Хранятся только день недели, час UTC и страна (её определяет сеть по соединению) — ни кода, ни промптов, ни IP. Агрегаты открыты: <a href={L('/data/')}>скачать JSON/CSV</a>.</>
-          : <>Only the weekday, UTC hour and country (detected by the network from the connection) are stored — no code, prompts or IPs. The aggregates are open: <a href={L('/data/')}>download JSON/CSV</a>.</>}
+          ? <>Хранятся только тип события, день недели, час UTC, страна (её определяет сеть по соединению) и числа токенов — ни текста, ни кода, ни IP. Агрегаты открыты: <a href={L('/data/')}>скачать JSON/CSV</a>.</>
+          : <>Only the event type, weekday, UTC hour, country (detected by the network) and token counts are stored — no text, code or IPs. The aggregates are open: <a href={L('/data/')}>download JSON/CSV</a>.</>}
       </p>
     </div>
   </div>

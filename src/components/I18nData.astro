@@ -14,9 +14,10 @@ const data = {
   checkinErr: t.checkinErr,
   copied: t.copied,
   copy: t.copy,
-  // "N check-ins" for 0/1/2/5 forms is computed client-side from these samples:
+  // Plural forms [1, 2, 5] for client-side labels.
   countryForms: [1, 2, 5].map((n) => t.countriesCount(n).split(' ').slice(1).join(' ')),
-  unitForms: [t.checkins(1).split(' ').slice(1).join(' '), t.checkins(2).split(' ').slice(1).join(' '), t.checkins(5).split(' ').slice(1).join(' ')],
+  metricUnits: t.metricUnits,
+  metricNote: t.metricNote,
 };
 ---
 <script type="application/json" id="hg-i18n" set:html={JSON.stringify(data)} />

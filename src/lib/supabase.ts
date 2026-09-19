@@ -1,10 +1,13 @@
 import { SUPABASE_KEY, SUPABASE_URL } from '../config';
 
-export interface Cell { utc_weekday: number; utc_hour: number; total: number }
-export interface CountryRow { country: string; total: number }
+/** `total` = sessions (kept for compatibility), plus messages and all tokens processed. */
+export interface Cell { utc_weekday: number; utc_hour: number; total: number; messages: number; tokens: number }
+export interface CountryRow { country: string; total: number; messages: number; tokens: number }
 export interface Stats {
   total: number; last_hour: number; last_24h: number; last_30d: number;
   first_at: string | null; last_at: string | null; generated_at: string;
+  messages_total: number; messages_hour: number; messages_24h: number;
+  tokens_total: number; tokens_24h: number; turns_total: number;
 }
 
 const headers = { apikey: SUPABASE_KEY };

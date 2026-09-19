@@ -36,43 +36,91 @@ Unofficial project, not affiliated with Anthropic.
 > **RU:** Hourglyph помогает понять, когда лучше работать с Claude Code, чтобы лимиты уходили медленнее: карта
 > показывает пиковые и спокойные часы в вашем часовом поясе.
 
-## Add your sessions (opt-in)
+## Add your work to the map (opt-in)
+
+Three hooks record, anonymously: a **session start**, each **message you send** (no text), and the **tokens used
+per turn** — so long sessions count as the load they really are.
+
+| Hook | When | What is sent |
+|---|---|---|
+| `SessionStart` | a new session starts | `{"p_event":"session"}` |
+| `UserPromptSubmit` | you send a message | `{"p_event":"message"}` — no text |
+| `Stop` | Claude finishes a turn | 4 integers: input, output, cache-write, cache-read tokens |
+
+Token counts are computed **locally** by [`hourglyph.sh`](public/hook/hourglyph.sh) (65 lines of `sh` + `awk`) from
+the transcript Claude Code passes to the hook; only the totals leave your machine. The server adds the UTC hour,
+weekday and the two-letter country code Cloudflare attaches to the request. No prompts, answers, code, paths,
+session IDs or IPs are stored (a salted, daily-rotating IP hash is kept only for rate limiting).
 
 ### Option A: let Claude Code do it
 
-Paste this prompt into Claude Code. It backs up your settings, merges the hook in, skips it if it's already installed and shows you the diff (it asks before writing the file).
+Paste this prompt into Claude Code. It downloads the script and shows it to you, backs up your settings, replaces an
+older Hourglyph hook, merges the new entries in and shows the diff (it asks before writing files).
 
 ````text
-Set up the Hourglyph hook for Claude Code on this machine (https://hourglyph.github.io/setup/).
+Set up the Hourglyph hooks for Claude Code on this machine (https://hourglyph.github.io/setup/).
 
-Goal: add one SessionStart hook to my user settings in ~/.claude/settings.json that anonymously sends a single check-in to the peak-hours map whenever a new session starts. It sends no data about me.
+Goal: anonymously send session starts, the times I send messages, and token counts per turn to the peak-hours map. Message text, answers, code and paths are never sent.
 
 Steps:
-1. Read ~/.claude/settings.json. If it doesn't exist, treat it as {}. If it exists, back it up to ~/.claude/settings.json.bak first.
-2. If hooks.SessionStart already contains a command with "rpc/checkin", change nothing and tell me the hook is already installed.
-3. Otherwise merge, don't overwrite: keep every existing setting and hook, and append exactly this element to the hooks.SessionStart array (create hooks and SessionStart if missing):
+1. Download the script and show me its full contents before continuing:
+   mkdir -p ~/.claude/hooks && curl -fsSL https://hourglyph.github.io/hook/hourglyph.sh -o ~/.claude/hooks/hourglyph.sh
+   (source: https://hourglyph.github.io/hook/hourglyph.sh). Check that it does nothing but send an event name and four token counts.
+2. Read ~/.claude/settings.json (treat a missing file as {}). If it exists, back it up to ~/.claude/settings.json.bak first.
+3. Remove any old Hourglyph entries from hooks — commands containing "hourglyph.sh" / "rpc/checkin" — so nothing is duplicated.
+4. Merge, don't overwrite: keep every other setting and hook, and append exactly these elements to hooks.SessionStart, hooks.UserPromptSubmit and hooks.Stop (create them if missing):
 
 {
-  "matcher": "startup",
-  "hooks": [
+  "SessionStart": [
     {
-      "type": "command",
-      "command": "curl -s -m 5 -X POST 'https://ludtufvegukpzbdarhnq.supabase.co/rest/v1/rpc/checkin' -H 'apikey: sb_publishable_yUz1zIFhM4V8qvELLDkKnA_YpjZmPIc' -H 'Content-Type: application/json' -d '{\"p_source\":\"hook\"}' >/dev/null 2>&1 || true",
-      "async": true
+      "matcher": "startup",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "sh \"$HOME/.claude/hooks/hourglyph.sh\" session",
+          "async": true
+        }
+      ]
+    }
+  ],
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "sh \"$HOME/.claude/hooks/hourglyph.sh\" message",
+          "async": true
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "sh \"$HOME/.claude/hooks/hourglyph.sh\" stop",
+          "async": true
+        }
+      ]
     }
   ]
 }
 
-4. Write the file back as valid JSON and re-read it to confirm it parses.
-5. Check that curl is available (command -v curl).
-6. Show me the diff and tell me how to remove the hook later.
+5. Write the file back as valid JSON and re-read it to confirm it parses.
+6. Check that curl and awk are available (command -v curl awk).
+7. Show me the diff and tell me how to remove everything: delete those three entries from settings.json and the file ~/.claude/hooks/hourglyph.sh.
 
-Don't change anything else. Check-ins start with the next new session.
+Don't change anything else. Data starts flowing with the next new session.
 ````
 
 ### Option B: by hand
 
-Add this to `~/.claude/settings.json` (merge with any existing `hooks`):
+```sh
+mkdir -p ~/.claude/hooks && curl -fsSL https://hourglyph.github.io/hook/hourglyph.sh -o ~/.claude/hooks/hourglyph.sh
+```
+
+Then merge this into `~/.claude/settings.json` (remove an older entry with `rpc/checkin` if you had one):
 
 ```json
 {
@@ -83,7 +131,29 @@ Add this to `~/.claude/settings.json` (merge with any existing `hooks`):
         "hooks": [
           {
             "type": "command",
-            "command": "curl -s -m 5 -X POST 'https://ludtufvegukpzbdarhnq.supabase.co/rest/v1/rpc/checkin' -H 'apikey: sb_publishable_yUz1zIFhM4V8qvELLDkKnA_YpjZmPIc' -H 'Content-Type: application/json' -d '{\"p_source\":\"hook\"}' >/dev/null 2>&1 || true",
+            "command": "sh \"$HOME/.claude/hooks/hourglyph.sh\" session",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$HOME/.claude/hooks/hourglyph.sh\" message",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$HOME/.claude/hooks/hourglyph.sh\" stop",
             "async": true
           }
         ]
@@ -93,20 +163,15 @@ Add this to `~/.claude/settings.json` (merge with any existing `hooks`):
 }
 ```
 
-**What it does:** on each *new* session (not resume/clear/compact) it sends one empty POST in the background.
-The server stamps the UTC hour and weekday itself and records the two-letter country code that Cloudflare attaches to
-the request (for the world map). No prompts, code, file names, user IDs or IPs are stored
-(a salted, daily-rotating IP hash is kept only for 10-minute rate limiting). The key is Supabase's public
-*publishable* key: it can only call the check-in function, not read raw rows.
-
-**To stop:** delete that `SessionStart` entry. More: [setup page](https://hourglyph.github.io/setup/) · [privacy](https://hourglyph.github.io/about/).
+**To stop:** delete the three entries mentioning `hourglyph.sh` and the script file.
+More: [setup page](https://hourglyph.github.io/setup/) · [privacy](https://hourglyph.github.io/about/).
 
 ## Data
 
 Aggregates are CC BY 4.0: [`/data/heatmap.json`](https://hourglyph.github.io/data/heatmap.json),
 [`/data/heatmap.csv`](https://hourglyph.github.io/data/heatmap.csv),
 [`/data/countries.csv`](https://hourglyph.github.io/data/countries.csv), or live via the `heatmap`, `heatmap_30d`,
-`countries`, `countries_30d` and `stats` REST views.
+`countries`, `countries_30d` and `stats` REST views. Every table has sessions, messages and tokens.
 
 ## Development
 

@@ -20,8 +20,8 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
   <h1>{ru ? 'Открытые данные' : 'Open data'}</h1>
   <p class="lead">
     {ru
-      ? 'Все агрегаты Hourglyph открыты: отметки о начале сессий Claude Code, сгруппированные по дню недели и часу UTC. Используйте в исследованиях, дашбордах и статьях — со ссылкой на источник.'
-      : 'All Hourglyph aggregates are open: Claude Code session-start check-ins grouped by UTC weekday and hour. Use them in research, dashboards and articles — with a link back.'}
+      ? 'Все агрегаты Hourglyph открыты: сессии, сообщения и токены Claude Code, сгруппированные по дню недели, часу UTC и стране. Используйте в исследованиях, дашбордах и статьях — со ссылкой на источник.'
+      : 'All Hourglyph aggregates are open: Claude Code sessions, messages and tokens grouped by UTC weekday, hour and country. Use them in research, dashboards and articles — with a link back.'}
   </p>
   <div style="margin:28px 0"><NowStatus lang={lang} stats={snap.stats} showButton={false} /></div>
 
@@ -37,7 +37,7 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
   <ul class="prose">
     <li><code>utc_weekday</code> — {ru ? 'день недели по UTC, 0 = воскресенье … 6 = суббота' : 'UTC weekday, 0 = Sunday … 6 = Saturday'}</li>
     <li><code>utc_hour</code> — {ru ? 'час по UTC, 0–23' : 'UTC hour, 0–23'}</li>
-    <li><code>total</code> / <code>total_all</code> — {ru ? 'число отметок за всё время' : 'check-ins, all time'}; <code>total_30d</code> — {ru ? 'за последние 30 дней' : 'last 30 days'}</li>
+    <li><code>total</code> / <code>sessions_*</code> — {ru ? 'запуски сессий' : 'session starts'}; <code>messages</code> — {ru ? 'отправленные сообщения' : 'messages sent'}; <code>tokens</code> — {ru ? 'все обработанные токены (вход, выход, запись и чтение кэша)' : 'all tokens processed (input, output, cache write and read)'}; {ru ? 'суффиксы' : 'suffixes'} <code>_all</code> / <code>_30d</code> — {ru ? 'за всё время / за 30 дней' : 'all time / last 30 days'}</li>
     <li><code>country</code> — {ru ? 'код страны ISO 3166-1 alpha-2 (определяется сетью по соединению; IP не хранится)' : 'ISO 3166-1 alpha-2 country code (derived by the network from the connection; no IPs stored)'}</li>
   </ul>
   <pre><code>{sample}</code></pre>
@@ -51,14 +51,14 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
     {ru ? (
       <>
         <li>Это добровольная выборка: данные отражают тех, кто подключил hook, а не всех пользователей Claude Code.</li>
-        <li>Отметка ставится в начале сессии; длительность сессий не учитывается.</li>
-        <li>Не больше одной отметки из одной сети за 10 минут.</li>
+        <li>Сессия отмечается при запуске, сообщение — при отправке, токены — по завершении хода. Токены подагентов не учитываются.</li>
+        <li>Из одной сети: не больше одного запуска сессии за 10 минут и 30 событий в минуту для сообщений и токенов.</li>
       </>
     ) : (
       <>
         <li>This is a volunteer sample: it reflects people who installed the hook, not every Claude Code user.</li>
-        <li>A check-in marks a session start; session length isn’t measured.</li>
-        <li>At most one check-in per network every 10 minutes.</li>
+        <li>A session is recorded when it starts, a message when it’s sent, tokens when a turn finishes. Subagent tokens aren’t counted.</li>
+        <li>Per network: at most one session start per 10 minutes and 30 message/token events a minute.</li>
       </>
     )}
   </ul>

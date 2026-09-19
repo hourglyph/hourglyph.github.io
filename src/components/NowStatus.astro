@@ -1,11 +1,12 @@
 ---
 import { UI, type Lang } from '../i18n';
 import type { Stats } from '../lib/supabase';
+import { fmtNum } from '../lib/heatmap';
 
 interface Props { lang: Lang; stats: Stats; showButton?: boolean }
 const { lang, stats, showButton = true } = Astro.props;
 const t = UI[lang];
-const keys = ['last_hour', 'last_24h', 'last_30d', 'total'] as const;
+const keys = ['messages_hour', 'messages_24h', 'tokens_24h', 'last_24h'] as const;
 ---
 <section class="card" aria-labelledby="now-h">
   <div class="now">
@@ -22,7 +23,7 @@ const keys = ['last_hour', 'last_24h', 'last_30d', 'total'] as const;
   {showButton && <p class="checkin-msg" data-checkin-msg role="status"></p>}
   <dl class="stats" style="margin-top:16px">
     {keys.map((k) => (
-      <div><dt>{t.stats[k]}</dt><dd data-stat={k}>{stats[k].toLocaleString(t.locale)}</dd></div>
+      <div><dt>{t.tiles[k]}</dt><dd data-stat={k}>{fmtNum(stats[k], k.startsWith('tokens') ? 'tokens' : 'total', t.locale)}</dd></div>
     ))}
   </dl>
 </section>

@@ -1,6 +1,6 @@
 ---
 import { UI, type Lang } from '../i18n';
-import { WEEK_ORDER, fromCells, level, toZone, offsetMinutes, fmtOffset, type CellLike } from '../lib/heatmap';
+import { WEEK_ORDER, fmtNum, fromCells, level, loadMetric, plural, toZone, offsetMinutes, fmtOffset, type CellLike, type Metric } from '../lib/heatmap';
 
 interface Props {
   lang: Lang;
@@ -9,16 +9,19 @@ interface Props {
   tz: string;
   window?: 'all' | '30d';
   zoneLabel?: string;
+  /** Defaults to messages once any exist, else sessions. */
+  metric?: Metric;
 }
 const { lang, cells, tz, window = 'all', zoneLabel } = Astro.props;
+const metric = Astro.props.metric ?? loadMetric(cells);
 const t = UI[lang];
 const offset = tz === 'auto' ? 0 : offsetMinutes(tz);
-const { grid, minute } = toZone(fromCells(cells), offset);
+const { grid, minute } = toZone(fromCells(cells, metric), offset);
 const max = Math.max(0, ...grid.flat());
 const label = zoneLabel ?? (tz === 'auto' ? t.utc : fmtOffset(offset));
 const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
 ---
-<figure class="hm" data-heatmap data-tz={tz} data-window={window}>
+<figure class="hm" data-heatmap data-tz={tz} data-window={window} data-metric={metric}>
   <div class="hm-scroll">
     <table>
       <caption class="sr-only">{t.hmCaption} ({label})</caption>
@@ -35,7 +38,7 @@ const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : 
           <tr>
             <th scope="row" title={t.daysLong[d]}>{t.daysShort[d]}</th>
             {grid[d].map((v, h) => (
-              <td data-d={d} data-h={h} data-l={level(v, max)} title={`${t.daysShort[d]} ${hh(h)} · ${t.checkins(v)}`}></td>
+              <td data-d={d} data-h={h} data-l={level(v, max)} title={`${t.daysShort[d]} ${hh(h)} · ${fmtNum(v, metric, t.locale)} ${plural(v, lang, t.metricUnits[metric])}`}></td>
             ))}
           </tr>
         ))}

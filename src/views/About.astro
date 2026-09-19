@@ -16,7 +16,9 @@ const L = (p: string) => localize(lang, p);
     <div class="prose">
       <p class="lead">Hourglyph — открытый проект сообщества, который помогает экономить лимиты Claude Code: он показывает, когда разработчики по всему миру работают в Claude Code, чтобы вы могли запускать работу в ненагруженные часы. Проект независимый и не связан с Anthropic.</p>
       <h2>Что хранится</h2>
-      <p>Одна строка на отметку: время записи, час и день недели по UTC, источник (<code>hook</code> или <code>manual</code>) и двухбуквенный код страны. Больше ничего: ни промптов, ни кода, ни имён файлов, ни идентификаторов пользователя.</p>
+      <p>Одна строка на событие: время записи, час и день недели по UTC, тип события (<code>session</code> — начало сессии, <code>message</code> — отправлено сообщение, <code>tokens</code> — завершён ход), источник, двухбуквенный код страны и для <code>tokens</code> — четыре числа токенов. Больше ничего: ни текста сообщений и ответов, ни кода, ни путей и имён проектов, ни идентификаторов сессии или пользователя.</p>
+      <h2>Как считаются токены</h2>
+      <p>Скрипт hook’а читает файл переписки <b>на вашем компьютере</b> (Claude Code передаёт hook’у путь к нему), суммирует поля <code>usage</code> ответов за последний ход и отправляет только четыре итоговых числа. Сам файл никуда не отправляется.</p>
       <h2>Страна</h2>
       <p>Код страны (например, <code>DE</code>) определяет сетевая инфраструктура Supabase/Cloudflare по соединению и передаёт в заголовке запроса. Мы сохраняем только этот код — не IP и не город. Если вы работаете через VPN, будет записана страна VPN-сервера. Публично видны только суммы по странам за день.</p>
       <h2>IP-адреса</h2>
@@ -32,7 +34,9 @@ const L = (p: string) => localize(lang, p);
     <div class="prose">
       <p class="lead">Hourglyph is an open community project that helps you save Claude Code limits: it shows when developers around the world use Claude Code, so you can start work in off-peak hours. It is independent and not affiliated with Anthropic.</p>
       <h2>What is stored</h2>
-      <p>One row per check-in: the insert time, the UTC hour and weekday, the source (<code>hook</code> or <code>manual</code>) and a two-letter country code. Nothing else — no prompts, code, file names or user identifiers.</p>
+      <p>One row per event: the insert time, the UTC hour and weekday, the event type (<code>session</code> — a session started, <code>message</code> — a message was sent, <code>tokens</code> — a turn finished), the source, a two-letter country code and, for <code>tokens</code>, four token counts. Nothing else — no message or answer text, code, paths, project names, session or user identifiers.</p>
+      <h2>How tokens are counted</h2>
+      <p>The hook script reads the transcript <b>on your machine</b> (Claude Code passes its path to the hook), sums the <code>usage</code> fields of the last turn’s replies and sends only the four totals. The file itself never leaves your computer.</p>
       <h2>Country</h2>
       <p>The country code (e.g. <code>DE</code>) is determined by Supabase/Cloudflare’s network from the connection and passed in a request header. We keep only that code — not the IP, not the city. Behind a VPN, the VPN server’s country is recorded. Only per-day totals by country are public.</p>
       <h2>IP addresses</h2>

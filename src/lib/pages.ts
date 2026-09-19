@@ -55,10 +55,10 @@ export const PAGES = {
   },
   setup: {
     path: '/setup/',
-    title: { en: 'Claude Code SessionStart Hook: Add Your Sessions to the Map', ru: 'SessionStart hook для Claude Code: добавьте свои сессии на карту' },
+    title: { en: 'Claude Code Hooks: Track Sessions, Messages and Tokens', ru: 'Hooks для Claude Code: сессии, сообщения и токены на карте' },
     description: {
-      en: 'A copy-paste Claude Code SessionStart hook for settings.json that anonymously adds one check-in per session to the peak-hours heatmap. What it sends, how to remove it.',
-      ru: 'Готовый SessionStart hook для settings.json Claude Code: анонимно добавляет одну отметку за сессию в общую карту пиковых часов. Что отправляется и как отключить.',
+      en: 'Copy-paste Claude Code hooks (SessionStart, UserPromptSubmit, Stop) that anonymously log sessions, messages and tokens per turn. No text sent.',
+      ru: 'Готовые hooks для Claude Code (SessionStart, UserPromptSubmit, Stop): анонимно отмечают сессии, сообщения и токены за ход. Текст не отправляется.',
     },
   },
   data: {

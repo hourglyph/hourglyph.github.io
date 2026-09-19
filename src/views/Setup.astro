@@ -6,7 +6,7 @@ import { localize, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { articleJsonLd } from '../lib/jsonld';
 import { setupPrompt } from '../lib/setupPrompt';
-import { HOOK_JSON, SUPABASE_URL } from '../config';
+import { HOOK_INSTALL, HOOK_JSON, HOOK_SCRIPT_PATH, HOOK_SCRIPT_URL } from '../config';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -16,67 +16,79 @@ const L = (p: string) => localize(lang, p);
 const DOCS = 'https://code.claude.com/docs/en/hooks';
 ---
 <Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Подключение' : 'Setup', path: meta.path }]}>
-  <h1>{ru ? 'Добавьте свои сессии на карту' : 'Add your sessions to the map'}</h1>
+  <h1>{ru ? 'Добавьте свою работу на карту' : 'Add your work to the map'}</h1>
   <p class="lead">
     {ru
-      ? 'Один SessionStart hook в настройках Claude Code — и каждая новая сессия анонимно добавляет одну отметку на общую карту. Это добровольно и отключается удалением пары строк.'
-      : 'One SessionStart hook in your Claude Code settings, and every new session anonymously adds one check-in to the shared map. It’s opt-in, and removing a few lines turns it off.'}
+      ? 'Три hook’а в настройках Claude Code анонимно отмечают начало сессии, каждое отправленное сообщение и число токенов за ход — так карта видит не только сессии, но и реальную нагрузку внутри долгой работы. Это добровольно и отключается удалением пары строк.'
+      : 'Three hooks in your Claude Code settings anonymously record session starts, every message you send and the tokens used per turn — so the map sees real load inside long sessions, not just session starts. It’s opt-in, and removing a few lines turns it off.'}
   </p>
 
-  <h2>{ru ? '1. Установите hook' : '1. Install the hook'}</h2>
+  <h2>{ru ? '1. Установите hooks' : '1. Install the hooks'}</h2>
 
   <h3>{ru ? 'Вариант А: пусть Claude Code сделает это сам' : 'Option A: let Claude Code do it'}<span class="option-tag">{ru ? 'проще всего' : 'easiest'}</span></h3>
   <p>
     {ru
-      ? <>Скопируйте промт и отправьте его в Claude Code. Агент сделает резервную копию настроек, аккуратно добавит hook к уже существующим, не создаст дубль и покажет diff. Перед записью файла Claude Code спросит разрешение.</>
-      : <>Copy the prompt and send it to Claude Code. The agent backs up your settings, merges the hook into what’s already there, skips it if it’s already installed, and shows you the diff. Claude Code asks for permission before writing the file.</>}
+      ? <>Скопируйте промт и отправьте его в Claude Code. Агент скачает скрипт и покажет его вам, сделает резервную копию настроек, заменит старый hook Hourglyph (если он был), добавит новые записи к существующим и покажет diff. Перед записью файлов Claude Code спросит разрешение.</>
+      : <>Copy the prompt and send it to Claude Code. The agent downloads the script and shows it to you, backs up your settings, replaces an older Hourglyph hook if there is one, merges the new entries in and shows you the diff. Claude Code asks for permission before writing files.</>}
   </p>
   <CopyBlock lang={lang} text={setupPrompt(lang)} wrap />
 
   <h3>{ru ? 'Вариант Б: вручную' : 'Option B: by hand'}</h3>
-  <p>{ru ? <>Добавьте блок <code>hooks</code> в <code>~/.claude/settings.json</code> (или объедините с уже существующим):</> : <>Add the <code>hooks</code> block to <code>~/.claude/settings.json</code> (or merge it into an existing one):</>}</p>
+  <p>{ru ? <>Скачайте скрипт (<a href={HOOK_SCRIPT_URL}>посмотреть исходник</a>, 65 строк на <code>sh</code> + <code>awk</code>):</> : <>Download the script (<a href={HOOK_SCRIPT_URL}>read the source</a>, 65 lines of <code>sh</code> + <code>awk</code>):</>}</p>
+  <CopyBlock lang={lang} text={HOOK_INSTALL} />
+  <p style="margin-top:16px">{ru ? <>Затем добавьте блок <code>hooks</code> в <code>~/.claude/settings.json</code> (или объедините с существующим). Если у вас был старый hook с <code>rpc/checkin</code>, удалите его.</> : <>Then add the <code>hooks</code> block to <code>~/.claude/settings.json</code> (or merge it into an existing one). If you had the older hook with <code>rpc/checkin</code>, remove it.</>}</p>
   <CopyBlock lang={lang} text={HOOK_JSON} />
 
-  <h2>{ru ? '2. Что делает этот hook' : '2. What this hook does'}</h2>
-  <ul class="prose">
+  <h2>{ru ? '2. Что отправляется' : '2. What gets sent'}</h2>
+  <div class="card table-card">
+    <table class="data-table">
+      <thead><tr><th scope="col">Hook</th><th scope="col">{ru ? 'Когда' : 'When'}</th><th scope="col">{ru ? 'Что уходит' : 'What is sent'}</th></tr></thead>
+      <tbody>
+        <tr><td><code>SessionStart</code></td><td>{ru ? 'запуск новой сессии' : 'a new session starts'}</td><td><code>{'{"p_event":"session"}'}</code></td></tr>
+        <tr><td><code>UserPromptSubmit</code></td><td>{ru ? 'вы отправили сообщение' : 'you send a message'}</td><td><code>{'{"p_event":"message"}'}</code> — {ru ? 'без текста' : 'no text'}</td></tr>
+        <tr><td><code>Stop</code></td><td>{ru ? 'Claude закончил отвечать' : 'Claude finishes a turn'}</td><td>{ru ? '4 числа: входные, выходные токены, запись и чтение кэша' : '4 integers: input, output, cache-write and cache-read tokens'}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="prose" style="margin-top:16px">
     {ru ? (
       <>
-        <li>Срабатывает только при <b>запуске новой сессии</b> (<code>matcher: "startup"</code>) — не при <code>/resume</code>, <code>/clear</code> или сжатии контекста.</li>
-        <li>Выполняется <b>в фоне</b> (<code>async: true</code>) с таймаутом 5 секунд и не задерживает запуск Claude Code. Вывод подавлен, так что в контекст модели ничего не попадает.</li>
-        <li>Отправляет POST без данных о вас на <code>{SUPABASE_URL}/rest/v1/rpc/checkin</code>. Час и день недели сервер берёт из собственных часов, а страну — из заголовка, который сеть добавляет по соединению (IP не сохраняется).</li>
-        <li>Ключ в команде — публичный (publishable) ключ Supabase: с ним можно только вызвать функцию отметки, прочитать сырые данные нельзя.</li>
+        <li>Токены скрипт считает <b>локально</b> из файла переписки, путь к которому Claude Code передаёт hook’у. Наружу уходят только итоговые числа — не текст, не код, не пути, не идентификатор сессии.</li>
+        <li>Все hooks работают <b>в фоне</b> (<code>async: true</code>) с таймаутом 5 секунд и не задерживают Claude Code. Вывод подавлен, в контекст модели ничего не попадает.</li>
+        <li>Час, день недели и страну определяет сервер (страну — по заголовку, который сеть добавляет к соединению); IP не сохраняется.</li>
+        <li>Ключ в скрипте — публичный (publishable) ключ Supabase: с ним можно только отправить событие, прочитать сырые данные нельзя. Из одной сети принимается не больше 30 событий в минуту.</li>
       </>
     ) : (
       <>
-        <li>Fires only when a <b>new session starts</b> (<code>matcher: "startup"</code>) — not on <code>/resume</code>, <code>/clear</code> or compaction.</li>
-        <li>Runs <b>in the background</b> (<code>async: true</code>) with a 5-second timeout, so it never delays Claude Code. Output is discarded, so nothing enters the model’s context.</li>
-        <li>Sends a POST with no data about you to <code>{SUPABASE_URL}/rest/v1/rpc/checkin</code>. The server takes the hour and weekday from its own clock, and the country from a header the network adds from the connection (the IP isn’t stored).</li>
-        <li>The key in the command is Supabase’s public (publishable) key: it can only call the check-in function and cannot read raw data.</li>
+        <li>The script counts tokens <b>locally</b> from the transcript file whose path Claude Code passes to the hook. Only the totals leave your machine — no text, code, paths or session id.</li>
+        <li>All hooks run <b>in the background</b> (<code>async: true</code>) with a 5-second timeout, so they never slow Claude Code down. Output is discarded; nothing enters the model’s context.</li>
+        <li>The server adds the hour, weekday and country (from a header the network attaches to the connection); the IP isn’t stored.</li>
+        <li>The key in the script is Supabase’s public (publishable) key: it can only send events, not read raw data. At most 30 events per minute are accepted from one network.</li>
       </>
     )}
   </ul>
 
   <h2>{ru ? '3. Проверьте' : '3. Verify'}</h2>
-  <p>{ru ? <>Запустите <code>claude</code> в новом терминале, подождите минуту и откройте <a href={L('/')}>карту</a> — счётчик «в этот час» вырастет. Список активных hooks показывает команда <code>/hooks</code>.</> : <>Start <code>claude</code> in a new terminal, wait a minute and open <a href={L('/')}>the map</a> — the “this hour” counter goes up. The <code>/hooks</code> command lists active hooks.</>}</p>
+  <p>{ru ? <>Запустите <code>claude</code> в новом терминале, отправьте сообщение, подождите минуту и откройте <a href={L('/')}>карту</a> — вырастут счётчики сообщений и токенов. Список активных hooks показывает команда <code>/hooks</code>.</> : <>Start <code>claude</code> in a new terminal, send a message, wait a minute and open <a href={L('/')}>the map</a> — the message and token counters go up. The <code>/hooks</code> command lists active hooks.</>}</p>
 
   <h2>{ru ? 'Как отключить' : 'How to turn it off'}</h2>
-  <p>{ru ? <>Удалите запись <code>SessionStart</code> с этой командой из <code>~/.claude/settings.json</code>. Ранее отправленные отметки обезличены и не связаны с вами.</> : <>Delete the <code>SessionStart</code> entry with this command from <code>~/.claude/settings.json</code>. Check-ins already sent are anonymous and not linked to you.</>}</p>
+  <p>{ru ? <>Удалите три записи с <code>hourglyph.sh</code> из <code>~/.claude/settings.json</code> и файл <code>{HOOK_SCRIPT_PATH}</code>. Ранее отправленные данные обезличены и не связаны с вами.</> : <>Delete the three entries mentioning <code>hourglyph.sh</code> from <code>~/.claude/settings.json</code> and the file <code>{HOOK_SCRIPT_PATH}</code>. Data already sent is anonymous and not linked to you.</>}</p>
 
   <h2>{ru ? 'Примечания' : 'Notes'}</h2>
   <ul class="prose">
     {ru ? (
       <>
-        <li>Нужен <code>curl</code>: есть в macOS, Linux и WSL. В Windows без WSL Claude Code выполняет hooks через Git Bash, где <code>curl</code> тоже доступен.</li>
+        <li>Нужны <code>sh</code>, <code>awk</code> и <code>curl</code>: они есть в macOS, Linux и WSL. В Windows без WSL Claude Code выполняет hooks через Git Bash, где всё это тоже есть.</li>
         <li>Чтобы отмечать только работу над конкретным проектом, положите тот же блок в <code>.claude/settings.json</code> репозитория.</li>
-        <li>Из одной сети учитывается не больше одной отметки за 10 минут.</li>
+        <li>Начало сессии из одной сети учитывается не чаще раза в 10 минут; сообщения и токены — до 30 событий в минуту.</li>
         <li>Не хотите ничего настраивать? Нажмите кнопку «Я сейчас работаю в Claude Code» на <a href={L('/')}>главной</a>.</li>
         <li>Документация по hooks: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
       </>
     ) : (
       <>
-        <li>Requires <code>curl</code>, which ships with macOS, Linux and WSL. On Windows without WSL, Claude Code runs hooks through Git Bash, which includes <code>curl</code>.</li>
+        <li>Requires <code>sh</code>, <code>awk</code> and <code>curl</code>, which ship with macOS, Linux and WSL. On Windows without WSL, Claude Code runs hooks through Git Bash, which includes all three.</li>
         <li>To count only work on a specific project, put the same block in that repository’s <code>.claude/settings.json</code>.</li>
-        <li>At most one check-in per network is counted every 10 minutes.</li>
+        <li>Session starts count at most once per network every 10 minutes; messages and tokens up to 30 events a minute.</li>
         <li>Don’t want to configure anything? Press “I’m using Claude Code right now” on the <a href={L('/')}>home page</a>.</li>
         <li>Hooks documentation: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
       </>

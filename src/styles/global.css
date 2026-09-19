@@ -261,3 +261,13 @@ details p:first-of-type { margin-top: 10px; }
 .site-footer li { margin: 5px 0; }
 .site-footer a { color: var(--muted); text-decoration: none; }
 .site-footer a:hover { color: var(--text); }
+
+/* Metric switch next to the chart tabs */
+.views-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.views-bar .tabs { margin: 0; }
+.segmented { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 10px; }
+.segmented button { font: 500 0.82rem var(--sans); color: var(--muted); background: none; border: 0; border-radius: 7px; padding: 5px 10px; cursor: pointer; }
+.segmented button:hover { color: var(--text); }
+.segmented button[aria-checked='true'] { background: var(--accent-soft); color: var(--accent-strong); }
+.metric-note { margin: 0 0 16px; }
+.data-table code { overflow-wrap: normal; white-space: nowrap; font-size: 0.82em; }

@@ -9,15 +9,15 @@ export const datasetJsonLd = (lang: Lang, stats: Stats) => ({
   name: lang === 'ru' ? 'Использование Claude Code по часам и дням недели' : 'Claude Code usage by hour and weekday',
   description:
     lang === 'ru'
-      ? 'Анонимные отметки о начале сессий Claude Code от добровольцев, агрегированные по дню недели, часу UTC и стране. Помогают выбрать ненагруженные часы и экономить лимиты.'
-      : 'Anonymous, opt-in Claude Code session-start check-ins from volunteers, aggregated by UTC weekday, hour and country. Helps pick off-peak hours to save usage limits.',
+      ? 'Анонимные данные о сессиях, сообщениях и токенах Claude Code от добровольцев, агрегированные по дню недели, часу UTC и стране. Помогают выбрать ненагруженные часы и экономить лимиты.'
+      : 'Anonymous, opt-in Claude Code sessions, messages and token counts from volunteers, aggregated by UTC weekday, hour and country. Helps pick off-peak hours to save usage limits.',
   url: SITE + (lang === 'ru' ? '/ru/data/' : '/data/'),
   license: 'https://creativecommons.org/licenses/by/4.0/',
   isAccessibleForFree: true,
   inLanguage: lang,
   creator: { '@type': 'Organization', name: SITE_NAME, url: SITE + '/' },
   temporalCoverage: stats.first_at ? `${stats.first_at.slice(0, 10)}/..` : undefined,
-  variableMeasured: ['utc_weekday', 'utc_hour', 'country', 'total'],
+  variableMeasured: ['utc_weekday', 'utc_hour', 'country', 'sessions', 'messages', 'tokens'],
   dateModified: stats.generated_at,
   sameAs: REPO_URL,
   distribution: [
