@@ -9,8 +9,8 @@ export const PAGES = {
     path: '/',
     title: { en: 'Claude Code Peak Hours — Live Usage Heatmap', ru: 'Пиковые часы Claude Code — живая карта нагрузки' },
     description: {
-      en: 'When is Claude Code busiest? A live, community-sourced heatmap of Claude Code sessions by hour and weekday, shown in your time zone. Find the quiet hours.',
-      ru: 'Когда Claude Code загружен сильнее всего? Живая тепловая карта сессий по часам и дням недели в вашем часовом поясе. Найдите спокойные часы для работы.',
+      en: 'When is Claude Code busiest? A live heatmap of sessions by hour and weekday in your time zone — find the quiet hours when your limits go further.',
+      ru: 'Когда Claude Code загружен сильнее всего? Живая карта сессий по часам и дням недели в вашем поясе — работайте в спокойные часы и тратьте лимиты медленнее.',
     },
   },
   best: {
@@ -84,16 +84,19 @@ export type PageKey = keyof typeof PAGES;
 export const page = (key: PageKey): PageMeta => ({ key, ...PAGES[key] });
 
 export function zonePage(z: Zone): PageMeta {
+  // Titles use a DST-independent label ("CET/CEST") so they don't change twice a year.
+  const en = z.abbrDst ? `${z.abbr}/${z.abbrDst}` : z.abbr;
+  const ru = z.abbrRu ?? en;
   return {
     key: `zone-${z.slug}`,
     path: `/peak-hours/${z.slug}/`,
     title: {
-      en: `Claude Code Peak Hours in ${z.en.name} (${z.abbr})`,
-      ru: `Пиковые часы Claude Code ${z.ru.by}`,
+      en: `Claude Code Peak Hours in ${z.en.name} (${en})`,
+      ru: `Пиковые часы Claude Code ${z.ru.by} (${ru})`,
     },
     description: {
-      en: `Claude Code peak hours in ${z.abbr}: a live heatmap of sessions, the busiest and quietest hours, and the best time to run long tasks.`,
-      ru: `Когда Claude Code загружен ${z.ru.by}: живая карта сессий, пиковые и спокойные часы, лучшее время для долгих задач.`,
+      en: `Claude Code peak hours in ${z.en.name}: live heatmap, busiest and quietest hours, and when to work so your limits last longer.`,
+      ru: `Пиковые часы Claude Code ${z.ru.by}: живая карта, загруженные и спокойные часы и когда работать, чтобы лимиты тратились медленнее.`,
     },
   };
 }

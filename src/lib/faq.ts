@@ -4,6 +4,8 @@ export interface QA { q: string; a: string } // `a` is trusted HTML authored her
 
 export const FAQ: Record<Lang, QA[]> = {
   en: [
+    { q: 'What is Hourglyph for?',
+      a: 'To help you pick the hours when your Claude Code limits go further. Anthropic has tied limits to the time of day before, peak hours bring more slow replies and failed runs you end up repeating, and your 5-hour window starts with your first message. The <a href="/">heatmap</a> shows when the load peaks in your time zone so you can plan heavy work around it.' },
     { q: 'When are Claude Code’s peak hours?',
       a: 'Anthropic has described weekdays from 5 to 11 AM Pacific Time (8 AM–2 PM Eastern, 13:00–19:00 UK in summer) as its peak window. That is when US mornings overlap with the European afternoon. The live heatmap on the <a href="/">home page</a> shows how real Claude Code sessions are distributed across the week, converted to your time zone.' },
     { q: 'What is the best time to use Claude Code?',
@@ -22,6 +24,8 @@ export const FAQ: Record<Lang, QA[]> = {
       a: 'Yes, it is published under CC BY 4.0 as <a href="/data/">JSON and CSV</a>. Please link back to Hourglyph.' },
   ],
   ru: [
+    { q: 'Зачем нужен Hourglyph?',
+      a: 'Чтобы понимать, когда лучше работать, чтобы лимиты Claude Code уходили медленнее. Anthropic уже привязывала расход лимитов ко времени суток; в часы пик чаще бывают медленные ответы и сбои, из-за которых задачу приходится перезапускать; а 5-часовое окно лимита начинается с первого сообщения. <a href="/ru/">Карта</a> показывает, когда нагрузка максимальна в вашем поясе, чтобы планировать тяжёлую работу в обход пика.' },
     { q: 'Когда у Claude Code пиковые часы?',
       a: 'Anthropic называла пиковым окном будни с 5:00 до 11:00 по тихоокеанскому времени — это 15:00–21:00 по Москве с марта по ноябрь и 16:00–22:00 зимой, когда в США действует стандартное время. В это время утро в США совпадает со второй половиной дня в Европе. Живая карта на <a href="/ru/">главной</a> показывает, как распределены реальные сессии Claude Code по неделе в вашем часовом поясе.' },
     { q: 'Когда лучше всего работать в Claude Code?',

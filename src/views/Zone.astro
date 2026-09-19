@@ -9,7 +9,7 @@ import { page, zonePage } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { articleJsonLd } from '../lib/jsonld';
 import { fmtHour, fmtOffset, offsetMinutes, officialPeakIn } from '../lib/heatmap';
-import type { Zone } from '../lib/timezones';
+import { zoneAbbr, type Zone } from '../lib/timezones';
 
 interface Props { lang: Lang; zone: Zone }
 const { lang, zone } = Astro.props;
@@ -21,6 +21,7 @@ const offset = offsetMinutes(zone.tz);
 const off = officialPeakIn(zone.tz);
 const peak = `${fmtHour(off.start.h, off.start.m, lang)}–${fmtHour(off.end.h, off.end.m, lang)}`;
 const phrase = ru ? zone.ru.by : `in ${zone.en.name}`;
+const abbr = zoneAbbr(zone, lang);
 
 // How many hours of a 9:00–18:00 local workday overlap the official peak window.
 const startM = off.start.h * 60 + off.start.m;
@@ -39,18 +40,18 @@ const shape =
   lang={lang}
   page={meta}
   jsonLd={[articleJsonLd(lang, meta)]}
-  crumbs={[{ name: page('zones').title[lang].split(/ по | in Every/)[0], path: '/peak-hours/' }, { name: zone[lang].name, path: meta.path }]}
+  crumbs={[{ name: ru ? 'Часовые пояса' : 'Time zones', path: page('zones').path }, { name: zone[lang].name, path: meta.path }]}
 >
-  <p class="eyebrow">{zone[lang].name} · {fmtOffset(offset)}</p>
+  <p class="eyebrow">{zone[lang].name} · {abbr} · {fmtOffset(offset)}</p>
   <h1>{meta.title[lang]}</h1>
   <p class="lead">
     {ru
-      ? <>Когда Claude Code загружен сильнее всего, если вы живёте и работаете {zone.ru.by.replace(/ \(.*\)$/, '')}: {zone.ru.city}. Карта ниже уже переведена в {zone.abbrRu ?? zone.abbr} ({fmtOffset(offset)}) и обновляется в реальном времени.</>
-      : <>When Claude Code is under the most load if you work from {zone.en.city}. The heatmap below is already converted to {zone.abbr} ({fmtOffset(offset)}) and updates live.</>}
+      ? <>Когда Claude Code загружен сильнее всего {zone.ru.by} ({zone.ru.city}) и когда работать выгоднее, чтобы лимиты расходовались медленнее. Карта ниже уже переведена в {abbr} ({fmtOffset(offset)}) и обновляется в реальном времени.</>
+      : <>When Claude Code is busiest in {zone.en.name} ({zone.en.city}), and when to work so your limits go further. The heatmap below is already converted to {abbr} ({fmtOffset(offset)}) and updates live.</>}
   </p>
 
-  <h2>{ru ? `Карта нагрузки ${zone.ru.by}` : `Claude Code heatmap in ${zone.abbr}`}</h2>
-  <div class="card"><Heatmap lang={lang} cells={snap.all} tz={zone.tz} zoneLabel={`${zone[lang].name} (${fmtOffset(offset)})`} /></div>
+  <h2>{ru ? `Карта нагрузки ${zone.ru.by}` : `Claude Code heatmap in ${zone.en.name}`}</h2>
+  <div class="card"><Heatmap lang={lang} cells={snap.all} tz={zone.tz} zoneLabel={`${zone[lang].name} · ${abbr} · ${fmtOffset(offset)}`} /></div>
 
   <h2>{ru ? `Пиковые и спокойные часы ${zone.ru.by}` : `Peak and quiet hours in ${zone.en.name}`}</h2>
   <Insights lang={lang} cells={snap.all} tz={zone.tz} zonePhrase={phrase} />

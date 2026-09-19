@@ -21,8 +21,8 @@ const L = (p: string) => localize(lang, p);
   <h1>{ru ? 'Когда Claude Code загружен сильнее всего?' : 'When is Claude Code busiest?'}</h1>
   <p class="lead">
     {ru
-      ? 'Живая тепловая карта сессий Claude Code по часам и дням недели — в вашем часовом поясе. Данные присылают сами разработчики через анонимный hook: видно, когда наступают пиковые часы и когда лучше запускать долгие задачи агента.'
-      : 'A live heatmap of Claude Code sessions by hour and weekday, in your time zone. Developers contribute anonymously through a tiny hook, so you can see when peak hours hit and when to schedule long agent runs.'}
+      ? 'Живая тепловая карта сессий Claude Code по часам и дням недели — в вашем часовом поясе. Она помогает понять, когда лучше работать, чтобы лимиты уходили медленнее: видно, когда наступает пик нагрузки и в какие часы спокойнее запускать долгие задачи агента.'
+      : 'A live heatmap of Claude Code sessions by hour and weekday, in your time zone. It shows when to work so your limits go further: when the load peaks, and which quiet hours are best for long agent runs.'}
   </p>
 
   <div style="margin-top:32px"><NowStatus lang={lang} stats={snap.stats} /></div>
@@ -37,6 +37,41 @@ const L = (p: string) => localize(lang, p);
 
   <h2>{ru ? 'Что показывают данные' : 'What the data says'}</h2>
   <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={ru ? 'по UTC' : 'in UTC'} />
+
+  <h2>{ru ? 'Зачем это нужно: лимиты уходят медленнее' : 'Why it matters: make your limits go further'}</h2>
+  <div class="grid-3">
+    {ru ? (
+      <>
+        <div class="card">
+          <h3 style="margin-top:0">Лимиты привязаны ко времени</h3>
+          <p class="muted" style="margin:0">В марте 2026 года Anthropic сделала так, что в будничный пик 5-часовые лимиты расходовались быстрее. 6 мая 2026 года это отменили только для Claude Code на Pro и Max. Карта показывает, когда пик, чтобы вы не попадали на него без нужды. <a href={L('/claude-code-usage-limits/')}>Подробнее о лимитах</a>.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Меньше повторных запусков</h3>
+          <p class="muted" style="margin:0">В часы пик чаще бывают медленные ответы и ошибки <code>overloaded</code>. Прерванную задачу агента приходится запускать заново — и лимит уходит на повтор, а не на работу.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Окно лимита — в удобное время</h3>
+          <p class="muted" style="margin:0">5-часовое окно начинается с первого сообщения. Начните в спокойный час, и лимит сбросится до пика, а не посреди него. <a href={L('/best-time-to-use-claude-code/')}>Когда лучше работать</a>.</p>
+        </div>
+      </>
+    ) : (
+      <>
+        <div class="card">
+          <h3 style="margin-top:0">Limits depend on the clock</h3>
+          <p class="muted" style="margin:0">In March 2026 Anthropic made 5-hour limits drain faster during the weekday peak. On May 6, 2026 that was lifted only for Claude Code on Pro and Max. The map shows when the peak is, so you don’t land in it by accident. <a href={L('/claude-code-usage-limits/')}>More on limits</a>.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Fewer wasted re-runs</h3>
+          <p class="muted" style="margin:0">Peak hours bring slower replies and <code>overloaded</code> errors. An interrupted agent task has to be started again, and your limit goes on the retry instead of the work.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Time your limit window</h3>
+          <p class="muted" style="margin:0">The 5-hour window starts with your first message. Start in a quiet hour and it resets before the rush, not in the middle of it. <a href={L('/best-time-to-use-claude-code/')}>Best time to work</a>.</p>
+        </div>
+      </>
+    )}
+  </div>
 
   <h2>{ru ? 'Как это работает' : 'How it works'}</h2>
   <div class="grid-2">

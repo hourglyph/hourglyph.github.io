@@ -46,7 +46,7 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
   </ul>
 
   <h2>{ru ? '3. Проверьте' : '3. Verify'}</h2>
-  <p>{ru ? <>Запустите <code>claude</code> в новом терминале, подождите минуту и откройте <a href={L('/')}>карту</a> — счётчик «за час» вырастет. Список активных hooks показывает команда <code>/hooks</code>.</> : <>Start <code>claude</code> in a new terminal, wait a minute and open <a href={L('/')}>the map</a> — the “last hour” counter goes up. The <code>/hooks</code> command lists active hooks.</>}</p>
+  <p>{ru ? <>Запустите <code>claude</code> в новом терминале, подождите минуту и откройте <a href={L('/')}>карту</a> — счётчик «в этот час» вырастет. Список активных hooks показывает команда <code>/hooks</code>.</> : <>Start <code>claude</code> in a new terminal, wait a minute and open <a href={L('/')}>the map</a> — the “this hour” counter goes up. The <code>/hooks</code> command lists active hooks.</>}</p>
 
   <h2>{ru ? 'Как отключить' : 'How to turn it off'}</h2>
   <p>{ru ? <>Удалите запись <code>SessionStart</code> с этой командой из <code>~/.claude/settings.json</code>. Ранее отправленные отметки обезличены и не связаны с вами.</> : <>Delete the <code>SessionStart</code> entry with this command from <code>~/.claude/settings.json</code>. Check-ins already sent are anonymous and not linked to you.</>}</p>

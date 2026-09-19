@@ -1,9 +1,32 @@
-# Hourglyph — Claude Code peak hours
+<p align="center">
+  <a href="https://hourglyph.github.io">
+    <img src=".github/assets/hero.svg" width="100%" alt="Hourglyph — an hourglass next to a weekly heatmap of Claude Code usage with a busy weekday peak and quiet hours">
+  </a>
+</p>
 
-**https://hourglyph.github.io** · [Русская версия](https://hourglyph.github.io/ru/)
+<h1 align="center">Hourglyph — Claude Code peak hours</h1>
+
+<p align="center">
+  <b><a href="https://hourglyph.github.io">hourglyph.github.io</a></b> · <a href="https://hourglyph.github.io/ru/">Русская версия</a> · <a href="https://hourglyph.github.io/data/">Open data</a>
+</p>
 
 A live, community-sourced heatmap of when developers use Claude Code, by weekday and hour, shown in your time zone.
 Unofficial project, not affiliated with Anthropic.
+
+## Why
+
+**To know when to work so your limits go further.**
+
+- **Limits have depended on the clock.** In March 2026 Anthropic made 5-hour limits drain faster during the weekday
+  peak (5–11 AM Pacific). On May 6, 2026 that was lifted only for Claude Code on Pro and Max
+  ([announcement](https://www.anthropic.com/news/higher-limits-spacex)). The map shows where the peak falls in your zone.
+- **Fewer wasted re-runs.** Peak hours bring slower replies and `overloaded` errors; an interrupted agent task has to
+  be run again, and your limit pays for the retry.
+- **Time your window.** The 5-hour window starts with your first message — start in a quiet hour and it resets
+  before the rush, not in the middle of it.
+
+> **RU:** Hourglyph помогает понять, когда лучше работать с Claude Code, чтобы лимиты уходили медленнее: карта
+> показывает пиковые и спокойные часы в вашем часовом поясе.
 
 ## Add your sessions (opt-in)
 
@@ -54,3 +77,4 @@ npm run build      # static site in dist/, fetches a data snapshot from Supabase
 - `src/lib/` — heatmap math (time-zone shifting, peak detection), time zones, page registry.
 - `src/views/` — page content (EN + RU); `src/pages/` — thin routes, OG image, data and `llms.txt` endpoints.
 - GitHub Actions rebuilds on push and every 6 hours so the numbers in the static HTML stay fresh.
+- `scripts/gen-hero.py` regenerates `.github/assets/hero.svg` (the heatmap in it is a stylised pattern, not live data).
