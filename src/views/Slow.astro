@@ -47,7 +47,12 @@ const L = (p: string) => localize(lang, p);
     )}
   </ol>
 
-  <h2>{ru ? 'Обычная неделя для сравнения' : 'A normal week for comparison'}</h2>
-  <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" /></div>
+  <h2>{ru ? 'Когда обычно случаются сбои' : 'When incidents usually happen'}</h2>
+  <p>
+    {ru
+      ? <>Часы, когда на <a href="https://status.claude.com" rel="nofollow">статус-странице Anthropic</a> был открыт инцидент по Claude, API или Claude Code, — в вашем часовом поясе. Если сейчас яркая ячейка, медленные ответы и ошибки ожидаемы. Данные обновляются ежечасно.</>
+      : <>Hours when <a href="https://status.claude.com" rel="nofollow">Anthropic’s status page</a> had an open incident for Claude, the API or Claude Code — in your time zone. If the current hour is a bright cell, slow replies and errors are expected. Synced hourly.</>}
+  </p>
+  <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" metric="incidents" /></div>
   <I18nData lang={lang} />
 </Base>

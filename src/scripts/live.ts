@@ -201,7 +201,10 @@ const renderCharts = () => Promise.all([renderHeatmaps(), renderBars(), renderCo
 /** Until the visitor picks a metric, follow the live data (the build-time default may be stale). */
 async function autoMetric() {
   const roots = [...document.querySelectorAll<HTMLElement>('[data-views]')].filter((r) => !r.dataset.userMetric);
-  const loose = [...document.querySelectorAll<HTMLElement>('[data-heatmap]')].filter((f) => !f.closest('[data-views]'));
+  // Standalone heatmaps follow the live default unless the page pinned a metric (data-metric-fixed).
+  const loose = [...document.querySelectorAll<HTMLElement>('[data-heatmap]')].filter(
+    (f) => !f.closest('[data-views]') && !f.hasAttribute('data-metric-fixed'),
+  );
   if (!roots.length && !loose.length) return;
   const metric = loadMetric(await cells('all'));
   roots.forEach((r) => selectMetric(r, metric));
