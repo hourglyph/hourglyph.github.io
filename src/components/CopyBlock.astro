@@ -1,0 +1,15 @@
+---
+import { UI, type Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  text: string;
+  /** Soft-wrap long lines (prose prompts) instead of scrolling horizontally (code). */
+  wrap?: boolean;
+}
+const { lang, text, wrap } = Astro.props;
+const t = UI[lang];
+---
+<div class:list={['snippet', { 'snippet-wrap': wrap }]}>
+  <pre><code data-copy-src>{text}</code></pre>
+  <button class="btn btn-ghost" type="button" data-copy>{t.copy}</button>
+</div>

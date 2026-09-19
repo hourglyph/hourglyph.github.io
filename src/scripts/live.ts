@@ -119,6 +119,13 @@ document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
       await navigator.clipboard.writeText(src.textContent || '');
       btn.textContent = i18n.copied;
       setTimeout(() => (btn.textContent = i18n.copy), 1800);
-    } catch { /* clipboard blocked: the text is still selectable */ }
+    } catch {
+      // Clipboard blocked: select the text so ⌘C / Ctrl+C works.
+      const range = document.createRange();
+      range.selectNodeContents(src);
+      const sel = getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
   });
 });

@@ -1,11 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
-import HookSnippet from '../components/HookSnippet.astro';
+import CopyBlock from '../components/CopyBlock.astro';
 import I18nData from '../components/I18nData.astro';
 import { localize, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { articleJsonLd } from '../lib/jsonld';
-import { SUPABASE_URL } from '../config';
+import { setupPrompt } from '../lib/setupPrompt';
+import { HOOK_JSON, SUPABASE_URL } from '../config';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -22,9 +23,19 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
       : 'One SessionStart hook in your Claude Code settings, and every new session anonymously adds one check-in to the shared map. It’s opt-in, and removing a few lines turns it off.'}
   </p>
 
-  <h2>{ru ? '1. Скопируйте конфигурацию' : '1. Copy the config'}</h2>
+  <h2>{ru ? '1. Установите hook' : '1. Install the hook'}</h2>
+
+  <h3>{ru ? 'Вариант А: пусть Claude Code сделает это сам' : 'Option A: let Claude Code do it'}<span class="option-tag">{ru ? 'проще всего' : 'easiest'}</span></h3>
+  <p>
+    {ru
+      ? <>Скопируйте промт и отправьте его в Claude Code. Агент сделает резервную копию настроек, аккуратно добавит hook к уже существующим, не создаст дубль и покажет diff. Перед записью файла Claude Code спросит разрешение.</>
+      : <>Copy the prompt and send it to Claude Code. The agent backs up your settings, merges the hook into what’s already there, skips it if it’s already installed, and shows you the diff. Claude Code asks for permission before writing the file.</>}
+  </p>
+  <CopyBlock lang={lang} text={setupPrompt(lang)} wrap />
+
+  <h3>{ru ? 'Вариант Б: вручную' : 'Option B: by hand'}</h3>
   <p>{ru ? <>Добавьте блок <code>hooks</code> в <code>~/.claude/settings.json</code> (или объедините с уже существующим):</> : <>Add the <code>hooks</code> block to <code>~/.claude/settings.json</code> (or merge it into an existing one):</>}</p>
-  <HookSnippet lang={lang} />
+  <CopyBlock lang={lang} text={HOOK_JSON} />
 
   <h2>{ru ? '2. Что делает этот hook' : '2. What this hook does'}</h2>
   <ul class="prose">

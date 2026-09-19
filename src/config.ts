@@ -14,14 +14,10 @@ export const HOOK_COMMAND =
   `-H 'apikey: ${SUPABASE_KEY}' -H 'Content-Type: application/json' ` +
   `-d '{"p_source":"hook"}' >/dev/null 2>&1 || true`;
 
-export const HOOK_JSON = JSON.stringify(
-  {
-    hooks: {
-      SessionStart: [
-        { matcher: 'startup', hooks: [{ type: 'command', command: HOOK_COMMAND, async: true }] },
-      ],
-    },
-  },
-  null,
-  2,
-);
+/** One element of `hooks.SessionStart`. */
+export const HOOK_ENTRY = { matcher: 'startup', hooks: [{ type: 'command', command: HOOK_COMMAND, async: true }] };
+
+export const HOOK_JSON = JSON.stringify({ hooks: { SessionStart: [HOOK_ENTRY] } }, null, 2);
+
+/** Marker an agent can use to detect an existing Hourglyph hook. */
+export const HOOK_MARKER = 'rpc/checkin';
