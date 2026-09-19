@@ -31,8 +31,8 @@ const L = (p: string) => localize(lang, p);
   <LoadViews lang={lang} cells={snap.all} countries={snap.countries} tz="auto" />
   <p class="small muted" style="margin-top:12px">
     {ru
-      ? <>Цвет — доля сессий, начавшихся в этот час, относительно самого загруженного часа недели; обведённая ячейка — текущий час. Переключайтесь между видами: по часам суток, по дням недели или карта мира — откуда приходят отметки. Нужен конкретный пояс? <a href={L('/peak-hours/')}>Все часовые пояса</a>.</>
-      : <>Colour shows how many sessions started in each hour, relative to the busiest hour of the week; the outlined cell is the current hour. Switch views to see totals by hour of day, by weekday, or a world map of where check-ins come from. Need a specific zone? <a href={L('/peak-hours/')}>All time zones</a>.</>}
+      ? <>Цвет показывает активность в этот час — сообщения, токены или сессии, смотря что выбрано, — относительно самого загруженного часа недели; обведённая ячейка — текущий час. Переключайтесь между видами: по часам суток, по дням недели или карта мира — откуда приходят отметки. Нужен конкретный пояс? <a href={L('/peak-hours/')}>Все часовые пояса</a>.</>
+      : <>Colour shows activity in each hour — messages, tokens or sessions, whichever is selected — relative to the busiest hour of the week; the outlined cell is the current hour. Switch views to see totals by hour of day, by weekday, or a world map of where check-ins come from. Need a specific zone? <a href={L('/peak-hours/')}>All time zones</a>.</>}
   </p>
 
   <h2>{ru ? 'Что показывают данные' : 'What the data says'}</h2>
