@@ -16,13 +16,13 @@ const L = (p: string) => localize(lang, p);
     <div class="prose">
       <p class="lead">Hourglyph — открытый проект сообщества, который помогает экономить лимиты Claude Code: он показывает, когда разработчики по всему миру работают в Claude Code, чтобы вы могли запускать работу в ненагруженные часы. Проект независимый и не связан с Anthropic.</p>
       <h2>Что хранится</h2>
-      <p>Одна строка на событие: время записи, час и день недели по UTC, тип события (<code>session</code> — начало сессии, <code>message</code> — отправлено сообщение, <code>tokens</code> — завершён ход), источник, двухбуквенный код страны и для <code>tokens</code> — четыре числа токенов. Больше ничего: ни текста сообщений и ответов, ни кода, ни путей и имён проектов, ни идентификаторов сессии или пользователя.</p>
+      <p>Сообщения и токены сразу прибавляются к общим счётчикам по часам и странам — отдельной записи на каждое событие не создаётся. Для запуска сессии хранится короткая запись (время, час и день недели по UTC, источник, код страны), она удаляется через 30 дней. Больше ничего: ни текста сообщений и ответов, ни кода, ни путей и имён проектов, ни идентификаторов сессии или пользователя.</p>
       <h2>Как считаются токены</h2>
       <p>Скрипт hook’а читает файл переписки <b>на вашем компьютере</b> (Claude Code передаёт hook’у путь к нему), суммирует поля <code>usage</code> ответов за последний ход и отправляет только четыре итоговых числа. Сам файл никуда не отправляется.</p>
       <h2>Страна</h2>
       <p>Код страны (например, <code>DE</code>) определяет сетевая инфраструктура Supabase/Cloudflare по соединению и передаёт в заголовке запроса. Мы сохраняем только этот код — не IP и не город. Если вы работаете через VPN, будет записана страна VPN-сервера. Публично видны только суммы по странам за день.</p>
       <h2>IP-адреса</h2>
-      <p>Чтобы защититься от накрутки, сервер ограничивает одну отметку на сеть за 10 минут. Для этого хранится только необратимый хэш IP-адреса с секретной солью, который меняется каждый день; устаревшие хэши удаляются. Сам IP нигде не сохраняется и не связывается с отметками.</p>
+      <p>Чтобы защититься от накрутки, сервер ограничивает частоту событий из одной сети: до 8 запусков сессий и до 30 сообщений или ходов в минуту, кнопка на сайте — раз в 10 минут. IPv6-адреса считаются по подсети /64. Для этого на несколько минут хранится только необратимый хэш адреса с секретной солью, которая меняется каждый день. Сам IP нигде не сохраняется и не связывается с данными.</p>
       <h2>Публичный доступ</h2>
       <p>Сырые строки закрыты правилами доступа базы данных. Публично доступны только агрегаты — <a href={L('/data/')}>тепловая карта и общая статистика</a>.</p>
       <h2>Как отказаться</h2>
@@ -34,13 +34,13 @@ const L = (p: string) => localize(lang, p);
     <div class="prose">
       <p class="lead">Hourglyph is an open community project that helps you save Claude Code limits: it shows when developers around the world use Claude Code, so you can start work in off-peak hours. It is independent and not affiliated with Anthropic.</p>
       <h2>What is stored</h2>
-      <p>One row per event: the insert time, the UTC hour and weekday, the event type (<code>session</code> — a session started, <code>message</code> — a message was sent, <code>tokens</code> — a turn finished), the source, a two-letter country code and, for <code>tokens</code>, four token counts. Nothing else — no message or answer text, code, paths, project names, session or user identifiers.</p>
+      <p>Messages and tokens are added straight to hourly and per-country totals — no record is kept per event. A session start keeps a short record (time, UTC hour and weekday, source, country code) that is deleted after 30 days. Nothing else — no message or answer text, code, paths, project names, session or user identifiers.</p>
       <h2>How tokens are counted</h2>
       <p>The hook script reads the transcript <b>on your machine</b> (Claude Code passes its path to the hook), sums the <code>usage</code> fields of the last turn’s replies and sends only the four totals. The file itself never leaves your computer.</p>
       <h2>Country</h2>
       <p>The country code (e.g. <code>DE</code>) is determined by Supabase/Cloudflare’s network from the connection and passed in a request header. We keep only that code — not the IP, not the city. Behind a VPN, the VPN server’s country is recorded. Only per-day totals by country are public.</p>
       <h2>IP addresses</h2>
-      <p>To prevent spam, the server allows one check-in per network every 10 minutes. For that it keeps only a one-way hash of the IP address with a secret salt that rotates daily; stale hashes are deleted. The IP itself is never stored or linked to check-ins.</p>
+      <p>To prevent spam, the server limits events per network: up to 8 session starts and 30 messages or turns a minute, and the site’s button once per 10 minutes. IPv6 addresses count per /64 subnet. For that it keeps, for a few minutes, only a one-way hash of the address with a secret salt that rotates daily. The IP itself is never stored or linked to the data.</p>
       <h2>Public access</h2>
       <p>Raw rows are locked down by database access rules. Only aggregates are public — <a href={L('/data/')}>the heatmap and summary stats</a>.</p>
       <h2>Opting out</h2>

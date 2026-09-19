@@ -53,13 +53,13 @@ const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0'
       <>
         <li>Это добровольная выборка: данные отражают тех, кто подключил hook, а не всех пользователей Claude Code.</li>
         <li>Сессия отмечается при запуске, сообщение — при отправке, токены — по завершении хода. Токены подагентов не учитываются.</li>
-        <li>Из одной сети: не больше одного запуска сессии за 10 минут и 30 событий в минуту для сообщений и токенов.</li>
+        <li>Из одной сети (IPv6 — по подсети /64): до 8 запусков сессий и 30 сообщений или ходов в минуту; кнопка на сайте — раз в 10 минут.</li>
       </>
     ) : (
       <>
         <li>This is a volunteer sample: it reflects people who installed the hook, not every Claude Code user.</li>
         <li>A session is recorded when it starts, a message when it’s sent, tokens when a turn finishes. Subagent tokens aren’t counted.</li>
-        <li>Per network: at most one session start per 10 minutes and 30 message/token events a minute.</li>
+        <li>Per network (IPv6 per /64): up to 8 session starts and 30 messages or turns a minute; the site’s button once per 10 minutes.</li>
       </>
     )}
   </ul>

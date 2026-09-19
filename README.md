@@ -50,7 +50,9 @@ per turn** — so long sessions count as the load they really are.
 Token counts are computed **locally** by [`hourglyph.sh`](public/hook/hourglyph.sh) (65 lines of `sh` + `awk`) from
 the transcript Claude Code passes to the hook; only the totals leave your machine. The server adds the UTC hour,
 weekday and the two-letter country code Cloudflare attaches to the request. No prompts, answers, code, paths,
-session IDs or IPs are stored (a salted, daily-rotating IP hash is kept only for rate limiting).
+session IDs or IPs are stored. Rate limits per network (IPv6 per /64): 8 sessions and 30 messages/turns a minute; a salted,
+daily-rotating hash is kept for a few minutes only to enforce them. Messages and tokens update aggregates only;
+session records are deleted after 30 days.
 
 ### Option A: let Claude Code do it
 

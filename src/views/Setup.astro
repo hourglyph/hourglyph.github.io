@@ -56,14 +56,14 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
         <li>Токены скрипт считает <b>локально</b> из файла переписки, путь к которому Claude Code передаёт hook’у. Наружу уходят только итоговые числа — не текст, не код, не пути, не идентификатор сессии.</li>
         <li>Все hooks работают <b>в фоне</b> (<code>async: true</code>) с таймаутом 5 секунд и не задерживают Claude Code. Вывод подавлен, в контекст модели ничего не попадает.</li>
         <li>Час, день недели и страну определяет сервер (страну — по заголовку, который сеть добавляет к соединению); IP не сохраняется.</li>
-        <li>Ключ в скрипте — публичный (publishable) ключ Supabase: с ним можно только отправить событие, прочитать сырые данные нельзя. Из одной сети принимается не больше 30 событий в минуту.</li>
+        <li>Ключ в скрипте — публичный (publishable) ключ Supabase: с ним можно только отправить событие, прочитать сырые данные нельзя. Частота событий из одной сети ограничена (см. примечания ниже).</li>
       </>
     ) : (
       <>
         <li>The script counts tokens <b>locally</b> from the transcript file whose path Claude Code passes to the hook. Only the totals leave your machine — no text, code, paths or session id.</li>
         <li>All hooks run <b>in the background</b> (<code>async: true</code>) with a 5-second timeout, so they never slow Claude Code down. Output is discarded; nothing enters the model’s context.</li>
         <li>The server adds the hour, weekday and country (from a header the network attaches to the connection); the IP isn’t stored.</li>
-        <li>The key in the script is Supabase’s public (publishable) key: it can only send events, not read raw data. At most 30 events per minute are accepted from one network.</li>
+        <li>The key in the script is Supabase’s public (publishable) key: it can only send events, not read raw data. Events per network are rate-limited (see the notes below).</li>
       </>
     )}
   </ul>
@@ -88,7 +88,7 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
       <>
         <li>Нужны <code>sh</code>, <code>awk</code> и <code>curl</code>: они есть в macOS, Linux и WSL. В Windows без WSL Claude Code выполняет hooks через Git Bash, где всё это тоже есть.</li>
         <li>Чтобы отмечать только работу над конкретным проектом, положите тот же блок в <code>.claude/settings.json</code> репозитория.</li>
-        <li>Начало сессии из одной сети учитывается не чаще раза в 10 минут; сообщения и токены — до 30 событий в минуту.</li>
+        <li>Из одной сети принимается до 8 запусков сессий и до 30 сообщений или ходов в минуту — хватит и для работы с несколькими проектами сразу.</li>
         <li>Не хотите ничего настраивать? Нажмите кнопку «Я сейчас работаю в Claude Code» на <a href={L('/')}>главной</a>.</li>
         <li>Документация по hooks: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
       </>
@@ -96,7 +96,7 @@ const DOCS = 'https://code.claude.com/docs/en/hooks';
       <>
         <li>Requires <code>sh</code>, <code>awk</code> and <code>curl</code>, which ship with macOS, Linux and WSL. On Windows without WSL, Claude Code runs hooks through Git Bash, which includes all three.</li>
         <li>To count only work on a specific project, put the same block in that repository’s <code>.claude/settings.json</code>.</li>
-        <li>Session starts count at most once per network every 10 minutes; messages and tokens up to 30 events a minute.</li>
+        <li>Up to 8 session starts and 30 messages or turns a minute are accepted per network — enough for several projects at once.</li>
         <li>Don’t want to configure anything? Press “I’m using Claude Code right now” on the <a href={L('/')}>home page</a>.</li>
         <li>Hooks documentation: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
       </>
