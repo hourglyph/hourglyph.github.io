@@ -171,10 +171,21 @@ async function renderStats() {
 
 const renderCharts = () => Promise.all([renderHeatmaps(), renderBars(), renderCountries()]);
 
+/** Until the visitor picks a metric, follow the live data (the build-time default may be stale). */
+async function autoMetric() {
+  const roots = [...document.querySelectorAll<HTMLElement>('[data-views]')].filter((r) => !r.dataset.userMetric);
+  const loose = [...document.querySelectorAll<HTMLElement>('[data-heatmap]')].filter((f) => !f.closest('[data-views]'));
+  if (!roots.length && !loose.length) return;
+  const metric = loadMetric(await cells('all'));
+  roots.forEach((r) => selectMetric(r, metric));
+  loose.forEach((f) => (f.dataset.metric = metric));
+}
+
 async function refresh() {
   cellCache.clear();
   countriesP = undefined;
   try {
+    await autoMetric();
     await Promise.all([renderCharts(), renderNow(), renderStats()]);
   } catch (err) {
     console.warn('[hourglyph] live refresh failed', err);
@@ -243,6 +254,7 @@ document.querySelectorAll<HTMLElement>('[data-views]').forEach((root) => {
   root.querySelectorAll<HTMLButtonElement>('[data-metric-btn]').forEach((btn) => {
     btn.addEventListener('click', () => {
       selectMetric(root, btn.dataset.metricBtn!);
+      root.dataset.userMetric = '1';
       remember(METRIC_KEY, btn.dataset.metricBtn!);
       renderCharts().catch((err) => console.warn('[hourglyph] re-render failed', err));
     });
@@ -250,7 +262,10 @@ document.querySelectorAll<HTMLElement>('[data-views]').forEach((root) => {
   const view = recall(VIEW_KEY);
   if (view) selectView(root, view);
   const metric = recall(METRIC_KEY);
-  if (metric) selectMetric(root, metric);
+  if (metric) {
+    selectMetric(root, metric);
+    root.dataset.userMetric = '1';
+  }
 });
 
 refresh();
