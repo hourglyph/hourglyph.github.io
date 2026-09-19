@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import Heatmap from '../components/Heatmap.astro';
+import NowStatus from '../components/NowStatus.astro';
+import I18nData from '../components/I18nData.astro';
+import { localize, type Lang } from '../i18n';
+import { page } from '../lib/pages';
+import { getSnapshot } from '../lib/snapshot';
+import { articleJsonLd } from '../lib/jsonld';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ru = lang === 'ru';
+const meta = page('slow');
+const snap = await getSnapshot();
+const L = (p: string) => localize(lang, p);
+---
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Claude тормозит?' : 'Is Claude slow?', path: meta.path }]}>
+  <h1>{ru ? 'Claude тормозит прямо сейчас?' : 'Is Claude slow right now?'}</h1>
+  <p class="lead">
+    {ru
+      ? 'Сравните текущий час с обычной неделей: если сейчас пик — медленные ответы ожидаемы. Если нет — стоит проверить статус-страницу Anthropic.'
+      : 'Compare the current hour with a normal week: if it’s peak time, slower responses are expected. If it isn’t, check Anthropic’s status page.'}
+  </p>
+  <div style="margin-top:28px"><NowStatus lang={lang} stats={snap.stats} /></div>
+
+  <h2>{ru ? 'Что делать по шагам' : 'What to do, step by step'}</h2>
+  <ol class="prose">
+    {ru ? (
+      <>
+        <li><b>Проверьте инциденты</b> на <a href="https://status.claude.com" rel="nofollow">status.claude.com</a> — там отмечаются сбои Claude, API и Claude Code.</li>
+        <li><b>Посмотрите на текущий час</b> на карте выше: будничное окно 5:00–11:00 по тихоокеанскому времени — самое загруженное.</li>
+        <li><b>Различайте ошибки.</b> <code>529 overloaded</code> — у Anthropic временно не хватает мощностей, помогает повтор через минуту. <code>429</code> или сообщение о лимите — исчерпан лимит вашего тарифа, повтор не поможет до сброса окна.</li>
+        <li><b>Смените модель</b> командой <code>/model</code>: при перегрузке одной модели другая может отвечать быстрее.</li>
+        <li><b>Отложите тяжёлые задачи</b> на <a href={L('/best-time-to-use-claude-code/')}>спокойные часы</a>, а сейчас работайте короткими итерациями.</li>
+      </>
+    ) : (
+      <>
+        <li><b>Check for incidents</b> on <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, which covers Claude, the API and Claude Code.</li>
+        <li><b>Look at the current hour</b> on the map: weekday 5–11 AM Pacific is the busiest window.</li>
+        <li><b>Tell the errors apart.</b> <code>529 overloaded</code> means Anthropic is temporarily out of capacity — retrying in a minute usually works. A <code>429</code> or a usage-limit message means your plan’s limit is used up, and retrying won’t help until the window resets.</li>
+        <li><b>Switch models</b> with <code>/model</code>: when one model is overloaded, another may respond faster.</li>
+        <li><b>Move heavy work</b> to <a href={L('/best-time-to-use-claude-code/')}>quiet hours</a> and stick to short loops for now.</li>
+      </>
+    )}
+  </ol>
+
+  <h2>{ru ? 'Обычная неделя для сравнения' : 'A normal week for comparison'}</h2>
+  <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" /></div>
+  <I18nData lang={lang} />
+</Base>

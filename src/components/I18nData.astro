@@ -1,0 +1,24 @@
+---
+// Strings the live script needs, emitted once per page as inert JSON.
+import { UI, type Lang } from '../i18n';
+interface Props { lang: Lang }
+const t = UI[Astro.props.lang];
+const data = {
+  lang: Astro.props.lang,
+  locale: t.locale,
+  daysShort: t.daysShort,
+  bands: t.bands,
+  yourTz: t.yourTz,
+  checkinOk: t.checkinOk,
+  checkinDup: t.checkinDup,
+  checkinErr: t.checkinErr,
+  copied: t.copied,
+  copy: t.copy,
+  // "N check-ins" for 0/1/2/5 forms is computed client-side from these samples:
+  unitForms: [t.checkins(1).split(' ').slice(1).join(' '), t.checkins(2).split(' ').slice(1).join(' '), t.checkins(5).split(' ').slice(1).join(' ')],
+};
+---
+<script type="application/json" id="hg-i18n" set:html={JSON.stringify(data)} />
+<script>
+  import '../scripts/live';
+</script>

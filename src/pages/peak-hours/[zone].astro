@@ -1,0 +1,10 @@
+---
+import ZoneView from '../../views/Zone.astro';
+import { ZONES, type Zone } from '../../lib/timezones';
+
+export function getStaticPaths() {
+  return ZONES.map((zone) => ({ params: { zone: zone.slug }, props: { zone } }));
+}
+const { zone } = Astro.props as { zone: Zone };
+---
+<ZoneView lang="en" zone={zone} />

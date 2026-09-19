@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Heatmap from '../components/Heatmap.astro';
+import Insights from '../components/Insights.astro';
+import I18nData from '../components/I18nData.astro';
+import { localize, type Lang } from '../i18n';
+import { page } from '../lib/pages';
+import { getSnapshot } from '../lib/snapshot';
+import { articleJsonLd } from '../lib/jsonld';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ru = lang === 'ru';
+const meta = page('best');
+const snap = await getSnapshot();
+const L = (p: string) => localize(lang, p);
+---
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Лучшее время' : 'Best time', path: meta.path }]}>
+  <h1>{ru ? 'Лучшее время для работы с Claude Code' : 'The best time to use Claude Code'}</h1>
+  <p class="lead">
+    {ru
+      ? 'Короткий ответ: вне будничного окна 5:00–11:00 по тихоокеанскому времени (15:00–21:00 по Москве летом, 16:00–22:00 зимой). Ниже — карта по реальным сессиям в вашем часовом поясе и советы, как планировать работу.'
+      : 'Short answer: outside the weekday 5–11 AM Pacific window (8 AM–2 PM Eastern, 2–8 PM in Central Europe). Below is a heatmap of real sessions in your time zone and practical advice for planning your work.'}
+  </p>
+
+  <h2>{ru ? 'Карта в вашем часовом поясе' : 'Heatmap in your time zone'}</h2>
+  <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" /></div>
+
+  <h2>{ru ? 'Пиковые и спокойные окна' : 'Peak and quiet windows'}</h2>
+  <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={ru ? 'по UTC' : 'in UTC'} />
+  <p class="small muted" style="margin-top:12px">{ru ? <>Нужен местный пояс? <a href={L('/peak-hours/')}>Выберите свой</a>.</> : <>Want it in local time? <a href={L('/peak-hours/')}>Pick your zone</a>.</>}</p>
+
+  <h2>{ru ? 'Как спланировать работу' : 'How to plan around the peak'}</h2>
+  <div class="prose">
+    {ru ? (
+      <>
+        <h3>Тяжёлые задачи — в спокойные часы</h3>
+        <p>Многошаговые задачи агента — рефакторинг модуля, миграция, генерация тестов — делают много запросов подряд. В пиковое окно они дольше выполняются и чаще упираются в ошибки перегрузки. Запускайте их утром по европейскому времени, поздно вечером или в выходные.</p>
+        <h3>В пик — короткие итерации</h3>
+        <p>Ревью диффа, точечные правки и вопросы по коду переносят задержки легче. Если ответ задерживается, не отправляйте запрос повторно — это только увеличивает очередь и расход лимита.</p>
+        <h3>Неинтерактивные запуски — ночью</h3>
+        <p>Задачи, не требующие вашего участия, можно запускать через <code>claude -p "…"</code> из скрипта или по расписанию (cron, CI) на спокойные часы.</p>
+        <h3>Следите за лимитами, а не только за часами</h3>
+        <p>5-часовое окно лимита начинается с первого сообщения. Начав работу в спокойное время, вы и обновление лимита получите раньше пика. Подробнее — в разделе <a href={L('/claude-code-usage-limits/')}>о лимитах Claude Code</a>.</p>
+      </>
+    ) : (
+      <>
+        <h3>Heavy work in quiet hours</h3>
+        <p>Multi-step agent tasks — refactoring a module, running a migration, generating tests — fire many requests in a row. During the peak they take longer and are more likely to hit overload errors. Run them in the European morning, late evening in the Americas, or at the weekend.</p>
+        <h3>Short loops during the peak</h3>
+        <p>Reviewing a diff, targeted edits and questions about code tolerate latency better. If a reply is slow, don’t resend the prompt — it only lengthens the queue and burns your limit.</p>
+        <h3>Unattended runs at night</h3>
+        <p>Jobs that don’t need you can run headless with <code>claude -p "…"</code> from a script or on a schedule (cron, CI) during quiet hours.</p>
+        <h3>Watch your limit window, not just the clock</h3>
+        <p>The 5-hour limit window starts with your first message. Starting in a quiet period means your window also resets before the next peak. More in <a href={L('/claude-code-usage-limits/')}>Claude Code usage limits explained</a>.</p>
+      </>
+    )}
+  </div>
+  <I18nData lang={lang} />
+</Base>

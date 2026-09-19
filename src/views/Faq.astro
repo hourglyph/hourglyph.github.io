@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import { type Lang } from '../i18n';
+import { page } from '../lib/pages';
+import { FAQ, faqJsonLd } from '../lib/faq';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ru = lang === 'ru';
+const meta = page('faq');
+---
+<Base lang={lang} page={meta} jsonLd={[faqJsonLd(lang)]} crumbs={[{ name: 'FAQ', path: meta.path }]}>
+  <h1>{ru ? 'Вопросы и ответы' : 'Frequently asked questions'}</h1>
+  <p class="lead">{ru ? 'Про пиковые часы Claude Code, лимиты и то, как устроена эта карта.' : 'About Claude Code peak hours, limits and how this map works.'}</p>
+  <div class="prose" style="margin-top:24px">
+    {FAQ[lang].map(({ q, a }, i) => (
+      <details open={i < 3}>
+        <summary>{q}</summary>
+        <p set:html={a} />
+      </details>
+    ))}
+  </div>
+</Base>

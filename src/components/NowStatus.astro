@@ -1,0 +1,28 @@
+---
+import { UI, type Lang } from '../i18n';
+import type { Stats } from '../lib/supabase';
+
+interface Props { lang: Lang; stats: Stats; showButton?: boolean }
+const { lang, stats, showButton = true } = Astro.props;
+const t = UI[lang];
+const keys = ['last_hour', 'last_24h', 'last_30d', 'total'] as const;
+---
+<section class="card" aria-labelledby="now-h">
+  <div class="now">
+    <div>
+      <p class="eyebrow" id="now-h">{t.now} <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:400">· <span data-now-time>{t.nowIn}</span></span></p>
+      <p class="band" data-now-band data-band="normal" style="margin:0">…</p>
+    </div>
+    {showButton && (
+      <div style="margin-left:auto">
+        <button class="btn btn-primary" type="button" data-checkin>{t.checkinBtn}</button>
+      </div>
+    )}
+  </div>
+  {showButton && <p class="checkin-msg" data-checkin-msg role="status"></p>}
+  <dl class="stats" style="margin-top:16px">
+    {keys.map((k) => (
+      <div><dt>{t.stats[k]}</dt><dd data-stat={k}>{stats[k].toLocaleString(t.locale)}</dd></div>
+    ))}
+  </dl>
+</section>

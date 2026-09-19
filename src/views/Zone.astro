@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import Heatmap from '../components/Heatmap.astro';
+import Insights from '../components/Insights.astro';
+import ZoneList from '../components/ZoneList.astro';
+import I18nData from '../components/I18nData.astro';
+import { localize, type Lang } from '../i18n';
+import { page, zonePage } from '../lib/pages';
+import { getSnapshot } from '../lib/snapshot';
+import { articleJsonLd } from '../lib/jsonld';
+import { fmtHour, fmtOffset, offsetMinutes, officialPeakIn } from '../lib/heatmap';
+import type { Zone } from '../lib/timezones';
+
+interface Props { lang: Lang; zone: Zone }
+const { lang, zone } = Astro.props;
+const ru = lang === 'ru';
+const meta = zonePage(zone);
+const snap = await getSnapshot();
+const L = (p: string) => localize(lang, p);
+const offset = offsetMinutes(zone.tz);
+const off = officialPeakIn(zone.tz);
+const peak = `${fmtHour(off.start.h, off.start.m, lang)}–${fmtHour(off.end.h, off.end.m, lang)}`;
+const phrase = ru ? zone.ru.by : `in ${zone.en.name}`;
+
+// How many hours of a 9:00–18:00 local workday overlap the official peak window.
+const startM = off.start.h * 60 + off.start.m;
+let overlap = 0;
+for (let m = 9 * 60; m < 18 * 60; m += 30) {
+  const rel = (m - startM + 1440) % 1440;
+  if (rel < 360) overlap += 0.5;
+}
+const shape =
+  overlap >= 6 ? (ru ? 'почти целиком приходится на ваш рабочий день' : 'lands almost entirely inside your working day')
+  : overlap >= 3 ? (ru ? 'захватывает вторую часть вашего рабочего дня' : 'covers a good part of your working day')
+  : overlap > 0 ? (ru ? 'лишь слегка задевает ваш рабочий день' : 'only brushes the edge of your working day')
+  : (ru ? 'приходится на нерабочее для вас время' : 'falls outside your usual working hours');
+---
+<Base
+  lang={lang}
+  page={meta}
+  jsonLd={[articleJsonLd(lang, meta)]}
+  crumbs={[{ name: page('zones').title[lang].split(/ по | in Every/)[0], path: '/peak-hours/' }, { name: zone[lang].name, path: meta.path }]}
+>
+  <p class="eyebrow">{zone[lang].name} · {fmtOffset(offset)}</p>
+  <h1>{meta.title[lang]}</h1>
+  <p class="lead">
+    {ru
+      ? <>Когда Claude Code загружен сильнее всего, если вы живёте и работаете {zone.ru.by.replace(/ \(.*\)$/, '')}: {zone.ru.city}. Карта ниже уже переведена в {zone.abbrRu ?? zone.abbr} ({fmtOffset(offset)}) и обновляется в реальном времени.</>
+      : <>When Claude Code is under the most load if you work from {zone.en.city}. The heatmap below is already converted to {zone.abbr} ({fmtOffset(offset)}) and updates live.</>}
+  </p>
+
+  <h2>{ru ? `Карта нагрузки ${zone.ru.by}` : `Claude Code heatmap in ${zone.abbr}`}</h2>
+  <div class="card"><Heatmap lang={lang} cells={snap.all} tz={zone.tz} zoneLabel={`${zone[lang].name} (${fmtOffset(offset)})`} /></div>
+
+  <h2>{ru ? `Пиковые и спокойные часы ${zone.ru.by}` : `Peak and quiet hours in ${zone.en.name}`}</h2>
+  <Insights lang={lang} cells={snap.all} tz={zone.tz} zonePhrase={phrase} />
+
+  <h2>{ru ? 'Как планировать день' : 'Planning your day'}</h2>
+  <div class="prose">
+    {ru ? (
+      <>
+        <p>Глобальный будничный пик — <b>{peak}</b> {zone.ru.by}. Это окно {shape}. Нагрузку создают одновременно утро Северной Америки и вторая половина дня в Европе, поэтому именно тогда чаще встречаются медленные ответы и ошибки <code>overloaded</code>.</p>
+        <ul>
+          <li><b>Долгие задачи агента</b> (рефакторинг, миграции, генерация тестов) запускайте до {fmtHour(off.start.h, off.start.m, lang)} или после {fmtHour(off.end.h, off.end.m, lang)}.</li>
+          <li><b>В пиковое окно</b> берите короткие итерации: ревью, мелкие правки, вопросы по коду — им задержки мешают меньше.</li>
+          <li><b>Выходные</b> заметно спокойнее будней во всех часовых поясах.</li>
+          <li>Если Claude всё же тормозит — проверьте <a href={L('/is-claude-slow-right-now/')}>текущую нагрузку</a> и <a href="https://status.claude.com" rel="nofollow">статус-страницу</a>.</li>
+        </ul>
+        <p class="small muted">Время рассчитано с учётом текущего перехода на летнее/зимнее время и пересчитывается при каждом обновлении сайта.</p>
+      </>
+    ) : (
+      <>
+        <p>The global weekday peak is <b>{peak}</b> {phrase}. In {zone.en.name} that window {shape}. It is when North American mornings overlap with the European afternoon, so slow responses and <code>overloaded</code> errors are most likely then.</p>
+        <ul>
+          <li><b>Long agent runs</b> (refactors, migrations, test generation): start them before {fmtHour(off.start.h, off.start.m, lang)} or after {fmtHour(off.end.h, off.end.m, lang)}.</li>
+          <li><b>During the peak</b>, favour short loops — reviews, small edits, questions about code — where a little latency hurts less.</li>
+          <li><b>Weekends</b> are noticeably calmer than weekdays in every time zone.</li>
+          <li>If Claude is slow anyway, check <a href={L('/is-claude-slow-right-now/')}>the current load</a> and <a href="https://status.claude.com" rel="nofollow">the official status page</a>.</li>
+        </ul>
+        <p class="small muted">Times account for the current daylight-saving state and are recalculated every time the site rebuilds.</p>
+      </>
+    )}
+  </div>
+
+  <h2>{ru ? 'Другие часовые пояса' : 'Other time zones'}</h2>
+  <ZoneList lang={lang} exclude={zone.slug} />
+  <I18nData lang={lang} />
+</Base>

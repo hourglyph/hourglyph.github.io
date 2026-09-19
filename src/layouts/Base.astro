@@ -1,0 +1,93 @@
+---
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/source-serif-4/400.css';
+import '@fontsource/source-serif-4/500.css';
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, SITE_NAME } from '../config';
+import { UI, localize, type Lang } from '../i18n';
+import type { PageMeta } from '../lib/pages';
+
+interface Props {
+  lang: Lang;
+  page: PageMeta;
+  /** Extra JSON-LD objects (FAQPage, Dataset, …). */
+  jsonLd?: object[];
+  crumbs?: { name: string; path: string }[];
+  noindex?: boolean;
+}
+const { lang, page, jsonLd = [], crumbs = [], noindex } = Astro.props;
+const t = UI[lang];
+const url = SITE + localize(lang, page.path);
+
+const ld: object[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': url,
+    url,
+    name: page.title[lang],
+    description: page.description[lang],
+    inLanguage: lang,
+    dateModified: new Date().toISOString(),
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE + '/' },
+  },
+  ...jsonLd,
+];
+if (crumbs.length) {
+  const trail = [{ name: t.breadcrumbsHome, path: '/' }, ...crumbs];
+  ld.push({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: trail.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: SITE + localize(lang, c.path) })),
+  });
+}
+const trail = crumbs.length ? [{ name: t.breadcrumbsHome, path: '/' }, ...crumbs] : [];
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+    </script>
+    <Seo
+      lang={lang}
+      title={page.title[lang]}
+      description={page.description[lang]}
+      path={page.path}
+      ogImage={`/og/${lang}/${page.key}.png`}
+      jsonLd={ld}
+      noindex={noindex}
+    />
+  </head>
+  <body>
+    <a class="skip" href="#main">{t.skip}</a>
+    <Header lang={lang} path={page.path} />
+    <main id="main">
+      <div class="wrap">
+        {trail.length > 0 && (
+          <nav class="crumbs" aria-label="Breadcrumb">
+            {trail.map((c, i) => (
+              <>
+                {i > 0 && ' / '}
+                {i < trail.length - 1 ? <a href={localize(lang, c.path)}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+              </>
+            ))}
+          </nav>
+        )}
+        <slot />
+      </div>
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

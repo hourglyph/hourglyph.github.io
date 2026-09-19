@@ -1,0 +1,41 @@
+---
+import Logo from './Logo.astro';
+import { SITE_NAME } from '../config';
+import { UI, localize, type Lang } from '../i18n';
+import { PAGES } from '../lib/pages';
+
+interface Props { lang: Lang; path: string }
+const { lang, path } = Astro.props;
+const t = UI[lang];
+const other: Lang = lang === 'en' ? 'ru' : 'en';
+const items = [
+  { href: PAGES.home.path, label: t.nav.home },
+  { href: PAGES.best.path, label: t.nav.best },
+  { href: PAGES.zones.path, label: t.nav.zones },
+  { href: PAGES.limits.path, label: t.nav.limits },
+];
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href={localize(lang, '/')}><Logo />{SITE_NAME}</a>
+    <nav class="nav" aria-label="Main">
+      {items.map((i) => <a href={localize(lang, i.href)} aria-current={isCurrent(i.href) ? 'page' : undefined}>{i.label}</a>)}
+      <a class="cta" href={localize(lang, PAGES.setup.path)} aria-current={path === PAGES.setup.path ? 'page' : undefined}>{t.nav.setup}</a>
+    </nav>
+    <div class="header-tools">
+      <a class="icon-btn" href={localize(other, path)} hreflang={other} lang={other} title={UI[other].langName}>{other.toUpperCase()}</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label={t.theme} title={t.theme}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<script>
+  document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('theme', root.dataset.theme); } catch {}
+  });
+</script>

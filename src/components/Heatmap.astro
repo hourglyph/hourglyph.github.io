@@ -1,0 +1,57 @@
+---
+import { UI, type Lang } from '../i18n';
+import { WEEK_ORDER, fromCells, level, toZone, offsetMinutes, fmtOffset, type CellLike } from '../lib/heatmap';
+
+interface Props {
+  lang: Lang;
+  cells: CellLike[];
+  /** IANA zone, or 'auto' = visitor's zone (SSR falls back to UTC, the client re-renders). */
+  tz: string;
+  window?: 'all' | '30d';
+  zoneLabel?: string;
+}
+const { lang, cells, tz, window = 'all', zoneLabel } = Astro.props;
+const t = UI[lang];
+const offset = tz === 'auto' ? 0 : offsetMinutes(tz);
+const { grid, minute } = toZone(fromCells(cells), offset);
+const max = Math.max(0, ...grid.flat());
+const label = zoneLabel ?? (tz === 'auto' ? t.utc : fmtOffset(offset));
+const hh = (h: number) => (minute ? `${h}:${String(minute).padStart(2, '0')}` : String(h));
+---
+<figure class="hm" data-heatmap data-tz={tz} data-window={window}>
+  <div class="hm-scroll">
+    <table>
+      <caption class="sr-only">{t.hmCaption} ({label})</caption>
+      <thead>
+        <tr>
+          <th scope="col"><span class="sr-only">{lang === 'ru' ? 'День' : 'Day'}</span></th>
+          {Array.from({ length: 24 }, (_, h) => (
+            <th scope="col" data-h={h}>{h % 3 === 0 ? hh(h) : <span class="sr-only">{hh(h)}</span>}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {WEEK_ORDER.map((d) => (
+          <tr>
+            <th scope="row" title={t.daysLong[d]}>{t.daysShort[d]}</th>
+            {grid[d].map((v, h) => (
+              <td data-d={d} data-h={h} data-l={level(v, max)} title={`${t.daysShort[d]} ${hh(h)} · ${t.checkins(v)}`}></td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <figcaption class="hm-foot">
+    <span>
+      <span data-zone-label>{label}</span>
+      {minute ? ` · ${t.halfHour}` : ''}
+      {' · '}<span data-window-label>{t.window[window]}</span>
+    </span>
+    <span class="legend" aria-hidden="true">
+      {t.less}
+      {[0, 1, 2, 3, 4, 5].map((l) => <i style={`background:var(--hm-${l})`}></i>)}
+      {t.more}
+    </span>
+  </figcaption>
+</figure>

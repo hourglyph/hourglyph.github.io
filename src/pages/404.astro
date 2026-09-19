@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro';
+const meta = { key: 'home', path: '/404/', title: { en: 'Page not found', ru: 'Страница не найдена' }, description: { en: 'This page does not exist.', ru: 'Такой страницы нет.' } };
+---
+<Base lang="en" page={meta} noindex>
+  <h1>Page not found</h1>
+  <p class="lead">This page doesn’t exist. <a href="/">Go to the heatmap</a> · <a href="/ru/">Открыть карту на русском</a></p>
+</Base>

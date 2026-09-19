@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import ZoneList from '../components/ZoneList.astro';
+import { type Lang } from '../i18n';
+import { page } from '../lib/pages';
+import { ZONES } from '../lib/timezones';
+import { fmtHour, officialPeakIn } from '../lib/heatmap';
+import { articleJsonLd } from '../lib/jsonld';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ru = lang === 'ru';
+const meta = page('zones');
+---
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Часовые пояса' : 'Time zones', path: meta.path }]}>
+  <h1>{meta.title[lang]}</h1>
+  <p class="lead">
+    {ru
+      ? 'Claude Code используют по всему миру, но пик нагрузки у всех один — будничное утро в США, совпадающее с европейским днём. Выберите свой часовой пояс, чтобы увидеть карту и пиковые часы в местном времени.'
+      : 'Claude Code is used worldwide, but everyone shares the same peak: weekday mornings in the US overlapping the European afternoon. Pick your time zone to see the heatmap and peak hours in local time.'}
+  </p>
+  <ZoneList lang={lang} />
+
+  <h2>{ru ? 'Будничный пик в каждом поясе' : 'The weekday peak in each zone'}</h2>
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:0.95rem">
+      <thead><tr style="text-align:left">
+        <th style="padding:12px 16px;border-bottom:1px solid var(--border)">{ru ? 'Часовой пояс' : 'Time zone'}</th>
+        <th style="padding:12px 16px;border-bottom:1px solid var(--border)">{ru ? 'Пик (будни)' : 'Peak (weekdays)'}</th>
+      </tr></thead>
+      <tbody>
+        {ZONES.map((z) => {
+          const o = officialPeakIn(z.tz);
+          return (
+            <tr>
+              <td style="padding:10px 16px;border-bottom:1px solid var(--border)">{z[lang].name} ({z.abbr})</td>
+              <td style="padding:10px 16px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums">{fmtHour(o.start.h, o.start.m, lang)}–{fmtHour(o.end.h, o.end.m, lang)}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted" style="margin-top:12px">
+    {ru
+      ? 'Окно 5:00–11:00 по тихоокеанскому времени, которое Anthropic назвала пиковым в марте 2026 года, в пересчёте на каждый пояс с учётом текущего летнего/зимнего времени.'
+      : 'The 5–11 AM Pacific window Anthropic named as peak in March 2026, converted to each zone with the current daylight-saving state.'}
+  </p>
+</Base>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hourglyph.github.io/sitemap-index.xml

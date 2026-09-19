@@ -1,0 +1,17 @@
+---
+import { localize, type Lang } from '../i18n';
+import { ZONES } from '../lib/timezones';
+import { fmtOffset, offsetMinutes } from '../lib/heatmap';
+interface Props { lang: Lang; exclude?: string }
+const { lang, exclude } = Astro.props;
+---
+<ul class="zone-list">
+  {ZONES.filter((z) => z.slug !== exclude).map((z) => (
+    <li>
+      <a href={localize(lang, `/peak-hours/${z.slug}/`)}>
+        {z[lang].name} ({z.abbr})
+        <span>{z[lang].city} · {fmtOffset(offsetMinutes(z.tz))}</span>
+      </a>
+    </li>
+  ))}
+</ul>

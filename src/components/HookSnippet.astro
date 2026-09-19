@@ -1,0 +1,10 @@
+---
+import { HOOK_JSON } from '../config';
+import { UI, type Lang } from '../i18n';
+interface Props { lang: Lang }
+const t = UI[Astro.props.lang];
+---
+<div class="snippet">
+  <pre><code data-copy-src>{HOOK_JSON}</code></pre>
+  <button class="btn btn-ghost" type="button" data-copy>{t.copy}</button>
+</div>

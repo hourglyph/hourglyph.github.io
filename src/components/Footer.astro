@@ -1,0 +1,40 @@
+---
+import { REPO_URL } from '../config';
+import { UI, localize, type Lang } from '../i18n';
+import { PAGES } from '../lib/pages';
+import { ZONES } from '../lib/timezones';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = UI[lang];
+const ru = lang === 'ru';
+const guides = (['best', 'slow', 'limits', 'setup', 'faq'] as const).map((k) => PAGES[k]);
+const project = (['data', 'about'] as const).map((k) => PAGES[k]);
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <nav aria-label="Footer">
+      <div>
+        <h2>{ru ? 'Гайды' : 'Guides'}</h2>
+        <ul>{guides.map((p) => <li><a href={localize(lang, p.path)}>{p.title[lang].split(/[:—]/)[0].trim()}</a></li>)}</ul>
+      </div>
+      <div>
+        <h2>{ru ? 'Часовые пояса' : 'Time zones'}</h2>
+        <ul>{ZONES.slice(0, 9).map((z) => <li><a href={localize(lang, `/peak-hours/${z.slug}/`)}>{z[lang].name}</a></li>)}</ul>
+      </div>
+      <div>
+        <h2>&nbsp;</h2>
+        <ul>{ZONES.slice(9).map((z) => <li><a href={localize(lang, `/peak-hours/${z.slug}/`)}>{z[lang].name}</a></li>)}</ul>
+      </div>
+      <div>
+        <h2>{ru ? 'Проект' : 'Project'}</h2>
+        <ul>
+          {project.map((p) => <li><a href={localize(lang, p.path)}>{p.title[lang].split(/[:—]/)[0].trim()}</a></li>)}
+          <li><a href={REPO_URL}>{t.footerSource}</a></li>
+          <li><a href="https://creativecommons.org/licenses/by/4.0/" rel="license">{t.footerData}</a></li>
+        </ul>
+      </div>
+    </nav>
+    <p>{t.footerNote}</p>
+  </div>
+</footer>

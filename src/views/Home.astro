@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import Heatmap from '../components/Heatmap.astro';
+import NowStatus from '../components/NowStatus.astro';
+import Insights from '../components/Insights.astro';
+import ZoneList from '../components/ZoneList.astro';
+import I18nData from '../components/I18nData.astro';
+import { localize, type Lang } from '../i18n';
+import { page } from '../lib/pages';
+import { getSnapshot } from '../lib/snapshot';
+import { datasetJsonLd, websiteJsonLd } from '../lib/jsonld';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ru = lang === 'ru';
+const snap = await getSnapshot();
+const L = (p: string) => localize(lang, p);
+---
+<Base lang={lang} page={page('home')} jsonLd={[websiteJsonLd(lang), datasetJsonLd(lang, snap.stats)]}>
+  <p class="eyebrow">{ru ? 'Карта нагрузки Claude Code' : 'Claude Code load map'}</p>
+  <h1>{ru ? 'Когда Claude Code загружен сильнее всего?' : 'When is Claude Code busiest?'}</h1>
+  <p class="lead">
+    {ru
+      ? 'Живая тепловая карта сессий Claude Code по часам и дням недели — в вашем часовом поясе. Данные присылают сами разработчики через анонимный hook: видно, когда наступают пиковые часы и когда лучше запускать долгие задачи агента.'
+      : 'A live heatmap of Claude Code sessions by hour and weekday, in your time zone. Developers contribute anonymously through a tiny hook, so you can see when peak hours hit and when to schedule long agent runs.'}
+  </p>
+
+  <div style="margin-top:32px"><NowStatus lang={lang} stats={snap.stats} /></div>
+
+  <h2>{ru ? 'Нагрузка по часам и дням недели' : 'Load by hour and weekday'}</h2>
+  <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" /></div>
+  <p class="small muted" style="margin-top:12px">
+    {ru
+      ? <>Цвет — доля сессий, начавшихся в этот час, относительно самого загруженного часа недели. Обведённая ячейка — текущий час. Нужен конкретный пояс? <a href={L('/peak-hours/')}>Все часовые пояса</a>.</>
+      : <>Colour shows how many sessions started in each hour, relative to the busiest hour of the week. The outlined cell is the current hour. Need a specific zone? <a href={L('/peak-hours/')}>All time zones</a>.</>}
+  </p>
+
+  <h2>{ru ? 'Что показывают данные' : 'What the data says'}</h2>
+  <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={ru ? 'по UTC' : 'in UTC'} />
+
+  <h2>{ru ? 'Как это работает' : 'How it works'}</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="margin-top:0">{ru ? '1. Hook отмечает начало сессии' : '1. A hook marks each session start'}</h3>
+      <p class="muted" style="margin:0">
+        {ru
+          ? <>Одна строка в <code>~/.claude/settings.json</code>: при запуске новой сессии Claude Code отправляет анонимный пинг. Час и день недели сервер определяет сам, поэтому подделать их нельзя. <a href={L('/setup/')}>Подключить</a>.</>
+          : <>One entry in <code>~/.claude/settings.json</code>: when a new Claude Code session starts it sends an anonymous ping. The server stamps the hour and weekday itself, so they can’t be faked. <a href={L('/setup/')}>Set it up</a>.</>}
+      </p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">{ru ? '2. Карта собирается из всех отметок' : '2. The map aggregates everyone'}</h3>
+      <p class="muted" style="margin:0">
+        {ru
+          ? <>Хранится только пара «день недели + час UTC» — ни кода, ни промптов, ни IP. Агрегаты открыты: <a href={L('/data/')}>скачать JSON/CSV</a>.</>
+          : <>Only a “weekday + UTC hour” pair is stored — no code, prompts or IPs. The aggregates are open: <a href={L('/data/')}>download JSON/CSV</a>.</>}
+      </p>
+    </div>
+  </div>
+
+  <h2>{ru ? 'Пиковые часы в вашем часовом поясе' : 'Peak hours in your time zone'}</h2>
+  <ZoneList lang={lang} />
+
+  <h2>{ru ? 'Полезное' : 'Guides'}</h2>
+  <ul class="prose">
+    <li><a href={L('/best-time-to-use-claude-code/')}>{ru ? 'Лучшее время для работы с Claude Code' : 'The best time to use Claude Code'}</a></li>
+    <li><a href={L('/is-claude-slow-right-now/')}>{ru ? 'Claude тормозит прямо сейчас — что делать' : 'Is Claude slow right now? What to do'}</a></li>
+    <li><a href={L('/claude-code-usage-limits/')}>{ru ? 'Лимиты Claude Code и пиковые часы' : 'Claude Code usage limits and peak hours'}</a></li>
+    <li><a href={L('/faq/')}>{ru ? 'Вопросы и ответы' : 'FAQ'}</a></li>
+  </ul>
+  <I18nData lang={lang} />
+</Base>
