@@ -9,7 +9,7 @@ export default defineConfig({
   build: { format: 'directory' },
   integrations: [
     sitemap({
-      i18n: { defaultLocale: 'en', locales: { en: 'en', ru: 'ru' } },
+      i18n: { defaultLocale: 'en', locales: { en: 'en', ru: 'ru', zh: 'zh-Hans', ja: 'ja' } },
       filter: (page) => !page.includes('/404'),
       serialize: (item) => ({ ...item, lastmod: builtAt.toISOString() }),
     }),

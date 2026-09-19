@@ -10,7 +10,7 @@
 Экономьте лимиты Claude Code — запускайте работу в ненагруженные часы.</p>
 
 <p align="center">
-  <b><a href="https://hourglyph.github.io">hourglyph.github.io</a></b> · <a href="https://hourglyph.github.io/ru/">Русская версия</a> · <a href="https://hourglyph.github.io/data/">Open data</a>
+  <b><a href="https://hourglyph.github.io">hourglyph.github.io</a></b> · <a href="https://hourglyph.github.io/ru/">Русский</a> · <a href="https://hourglyph.github.io/zh/">简体中文</a> · <a href="https://hourglyph.github.io/ja/">日本語</a> · <a href="https://hourglyph.github.io/data/">Open data</a>
 </p>
 
 A live, community-sourced map of when and where developers use Claude Code — by hour, weekday and country, shown in
@@ -18,7 +18,7 @@ your time zone — so you can **start heavy work in off-peak hours and make your
 Unofficial project, not affiliated with Anthropic.
 
 - 🗺️ Heatmap, hour-of-day and weekday charts, and a world map of check-ins
-- 🕐 18 time-zone pages with the peak converted to local time (EN + RU)
+- 🕐 18 time-zone pages with the peak converted to local time (English, Русский, 简体中文, 日本語)
 - 💡 [How to save Claude Code limits](https://hourglyph.github.io/save-claude-code-limits/) · [по-русски](https://hourglyph.github.io/ru/save-claude-code-limits/)
 
 ## Why: save your limits
@@ -196,3 +196,7 @@ npm run build      # static site in dist/, fetches a data snapshot from Supabase
 - `src/views/` — page content (EN + RU); `src/pages/` — thin routes, OG image, data and `llms.txt` endpoints.
 - GitHub Actions rebuilds on push and every 6 hours so the numbers in the static HTML stay fresh.
 - `scripts/gen-hero.py` regenerates `.github/assets/hero.svg` (the heatmap in it is a stylised pattern, not live data).
+
+## License
+
+Code: [MIT](LICENSE). Data: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

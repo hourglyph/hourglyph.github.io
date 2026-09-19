@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import CopyBlock from '../components/CopyBlock.astro';
 import I18nData from '../components/I18nData.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { articleJsonLd } from '../lib/jsonld';
 import { setupPrompt, uninstallPrompt } from '../lib/setupPrompt';
@@ -10,97 +10,172 @@ import { HOOK_INSTALL, HOOK_JSON, HOOK_SCRIPT_PATH, HOOK_SCRIPT_SOURCE, UNINSTAL
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('setup');
 const L = (p: string) => localize(lang, p);
 const DOCS = 'https://code.claude.com/docs/en/hooks';
 ---
-<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Подключение' : 'Setup', path: meta.path }]}>
-  <h1>{ru ? 'Добавьте свою работу на карту' : 'Add your work to the map'}</h1>
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: tr(lang, { en: 'Setup', ru: 'Подключение', zh: '安装', ja: 'セットアップ' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'Add your work to the map', ru: 'Добавьте свою работу на карту', zh: '把你的使用情况加到地图上', ja: 'あなたの作業をマップに加える' })}</h1>
   <p class="lead">
-    {ru
-      ? 'Три hook’а в настройках Claude Code анонимно отмечают начало сессии, каждое отправленное сообщение и число токенов за ход — так карта видит не только сессии, но и реальную нагрузку внутри долгой работы. Это добровольно и отключается удалением пары строк.'
-      : 'Three hooks in your Claude Code settings anonymously record session starts, every message you send and the tokens used per turn — so the map sees real load inside long sessions, not just session starts. It’s opt-in, and removing a few lines turns it off.'}
+    {tr(lang, {
+      en: 'Three hooks in your Claude Code settings anonymously record session starts, every message you send and the tokens used per turn — so the map sees real load inside long sessions, not just session starts. It’s opt-in, and removing a few lines turns it off.',
+      ru: 'Три hook’а в настройках Claude Code анонимно отмечают начало сессии, каждое отправленное сообщение и число токенов за ход — так карта видит не только сессии, но и реальную нагрузку внутри долгой работы. Это добровольно и отключается удалением пары строк.',
+      zh: '在 Claude Code 设置里加三个 hook，就能匿名记录会话启动、你发出的每条消息以及每轮消耗的 token——这样地图看到的不只是会话数量，还有长时间工作中的真实负载。完全自愿，删掉几行配置即可关闭。',
+      ja: 'Claude Code の設定に3つの hook を追加すると、セッションの開始、送信したメッセージ、ターンごとのトークン数が匿名で記録されます。セッション数だけでなく、長い作業の中の実際の負荷もマップに反映されます。参加は任意で、数行削除すれば無効になります。',
+    })}
   </p>
 
-  <h2>{ru ? '1. Установите hooks' : '1. Install the hooks'}</h2>
+  <h2>{tr(lang, { en: '1. Install the hooks', ru: '1. Установите hooks', zh: '1. 安装 hook', ja: '1. hook をインストール' })}</h2>
 
-  <h3>{ru ? 'Вариант А: пусть Claude Code сделает это сам' : 'Option A: let Claude Code do it'}<span class="option-tag">{ru ? 'проще всего' : 'easiest'}</span></h3>
+  <h3>{tr(lang, { en: 'Option A: let Claude Code do it', ru: 'Вариант А: пусть Claude Code сделает это сам', zh: '方式 A：让 Claude Code 自己完成', ja: '方法 A：Claude Code に任せる' })}<span class="option-tag">{tr(lang, { en: 'easiest', ru: 'проще всего', zh: '最简单', ja: 'いちばん簡単' })}</span></h3>
   <p>
-    {ru
-      ? <>Скопируйте промт и отправьте его в Claude Code. Агент скачает скрипт и покажет его вам, сделает резервную копию настроек, заменит старый hook Hourglyph (если он был), добавит новые записи к существующим и покажет diff. Перед записью файлов Claude Code спросит разрешение.</>
-      : <>Copy the prompt and send it to Claude Code. The agent downloads the script and shows it to you, backs up your settings, replaces an older Hourglyph hook if there is one, merges the new entries in and shows you the diff. Claude Code asks for permission before writing files.</>}
+    {tr(lang, {
+      en: <>Copy the prompt and send it to Claude Code. The agent downloads the script and shows it to you, backs up your settings, replaces an older Hourglyph hook if there is one, merges the new entries in and shows you the diff. Claude Code asks for permission before writing files.</>,
+      ru: <>Скопируйте промт и отправьте его в Claude Code. Агент скачает скрипт и покажет его вам, сделает резервную копию настроек, заменит старый hook Hourglyph (если он был), добавит новые записи к существующим и покажет diff. Перед записью файлов Claude Code спросит разрешение.</>,
+      zh: <>复制下面的提示词发给 Claude Code。智能体会下载脚本并先给你看内容，备份你的设置，替换旧版 Hourglyph hook（如果有），把新条目合并进去，最后展示 diff。写入文件前 Claude Code 会征求你的同意。</>,
+      ja: <>プロンプトをコピーして Claude Code に送ってください。エージェントがスクリプトをダウンロードして内容を見せ、設定をバックアップし、古い Hourglyph の hook があれば置き換え、新しいエントリを既存の設定にマージして diff を表示します。ファイルを書き込む前に Claude Code が許可を求めます。</>,
+    })}
   </p>
   <CopyBlock lang={lang} text={setupPrompt(lang)} wrap />
 
-  <h3>{ru ? 'Вариант Б: вручную' : 'Option B: by hand'}</h3>
-  <p>{ru ? <>Скачайте скрипт (<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">посмотреть исходник на GitHub</a>, 65 строк на <code>sh</code> + <code>awk</code>):</> : <>Download the script (<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">read the source on GitHub</a>, 65 lines of <code>sh</code> + <code>awk</code>):</>}</p>
+  <h3>{tr(lang, { en: 'Option B: by hand', ru: 'Вариант Б: вручную', zh: '方式 B：手动安装', ja: '方法 B：手動で設定' })}</h3>
+  <p>{tr(lang, {
+    en: <>Download the script (<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">read the source on GitHub</a>, 65 lines of <code>sh</code> + <code>awk</code>):</>,
+    ru: <>Скачайте скрипт (<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">посмотреть исходник на GitHub</a>, 65 строк на <code>sh</code> + <code>awk</code>):</>,
+    zh: <>下载脚本（<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">在 GitHub 上查看源码</a>，65 行 <code>sh</code> + <code>awk</code>）：</>,
+    ja: <>スクリプトをダウンロードします（<a href={HOOK_SCRIPT_SOURCE} target="_blank" rel="noopener">GitHub でソースを見る</a>、<code>sh</code> + <code>awk</code> で65行）：</>,
+  })}</p>
   <CopyBlock lang={lang} text={HOOK_INSTALL} />
-  <p style="margin-top:16px">{ru ? <>Затем добавьте блок <code>hooks</code> в <code>~/.claude/settings.json</code> (или объедините с существующим). Если у вас был старый hook с <code>rpc/checkin</code>, удалите его.</> : <>Then add the <code>hooks</code> block to <code>~/.claude/settings.json</code> (or merge it into an existing one). If you had the older hook with <code>rpc/checkin</code>, remove it.</>}</p>
+  <p style="margin-top:16px">{tr(lang, {
+    en: <>Then add the <code>hooks</code> block to <code>~/.claude/settings.json</code> (or merge it into an existing one). If you had the older hook with <code>rpc/checkin</code>, remove it.</>,
+    ru: <>Затем добавьте блок <code>hooks</code> в <code>~/.claude/settings.json</code> (или объедините с существующим). Если у вас был старый hook с <code>rpc/checkin</code>, удалите его.</>,
+    zh: <>然后把 <code>hooks</code> 块加到 <code>~/.claude/settings.json</code>（或与已有的合并）。如果你装过带 <code>rpc/checkin</code> 的旧版 hook，请删掉它。</>,
+    ja: <>次に <code>hooks</code> ブロックを <code>~/.claude/settings.json</code> に追加します（既存のものがあればマージ）。<code>rpc/checkin</code> を使う古い hook があれば削除してください。</>,
+  })}</p>
   <CopyBlock lang={lang} text={HOOK_JSON} />
 
-  <h2>{ru ? '2. Что отправляется' : '2. What gets sent'}</h2>
+  <h2>{tr(lang, { en: '2. What gets sent', ru: '2. Что отправляется', zh: '2. 会发送什么', ja: '2. 送信される内容' })}</h2>
   <div class="card table-card">
     <table class="data-table">
-      <thead><tr><th scope="col">Hook</th><th scope="col">{ru ? 'Когда' : 'When'}</th><th scope="col">{ru ? 'Что уходит' : 'What is sent'}</th></tr></thead>
+      <thead><tr><th scope="col">Hook</th><th scope="col">{tr(lang, { en: 'When', ru: 'Когда', zh: '触发时机', ja: 'タイミング' })}</th><th scope="col">{tr(lang, { en: 'What is sent', ru: 'Что уходит', zh: '发送内容', ja: '送信内容' })}</th></tr></thead>
       <tbody>
-        <tr><td><code>SessionStart</code></td><td>{ru ? 'запуск новой сессии' : 'a new session starts'}</td><td><code>{'{"p_event":"session"}'}</code></td></tr>
-        <tr><td><code>UserPromptSubmit</code></td><td>{ru ? 'вы отправили сообщение' : 'you send a message'}</td><td><code>{'{"p_event":"message"}'}</code> — {ru ? 'без текста' : 'no text'}</td></tr>
-        <tr><td><code>Stop</code></td><td>{ru ? 'Claude закончил отвечать' : 'Claude finishes a turn'}</td><td>{ru ? '4 числа: входные, выходные токены, запись и чтение кэша' : '4 integers: input, output, cache-write and cache-read tokens'}</td></tr>
+        <tr><td><code>SessionStart</code></td><td>{tr(lang, { en: 'a new session starts', ru: 'запуск новой сессии', zh: '新会话启动', ja: '新しいセッションの開始' })}</td><td><code>{'{"p_event":"session"}'}</code></td></tr>
+        <tr><td><code>UserPromptSubmit</code></td><td>{tr(lang, { en: 'you send a message', ru: 'вы отправили сообщение', zh: '你发送一条消息', ja: 'メッセージを送信したとき' })}</td><td><code>{'{"p_event":"message"}'}</code> — {tr(lang, { en: 'no text', ru: 'без текста', zh: '不含文本', ja: 'テキストなし' })}</td></tr>
+        <tr><td><code>Stop</code></td><td>{tr(lang, { en: 'Claude finishes a turn', ru: 'Claude закончил отвечать', zh: 'Claude 完成一轮回复', ja: 'Claude が応答を終えたとき' })}</td><td>{tr(lang, { en: '4 integers: input, output, cache-write and cache-read tokens', ru: '4 числа: входные, выходные токены, запись и чтение кэша', zh: '4 个整数：输入、输出、缓存写入和缓存读取 token 数', ja: '4つの整数：入力・出力・キャッシュ書き込み・キャッシュ読み取りのトークン数' })}</td></tr>
       </tbody>
     </table>
   </div>
   <ul class="prose" style="margin-top:16px">
-    {ru ? (
-      <>
-        <li>Токены скрипт считает <b>локально</b> из файла переписки, путь к которому Claude Code передаёт hook’у. Наружу уходят только итоговые числа — не текст, не код, не пути, не идентификатор сессии.</li>
-        <li>Все hooks работают <b>в фоне</b> (<code>async: true</code>) с таймаутом 5 секунд и не задерживают Claude Code. Вывод подавлен, в контекст модели ничего не попадает.</li>
-        <li>Час, день недели и страну определяет сервер (страну — по заголовку, который сеть добавляет к соединению); IP не сохраняется.</li>
-        <li>Ключ в скрипте — публичный (publishable) ключ Supabase: с ним можно только отправить событие, прочитать сырые данные нельзя. Частота событий из одной сети ограничена (см. примечания ниже).</li>
-      </>
-    ) : (
-      <>
-        <li>The script counts tokens <b>locally</b> from the transcript file whose path Claude Code passes to the hook. Only the totals leave your machine — no text, code, paths or session id.</li>
-        <li>All hooks run <b>in the background</b> (<code>async: true</code>) with a 5-second timeout, so they never slow Claude Code down. Output is discarded; nothing enters the model’s context.</li>
-        <li>The server adds the hour, weekday and country (from a header the network attaches to the connection); the IP isn’t stored.</li>
-        <li>The key in the script is Supabase’s public (publishable) key: it can only send events, not read raw data. Events per network are rate-limited (see the notes below).</li>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <li>The script counts tokens <b>locally</b> from the transcript file whose path Claude Code passes to the hook. Only the totals leave your machine — no text, code, paths or session id.</li>
+          <li>All hooks run <b>in the background</b> (<code>async: true</code>) with a 5-second timeout, so they never slow Claude Code down. Output is discarded; nothing enters the model’s context.</li>
+          <li>The server adds the hour, weekday and country (from a header the network attaches to the connection); the IP isn’t stored.</li>
+          <li>The key in the script is Supabase’s public (publishable) key: it can only send events, not read raw data. Events per network are rate-limited (see the notes below).</li>
+        </>
+      ),
+      ru: (
+        <>
+          <li>Токены скрипт считает <b>локально</b> из файла переписки, путь к которому Claude Code передаёт hook’у. Наружу уходят только итоговые числа — не текст, не код, не пути, не идентификатор сессии.</li>
+          <li>Все hooks работают <b>в фоне</b> (<code>async: true</code>) с таймаутом 5 секунд и не задерживают Claude Code. Вывод подавлен, в контекст модели ничего не попадает.</li>
+          <li>Час, день недели и страну определяет сервер (страну — по заголовку, который сеть добавляет к соединению); IP не сохраняется.</li>
+          <li>Ключ в скрипте — публичный (publishable) ключ Supabase: с ним можно только отправить событие, прочитать сырые данные нельзя. Частота событий из одной сети ограничена (см. примечания ниже).</li>
+        </>
+      ),
+      zh: (
+        <>
+          <li>脚本在<b>本地</b>根据会话记录文件统计 token，文件路径由 Claude Code 传给 hook。离开你电脑的只有合计数字——没有文本、代码、路径或会话 ID。</li>
+          <li>所有 hook 都在<b>后台</b>运行（<code>async: true</code>），超时 5 秒，不会拖慢 Claude Code。输出会被丢弃，不会进入模型上下文。</li>
+          <li>小时、星期和国家由服务器添加（国家取自网络附加在连接上的请求头）；IP 不会被存储。</li>
+          <li>脚本里的密钥是 Supabase 的公开（publishable）密钥：只能发送事件，无法读取原始数据。每个网络的事件频率都有限制（见下方说明）。</li>
+        </>
+      ),
+      ja: (
+        <>
+          <li>トークン数は、Claude Code が hook に渡すトランスクリプトファイルからスクリプトが<b>ローカルで</b>集計します。外部に出るのは合計値だけで、テキスト、コード、パス、セッション ID は送信されません。</li>
+          <li>すべての hook は<b>バックグラウンド</b>（<code>async: true</code>）でタイムアウト5秒で動くため、Claude Code が遅くなることはありません。出力は破棄され、モデルのコンテキストには何も入りません。</li>
+          <li>時間帯・曜日・国はサーバー側で付与します（国はネットワークが接続に付けるヘッダーから判定）。IP アドレスは保存しません。</li>
+          <li>スクリプト内のキーは Supabase の公開（publishable）キーです。イベントの送信しかできず、生データは読めません。ネットワークごとのイベント数には上限があります（下の注意事項を参照）。</li>
+        </>
+      ),
+    })}
   </ul>
 
-  <h2>{ru ? '3. Проверьте' : '3. Verify'}</h2>
-  <p>{ru ? <>Запустите <code>claude</code> в новом терминале, отправьте сообщение, подождите минуту и откройте <a href={L('/')}>карту</a> — вырастут счётчики сообщений и токенов. Список активных hooks показывает команда <code>/hooks</code>.</> : <>Start <code>claude</code> in a new terminal, send a message, wait a minute and open <a href={L('/')}>the map</a> — the message and token counters go up. The <code>/hooks</code> command lists active hooks.</>}</p>
+  <h2>{tr(lang, { en: '3. Verify', ru: '3. Проверьте', zh: '3. 验证', ja: '3. 動作確認' })}</h2>
+  <p>{tr(lang, {
+    en: <>Start <code>claude</code> in a new terminal, send a message, wait a minute and open <a href={L('/')}>the map</a> — the message and token counters go up. The <code>/hooks</code> command lists active hooks.</>,
+    ru: <>Запустите <code>claude</code> в новом терминале, отправьте сообщение, подождите минуту и откройте <a href={L('/')}>карту</a> — вырастут счётчики сообщений и токенов. Список активных hooks показывает команда <code>/hooks</code>.</>,
+    zh: <>在新终端里启动 <code>claude</code>，发一条消息，等一分钟后打开<a href={L('/')}>地图</a>——消息和 token 计数会增加。<code>/hooks</code> 命令可以列出当前生效的 hook。</>,
+    ja: <>新しいターミナルで <code>claude</code> を起動してメッセージを送り、1分ほど待ってから<a href={L('/')}>マップ</a>を開くと、メッセージとトークンのカウンターが増えています。有効な hook は <code>/hooks</code> コマンドで確認できます。</>,
+  })}</p>
 
-  <h2>{ru ? 'Как отключить' : 'How to turn it off'}</h2>
-  <p>{ru ? <>Одна команда удалит из <code>~/.claude/settings.json</code> только записи Hourglyph (с резервной копией <code>settings.json.hourglyph-bak</code>) и сам скрипт. Остальные ваши hooks и настройки не меняются. <a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">Посмотреть исходник на GitHub</a>.</> : <>One command removes only the Hourglyph entries from <code>~/.claude/settings.json</code> (keeping a backup at <code>settings.json.hourglyph-bak</code>) and deletes the script. Your other hooks and settings stay as they are. <a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">Read the source on GitHub</a>.</>}</p>
+  <h2>{tr(lang, { en: 'How to turn it off', ru: 'Как отключить', zh: '如何关闭', ja: '無効にする方法' })}</h2>
+  <p>{tr(lang, {
+    en: <>One command removes only the Hourglyph entries from <code>~/.claude/settings.json</code> (keeping a backup at <code>settings.json.hourglyph-bak</code>) and deletes the script. Your other hooks and settings stay as they are. <a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">Read the source on GitHub</a>.</>,
+    ru: <>Одна команда удалит из <code>~/.claude/settings.json</code> только записи Hourglyph (с резервной копией <code>settings.json.hourglyph-bak</code>) и сам скрипт. Остальные ваши hooks и настройки не меняются. <a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">Посмотреть исходник на GitHub</a>.</>,
+    zh: <>一条命令即可从 <code>~/.claude/settings.json</code> 中只删除 Hourglyph 的条目（备份保存在 <code>settings.json.hourglyph-bak</code>），并删除脚本本身。你的其他 hook 和设置保持不变。<a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">在 GitHub 上查看源码</a>。</>,
+    ja: <>コマンド1つで <code>~/.claude/settings.json</code> から Hourglyph のエントリだけを削除し（バックアップは <code>settings.json.hourglyph-bak</code>）、スクリプト本体も削除します。ほかの hook や設定はそのまま残ります。<a href={UNINSTALL_SOURCE} target="_blank" rel="noopener">GitHub でソースを見る</a>。</>,
+  })}</p>
   <CopyBlock lang={lang} text={UNINSTALL_CMD} />
-  <p class="small muted" style="margin-top:8px">{ru ? <>Нужен <code>python3</code> или <code>node</code>; если их нет, скрипт ничего не изменит и подскажет, что удалить вручную.</> : <>Needs <code>python3</code> or <code>node</code>; without them it changes nothing and tells you what to remove by hand.</>}</p>
+  <p class="small muted" style="margin-top:8px">{tr(lang, {
+    en: <>Needs <code>python3</code> or <code>node</code>; without them it changes nothing and tells you what to remove by hand.</>,
+    ru: <>Нужен <code>python3</code> или <code>node</code>; если их нет, скрипт ничего не изменит и подскажет, что удалить вручную.</>,
+    zh: <>需要 <code>python3</code> 或 <code>node</code>；如果都没有，脚本不会做任何修改，并会告诉你需要手动删除哪些内容。</>,
+    ja: <><code>python3</code> か <code>node</code> が必要です。どちらもない場合は何も変更せず、手動で削除すべき箇所を表示します。</>,
+  })}</p>
 
-  <h3>{ru ? 'Или попросите Claude Code' : 'Or ask Claude Code'}</h3>
+  <h3>{tr(lang, { en: 'Or ask Claude Code', ru: 'Или попросите Claude Code', zh: '或者让 Claude Code 来做', ja: 'または Claude Code に頼む' })}</h3>
   <CopyBlock lang={lang} text={uninstallPrompt(lang)} wrap />
 
-  <h3>{ru ? 'Вручную' : 'By hand'}</h3>
-  <p>{ru ? <>Удалите три записи с <code>hourglyph.sh</code> из <code>~/.claude/settings.json</code> и файл <code>{HOOK_SCRIPT_PATH}</code>. Ранее отправленные данные обезличены и не связаны с вами.</> : <>Delete the three entries mentioning <code>hourglyph.sh</code> from <code>~/.claude/settings.json</code> and the file <code>{HOOK_SCRIPT_PATH}</code>. Data already sent is anonymous and not linked to you.</>}</p>
+  <h3>{tr(lang, { en: 'By hand', ru: 'Вручную', zh: '手动删除', ja: '手動で削除' })}</h3>
+  <p>{tr(lang, {
+    en: <>Delete the three entries mentioning <code>hourglyph.sh</code> from <code>~/.claude/settings.json</code> and the file <code>{HOOK_SCRIPT_PATH}</code>. Data already sent is anonymous and not linked to you.</>,
+    ru: <>Удалите три записи с <code>hourglyph.sh</code> из <code>~/.claude/settings.json</code> и файл <code>{HOOK_SCRIPT_PATH}</code>. Ранее отправленные данные обезличены и не связаны с вами.</>,
+    zh: <>从 <code>~/.claude/settings.json</code> 中删除包含 <code>hourglyph.sh</code> 的三个条目，并删除文件 <code>{HOOK_SCRIPT_PATH}</code>。已发送的数据是匿名的，与你无关联。</>,
+    ja: <><code>~/.claude/settings.json</code> から <code>hourglyph.sh</code> を含む3つのエントリを削除し、<code>{HOOK_SCRIPT_PATH}</code> ファイルも削除してください。送信済みのデータは匿名で、あなたとは結び付いていません。</>,
+  })}</p>
 
-  <h2>{ru ? 'Примечания' : 'Notes'}</h2>
+  <h2>{tr(lang, { en: 'Notes', ru: 'Примечания', zh: '说明', ja: '注意事項' })}</h2>
   <ul class="prose">
-    {ru ? (
-      <>
-        <li>Нужны <code>sh</code>, <code>awk</code> и <code>curl</code>: они есть в macOS, Linux и WSL. В Windows без WSL Claude Code выполняет hooks через Git Bash, где всё это тоже есть.</li>
-        <li>Чтобы отмечать только работу над конкретным проектом, положите тот же блок в <code>.claude/settings.json</code> репозитория.</li>
-        <li>Из одной сети принимается до 8 запусков сессий и до 30 сообщений или ходов в минуту — хватит и для работы с несколькими проектами сразу.</li>
-        <li>Не хотите ничего настраивать? Нажмите кнопку «Я сейчас работаю в Claude Code» на <a href={L('/')}>главной</a>.</li>
-        <li>Документация по hooks: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
-      </>
-    ) : (
-      <>
-        <li>Requires <code>sh</code>, <code>awk</code> and <code>curl</code>, which ship with macOS, Linux and WSL. On Windows without WSL, Claude Code runs hooks through Git Bash, which includes all three.</li>
-        <li>To count only work on a specific project, put the same block in that repository’s <code>.claude/settings.json</code>.</li>
-        <li>Up to 8 session starts and 30 messages or turns a minute are accepted per network — enough for several projects at once.</li>
-        <li>Don’t want to configure anything? Press “I’m using Claude Code right now” on the <a href={L('/')}>home page</a>.</li>
-        <li>Hooks documentation: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <li>Requires <code>sh</code>, <code>awk</code> and <code>curl</code>, which ship with macOS, Linux and WSL. On Windows without WSL, Claude Code runs hooks through Git Bash, which includes all three.</li>
+          <li>To count only work on a specific project, put the same block in that repository’s <code>.claude/settings.json</code>.</li>
+          <li>Up to 8 session starts and 30 messages or turns a minute are accepted per network — enough for several projects at once.</li>
+          <li>Don’t want to configure anything? Press “I’m using Claude Code right now” on the <a href={L('/')}>home page</a>.</li>
+          <li>Hooks documentation: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
+        </>
+      ),
+      ru: (
+        <>
+          <li>Нужны <code>sh</code>, <code>awk</code> и <code>curl</code>: они есть в macOS, Linux и WSL. В Windows без WSL Claude Code выполняет hooks через Git Bash, где всё это тоже есть.</li>
+          <li>Чтобы отмечать только работу над конкретным проектом, положите тот же блок в <code>.claude/settings.json</code> репозитория.</li>
+          <li>Из одной сети принимается до 8 запусков сессий и до 30 сообщений или ходов в минуту — хватит и для работы с несколькими проектами сразу.</li>
+          <li>Не хотите ничего настраивать? Нажмите кнопку «Я сейчас работаю в Claude Code» на <a href={L('/')}>главной</a>.</li>
+          <li>Документация по hooks: <a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>.</li>
+        </>
+      ),
+      zh: (
+        <>
+          <li>需要 <code>sh</code>、<code>awk</code> 和 <code>curl</code>，macOS、Linux 和 WSL 都自带。在没有 WSL 的 Windows 上，Claude Code 通过 Git Bash 运行 hook，其中也包含这三个工具。</li>
+          <li>如果只想统计某个项目的工作，把同样的配置块放进该仓库的 <code>.claude/settings.json</code>。</li>
+          <li>每个网络每分钟最多接受 8 次会话启动和 30 条消息或回合——同时处理多个项目也够用。</li>
+          <li>不想做任何配置？在<a href={L('/')}>首页</a>点击“我正在使用 Claude Code”即可。</li>
+          <li>Hooks 文档：<a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>。</li>
+        </>
+      ),
+      ja: (
+        <>
+          <li><code>sh</code>・<code>awk</code>・<code>curl</code> が必要です。macOS、Linux、WSL には標準で入っています。WSL のない Windows では Claude Code が Git Bash で hook を実行し、そこにも3つとも含まれています。</li>
+          <li>特定のプロジェクトの作業だけを記録したい場合は、同じブロックをそのリポジトリの <code>.claude/settings.json</code> に置いてください。</li>
+          <li>1つのネットワークから受け付けるのは、1分あたりセッション開始8回、メッセージまたはターン30件までです。複数のプロジェクトを同時に進めても十分な量です。</li>
+          <li>設定は面倒？<a href={L('/')}>トップページ</a>の「今 Claude Code を使っています」ボタンを押すだけでも参加できます。</li>
+          <li>Hooks のドキュメント：<a href={DOCS} rel="nofollow">code.claude.com/docs/en/hooks</a>。</li>
+        </>
+      ),
+    })}
   </ul>
   <I18nData lang={lang} />
 </Base>

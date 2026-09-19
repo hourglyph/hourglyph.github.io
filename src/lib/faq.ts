@@ -1,4 +1,4 @@
-import type { Lang } from '../i18n';
+import { UI, type Lang } from '../i18n';
 
 export interface QA { q: string; a: string } // `a` is trusted HTML authored here
 
@@ -55,6 +55,58 @@ export const FAQ: Record<Lang, QA[]> = {
     { q: 'Можно ли использовать данные?',
       a: 'Да, они опубликованы под лицензией CC BY 4.0 в формате <a href="/ru/data/">JSON и CSV</a>. Пожалуйста, ставьте ссылку на Hourglyph.' },
   ],
+  zh: [
+    { q: 'Hourglyph 是做什么的？',
+      a: '它帮你把工作安排在非高峰时段，从而节省 Claude Code 额度。Anthropic 曾把额度消耗与时段挂钩；高峰时段响应更慢、失败更多，任务常常要重跑；而 5 小时额度窗口从你的第一条消息开始计时。<a href="/zh/">热力图</a>显示你所在时区的负载高峰，方便你把繁重工作避开高峰。更多技巧：<a href="/zh/save-claude-code-limits/">如何节省 Claude Code 额度</a>。' },
+    { q: 'Claude Code 的高峰时段是什么时候？',
+      a: 'Anthropic 公布的高峰窗口是工作日太平洋时间 5:00–11:00，即北京时间 20:00–次日 02:00（美国冬令时期间为 21:00–03:00）。这是美国上午与欧洲下午重叠的时段。<a href="/zh/">首页</a>的实时热力图按你的时区显示真实 Claude Code 会话在一周中的分布。' },
+    { q: '什么时候使用 Claude Code 最好？',
+      a: '避开工作日高峰即可：对中国用户来说，白天和上午通常更空闲；美洲的深夜和欧洲的清晨也较为平静，各地的周末都更空闲。当前的空闲时段见 <a href="/zh/best-time-to-use-claude-code/">Claude Code 最佳使用时间</a>。' },
+    { q: '高峰时段会影响我的 Claude Code 用量限制吗？',
+      a: '对大多数付费用户来说已经不会了。2026 年 3 月，Anthropic 规定工作日高峰时段 5 小时额度消耗更快。2026 年 5 月 6 日，Pro、Max、Team 和按席位 Enterprise 的 Claude Code 5 小时额度翻倍，Pro 和 Max 的高峰期削减也被取消。每周限制仍然有效。详情：<a href="/zh/claude-code-usage-limits/">Claude Code 用量限制详解</a>。' },
+    { q: '为什么 Claude 提示 “overloaded” 或者很慢？',
+      a: '“overloaded” 错误（HTTP 529）表示算力暂时耗尽，高峰时段和故障期间更容易出现。可以查看 <a href="https://status.claude.com" rel="nofollow">status.claude.com</a> 上的事件，以及本站的<a href="/zh/is-claude-slow-right-now/">当前负载</a>。' },
+    { q: '这是 Anthropic 的官方工具吗？',
+      a: '不是。Hourglyph 是一个独立的开源社区项目。数据只来自主动安装 hook 或点击记录按钮的用户，因此它反映的是相对规律，而不是 Anthropic 的内部流量。' },
+    { q: 'hook 会发送哪些数据？',
+      a: '三类事件：会话开始、发送了一条消息（不含内容），以及一轮结束时在本地根据对话记录算出的四个 token 数。服务器会补充 UTC 小时、星期，以及网络根据连接判断的国家代码。不存储任何提示、回答、代码、路径、会话 ID 或 IP 地址。参见<a href="/zh/about/">隐私说明</a>。' },
+    { q: '为什么要统计消息和 token，而不只是会话？',
+      a: '一个会话可能持续一整天。消息能反映人们实际在工作的时间，token 能反映工作的繁重程度——两者结合，能更准确地描绘负载，以及哪些时段额度更耐用。' },
+    { q: '世界地图的数据从哪里来？',
+      a: '来自同样的记录。国家是 Cloudflare 附加在每个请求上的两位字母代码；只公开按国家的每日汇总。使用 VPN 时，计入的是 VPN 所在的国家。' },
+    { q: '故障数据从哪里来？',
+      a: '来自 Anthropic 官方状态页 status.claude.com 的公开 API。我们的数据库每小时同步一次最新事件，并统计 Claude、API 或 Claude Code 存在未关闭事件的小时数。在图表上方选择“故障”，即可看到故障集中在哪些时段。' },
+    { q: '热力图用的是哪个时区？',
+      a: '你浏览器的时区。数据以 UTC 存储并实时换算。另外还有<a href="/zh/peak-hours/">主要时区</a>的专门页面，包括北京时间、日本时间和新加坡时间。' },
+    { q: '我可以使用这些数据吗？',
+      a: '可以，数据以 CC BY 4.0 许可发布，提供 <a href="/zh/data/">JSON 和 CSV</a> 格式。请注明来源并链接到 Hourglyph。' },
+  ],
+  ja: [
+    { q: 'Hourglyph は何のためのツールですか？',
+      a: '空いている時間に作業を始めることで、Claude Code の利用上限を節約するためのツールです。Anthropic は以前、上限の消費を時間帯と結びつけたことがあります。ピーク時間は応答が遅く失敗も多いため、やり直しが増えます。また5時間のウィンドウは最初のメッセージから始まります。<a href="/ja/">ヒートマップ</a>を見れば、あなたのタイムゾーンで負荷がピークになる時間がわかり、重い作業をずらせます。ほかのコツ：<a href="/ja/save-claude-code-limits/">Claude Code の利用上限を節約する方法</a>。' },
+    { q: 'Claude Code のピーク時間はいつですか？',
+      a: 'Anthropic はピーク時間として平日の太平洋時間 5:00〜11:00 を示しています。日本時間では 21:00〜翌 03:00（米国の冬時間中は 22:00〜翌 04:00）です。米国の午前とヨーロッパの午後が重なる時間帯です。<a href="/ja/">トップページ</a>のライブヒートマップでは、実際の Claude Code セッションの1週間の分布をあなたのタイムゾーンで確認できます。' },
+    { q: 'Claude Code を使うのに最適な時間は？',
+      a: '平日のピークを避けることです。日本では日中から夕方にかけてが比較的空いており、米国の深夜やヨーロッパの早朝も落ち着いています。週末はどの地域でも空いています。現在の空いている時間帯は <a href="/ja/best-time-to-use-claude-code/">Claude Code を使うおすすめの時間</a> をご覧ください。' },
+    { q: 'ピーク時間は Claude Code の利用上限に影響しますか？',
+      a: 'ほとんどの有料ユーザーにとって、今は影響しません。2026年3月、Anthropic は平日のピーク時間に5時間上限の消費が早まるようにしました。2026年5月6日には、Pro・Max・Team・シート制 Enterprise の Claude Code の5時間上限を2倍にし、Pro と Max のピーク時の削減を廃止しました。週間上限は引き続き適用されます。詳細：<a href="/ja/claude-code-usage-limits/">Claude Code の利用上限の解説</a>。' },
+    { q: 'Claude が「overloaded」と表示したり、遅くなったりするのはなぜ？',
+      a: '「overloaded」エラー（HTTP 529）は、処理能力が一時的に不足していることを意味します。ピーク時間や障害発生中に起きやすくなります。障害は <a href="https://status.claude.com" rel="nofollow">status.claude.com</a> で、負荷は<a href="/ja/is-claude-slow-right-now/">このサイトの現在の負荷</a>で確認できます。' },
+    { q: 'これは Anthropic の公式ツールですか？',
+      a: 'いいえ。Hourglyph は独立したオープンソースのコミュニティプロジェクトです。データは hook を追加したり記録ボタンを押したりした人からのみ集まるため、表示されるのは相対的な傾向であり、Anthropic の内部トラフィックではありません。' },
+    { q: 'hook はどんなデータを送信しますか？',
+      a: '3種類のイベントです：セッションの開始、メッセージの送信（本文は含みません）、そしてターンの終了時に会話ログからローカルで計算した4つのトークン数。サーバー側で UTC の時間と曜日、接続元からネットワークが判定した国コードを付け加えます。プロンプト、回答、コード、パス、セッション ID、IP アドレスは保存しません。詳しくは<a href="/ja/about/">プライバシー</a>をご覧ください。' },
+    { q: 'なぜセッションだけでなく、メッセージとトークンも数えるのですか？',
+      a: '1つのセッションが丸1日続くこともあるからです。メッセージは実際に作業している時間を、トークンはその作業の重さを示します。両方を合わせることで、負荷の様子や上限が長持ちする時間帯をより正確に把握できます。' },
+    { q: '世界地図のデータはどこから来ていますか？',
+      a: '同じ記録からです。国は Cloudflare が各リクエストに付ける2文字のコードで、公開するのは国ごとの日別合計だけです。VPN を使っている場合は VPN の国として数えられます。' },
+    { q: '障害のデータはどこから来ていますか？',
+      a: 'Anthropic の公式ステータスページ status.claude.com の公開 API からです。データベースが1時間ごとに最新の障害を同期し、Claude・API・Claude Code の障害が発生中だった時間を数えます。グラフの上で「障害」を選ぶと、障害が集中する時間帯がわかります。' },
+    { q: 'ヒートマップはどのタイムゾーンで表示されますか？',
+      a: 'お使いのブラウザのタイムゾーンです。データは UTC で保存し、表示時に換算しています。日本時間、韓国時間、中国時間など<a href="/ja/peak-hours/">主なタイムゾーン</a>の専用ページもあります。' },
+    { q: 'データを利用してもいいですか？',
+      a: 'はい。CC BY 4.0 ライセンスで <a href="/ja/data/">JSON と CSV</a> として公開しています。Hourglyph へのリンクを添えてください。' },
+  ],
 };
 
 const strip = (html: string) => html.replace(/<[^>]+>/g, '');
@@ -62,6 +114,6 @@ const strip = (html: string) => html.replace(/<[^>]+>/g, '');
 export const faqJsonLd = (lang: Lang) => ({
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  inLanguage: lang,
+  inLanguage: UI[lang].htmlLang,
   mainEntity: FAQ[lang].map(({ q, a }) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: strip(a) } })),
 });

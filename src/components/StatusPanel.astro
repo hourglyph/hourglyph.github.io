@@ -15,7 +15,7 @@ const fmtDuration = (a: string, b: string | null) => {
   if (!b) return t.status.ongoing;
   const min = Math.max(1, Math.round((+new Date(b) - +new Date(a)) / 60000));
   const h = Math.floor(min / 60), m = min % 60;
-  return lang === 'ru' ? (h ? `${h} ч ${m} мин` : `${m} мин`) : h ? `${h} h ${m} min` : `${m} min`;
+  return t.duration(h, m);
 };
 ---
 <section class="card status-panel" data-status-panel>

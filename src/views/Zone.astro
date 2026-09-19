@@ -4,7 +4,7 @@ import LoadViews from '../components/LoadViews.astro';
 import Insights from '../components/Insights.astro';
 import ZoneList from '../components/ZoneList.astro';
 import I18nData from '../components/I18nData.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page, zonePage } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { articleJsonLd } from '../lib/jsonld';
@@ -13,14 +13,13 @@ import { zoneAbbr, type Zone } from '../lib/timezones';
 
 interface Props { lang: Lang; zone: Zone }
 const { lang, zone } = Astro.props;
-const ru = lang === 'ru';
 const meta = zonePage(zone);
 const snap = await getSnapshot();
 const L = (p: string) => localize(lang, p);
 const offset = offsetMinutes(zone.tz);
 const off = officialPeakIn(zone.tz);
 const peak = `${fmtHour(off.start.h, off.start.m, lang)}–${fmtHour(off.end.h, off.end.m, lang)}`;
-const phrase = ru ? zone.ru.by : `in ${zone.en.name}`;
+const phrase = tr(lang, { en: `in ${zone.en.name}`, ru: zone.ru.by, zh: zone.zh.name, ja: zone.ja.name });
 const abbr = zoneAbbr(zone, lang);
 
 // How many hours of a 9:00–18:00 local workday overlap the official peak window.
@@ -30,60 +29,90 @@ for (let m = 9 * 60; m < 18 * 60; m += 30) {
   const rel = (m - startM + 1440) % 1440;
   if (rel < 360) overlap += 0.5;
 }
-const shape =
-  overlap >= 6 ? (ru ? 'почти целиком приходится на ваш рабочий день' : 'lands almost entirely inside your working day')
-  : overlap >= 3 ? (ru ? 'захватывает вторую часть вашего рабочего дня' : 'covers a good part of your working day')
-  : overlap > 0 ? (ru ? 'лишь слегка задевает ваш рабочий день' : 'only brushes the edge of your working day')
-  : (ru ? 'приходится на нерабочее для вас время' : 'falls outside your usual working hours');
+const shape = tr(lang,
+  overlap >= 6 ? { en: 'lands almost entirely inside your working day', ru: 'почти целиком приходится на ваш рабочий день', zh: '几乎完全落在你的工作时间内', ja: 'ほぼすべてが勤務時間内に重なります' }
+  : overlap >= 3 ? { en: 'covers a good part of your working day', ru: 'захватывает вторую часть вашего рабочего дня', zh: '覆盖了你相当一部分的工作时间', ja: '勤務時間のかなりの部分に重なります' }
+  : overlap > 0 ? { en: 'only brushes the edge of your working day', ru: 'лишь слегка задевает ваш рабочий день', zh: '只稍微碰到你工作时间的边缘', ja: '勤務時間の端にわずかにかかる程度です' }
+  : { en: 'falls outside your usual working hours', ru: 'приходится на нерабочее для вас время', zh: '落在你通常的工作时间之外', ja: '通常の勤務時間外にあたります' });
 ---
 <Base
   lang={lang}
   page={meta}
   jsonLd={[articleJsonLd(lang, meta)]}
-  crumbs={[{ name: ru ? 'Часовые пояса' : 'Time zones', path: page('zones').path }, { name: zone[lang].name, path: meta.path }]}
+  crumbs={[{ name: tr(lang, { en: 'Time zones', ru: 'Часовые пояса', zh: '时区', ja: 'タイムゾーン' }), path: page('zones').path }, { name: zone[lang].name, path: meta.path }]}
 >
   <p class="eyebrow">{zone[lang].name} · {abbr} · {fmtOffset(offset)}</p>
   <h1>{meta.title[lang]}</h1>
   <p class="lead">
-    {ru
-      ? <>Когда Claude Code загружен сильнее всего {zone.ru.by} ({zone.ru.city}) и когда работать выгоднее, чтобы лимиты расходовались медленнее. Карта ниже уже переведена в {abbr} ({fmtOffset(offset)}) и обновляется в реальном времени.</>
-      : <>When Claude Code is busiest in {zone.en.name} ({zone.en.city}), and when to work so your limits go further. The heatmap below is already converted to {abbr} ({fmtOffset(offset)}) and updates live.</>}
+    {tr(lang, {
+      en: <>When Claude Code is busiest in {zone.en.name} ({zone.en.city}), and when to work so your limits go further. The heatmap below is already converted to {abbr} ({fmtOffset(offset)}) and updates live.</>,
+      ru: <>Когда Claude Code загружен сильнее всего {zone.ru.by} ({zone.ru.city}) и когда работать выгоднее, чтобы лимиты расходовались медленнее. Карта ниже уже переведена в {abbr} ({fmtOffset(offset)}) и обновляется в реальном времени.</>,
+      zh: <>按{zone.zh.name}（{zone.zh.city}）计算，Claude Code 什么时候最忙，什么时候工作能让额度用得更久。下面的热力图已换算为 {abbr}（{fmtOffset(offset)}），并实时更新。</>,
+      ja: <>{zone.ja.name}（{zone.ja.city}）で Claude Code が最も混む時間と、利用上限を長持ちさせるための作業タイミング。下のヒートマップはすでに {abbr}（{fmtOffset(offset)}）に換算済みで、リアルタイムに更新されます。</>,
+    })}
   </p>
 
-  <h2>{ru ? `Карта нагрузки ${zone.ru.by}` : `Claude Code heatmap in ${zone.en.name}`}</h2>
+  <h2>{tr(lang, { en: `Claude Code heatmap in ${zone.en.name}`, ru: `Карта нагрузки ${zone.ru.by}`, zh: `${zone.zh.name}的 Claude Code 热力图`, ja: `${zone.ja.name}の Claude Code ヒートマップ` })}</h2>
   <LoadViews lang={lang} cells={snap.all} countries={snap.countries} tz={zone.tz} zoneLabel={`${zone[lang].name} · ${abbr} · ${fmtOffset(offset)}`} />
 
-  <h2>{ru ? `Пиковые и спокойные часы ${zone.ru.by}` : `Peak and quiet hours in ${zone.en.name}`}</h2>
+  <h2>{tr(lang, { en: `Peak and quiet hours in ${zone.en.name}`, ru: `Пиковые и спокойные часы ${zone.ru.by}`, zh: `${zone.zh.name}的高峰与空闲时段`, ja: `${zone.ja.name}のピーク時間と空いている時間` })}</h2>
   <Insights lang={lang} cells={snap.all} tz={zone.tz} zonePhrase={phrase} />
 
-  <h2>{ru ? 'Как планировать день' : 'Planning your day'}</h2>
+  <h2>{tr(lang, { en: 'Planning your day', ru: 'Как планировать день', zh: '如何安排一天的工作', ja: '1日の計画の立て方' })}</h2>
   <div class="prose">
-    {ru ? (
-      <>
-        <p>Глобальный будничный пик — <b>{peak}</b> {zone.ru.by}. Это окно {shape}. Нагрузку создают одновременно утро Северной Америки и вторая половина дня в Европе, поэтому именно тогда чаще встречаются медленные ответы и ошибки <code>overloaded</code>.</p>
-        <ul>
-          <li><b>Долгие задачи агента</b> (рефакторинг, миграции, генерация тестов) запускайте до {fmtHour(off.start.h, off.start.m, lang)} или после {fmtHour(off.end.h, off.end.m, lang)}.</li>
-          <li><b>В пиковое окно</b> берите короткие итерации: ревью, мелкие правки, вопросы по коду — им задержки мешают меньше.</li>
-          <li><b>Выходные</b> заметно спокойнее будней во всех часовых поясах.</li>
-          <li>Если Claude всё же тормозит — проверьте <a href={L('/is-claude-slow-right-now/')}>текущую нагрузку</a> и <a href="https://status.claude.com" rel="nofollow">статус-страницу</a>.</li>
-        </ul>
-        <p class="small muted">Время рассчитано с учётом текущего перехода на летнее/зимнее время и пересчитывается при каждом обновлении сайта.</p>
-      </>
-    ) : (
-      <>
-        <p>The global weekday peak is <b>{peak}</b> {phrase}. In {zone.en.name} that window {shape}. It is when North American mornings overlap with the European afternoon, so slow responses and <code>overloaded</code> errors are most likely then.</p>
-        <ul>
-          <li><b>Long agent runs</b> (refactors, migrations, test generation): start them before {fmtHour(off.start.h, off.start.m, lang)} or after {fmtHour(off.end.h, off.end.m, lang)}.</li>
-          <li><b>During the peak</b>, favour short loops — reviews, small edits, questions about code — where a little latency hurts less.</li>
-          <li><b>Weekends</b> are noticeably calmer than weekdays in every time zone.</li>
-          <li>If Claude is slow anyway, check <a href={L('/is-claude-slow-right-now/')}>the current load</a> and <a href="https://status.claude.com" rel="nofollow">the official status page</a>.</li>
-        </ul>
-        <p class="small muted">Times account for the current daylight-saving state and are recalculated every time the site rebuilds.</p>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <p>The global weekday peak is <b>{peak}</b> {phrase}. In {zone.en.name} that window {shape}. It is when North American mornings overlap with the European afternoon, so slow responses and <code>overloaded</code> errors are most likely then.</p>
+          <ul>
+            <li><b>Long agent runs</b> (refactors, migrations, test generation): start them before {fmtHour(off.start.h, off.start.m, lang)} or after {fmtHour(off.end.h, off.end.m, lang)}.</li>
+            <li><b>During the peak</b>, favour short loops — reviews, small edits, questions about code — where a little latency hurts less.</li>
+            <li><b>Weekends</b> are noticeably calmer than weekdays in every time zone.</li>
+            <li>If Claude is slow anyway, check <a href={L('/is-claude-slow-right-now/')}>the current load</a> and <a href="https://status.claude.com" rel="nofollow">the official status page</a>.</li>
+          </ul>
+          <p class="small muted">Times account for the current daylight-saving state and are recalculated every time the site rebuilds.</p>
+        </>
+      ),
+      ru: (
+        <>
+          <p>Глобальный будничный пик — <b>{peak}</b> {zone.ru.by}. Это окно {shape}. Нагрузку создают одновременно утро Северной Америки и вторая половина дня в Европе, поэтому именно тогда чаще встречаются медленные ответы и ошибки <code>overloaded</code>.</p>
+          <ul>
+            <li><b>Долгие задачи агента</b> (рефакторинг, миграции, генерация тестов) запускайте до {fmtHour(off.start.h, off.start.m, lang)} или после {fmtHour(off.end.h, off.end.m, lang)}.</li>
+            <li><b>В пиковое окно</b> берите короткие итерации: ревью, мелкие правки, вопросы по коду — им задержки мешают меньше.</li>
+            <li><b>Выходные</b> заметно спокойнее будней во всех часовых поясах.</li>
+            <li>Если Claude всё же тормозит — проверьте <a href={L('/is-claude-slow-right-now/')}>текущую нагрузку</a> и <a href="https://status.claude.com" rel="nofollow">статус-страницу</a>.</li>
+          </ul>
+          <p class="small muted">Время рассчитано с учётом текущего перехода на летнее/зимнее время и пересчитывается при каждом обновлении сайта.</p>
+        </>
+      ),
+      zh: (
+        <>
+          <p>全球工作日高峰为{zone.zh.name} <b>{peak}</b>。这个时段{shape}。此时北美的上午与欧洲的下午重叠，因此最容易出现响应缓慢和 <code>overloaded</code> 错误。</p>
+          <ul>
+            <li><b>耗时较长的智能体任务</b>（重构、迁移、生成测试）：在 {fmtHour(off.start.h, off.start.m, lang)} 之前或 {fmtHour(off.end.h, off.end.m, lang)} 之后启动。</li>
+            <li><b>高峰期间</b>优先做短循环——审阅、小改动、代码问答，这些工作受延迟影响较小。</li>
+            <li><b>周末</b>在所有时区都明显比工作日空闲。</li>
+            <li>如果 Claude 依然很慢，请查看<a href={L('/is-claude-slow-right-now/')}>当前负载</a>和<a href="https://status.claude.com" rel="nofollow">官方状态页</a>。</li>
+          </ul>
+          <p class="small muted">时间已考虑当前的夏令时状态，并会在每次网站重新构建时重新计算。</p>
+        </>
+      ),
+      ja: (
+        <>
+          <p>世界共通の平日ピークは{zone.ja.name}で <b>{peak}</b> です。この時間帯は{shape}。北米の午前とヨーロッパの午後が重なるため、応答の遅れや <code>overloaded</code> エラーが最も起きやすくなります。</p>
+          <ul>
+            <li><b>時間のかかるエージェント作業</b>（リファクタリング、マイグレーション、テスト生成）は {fmtHour(off.start.h, off.start.m, lang)} より前か {fmtHour(off.end.h, off.end.m, lang)} 以降に始めましょう。</li>
+            <li><b>ピーク中</b>は、レビューや小さな修正、コードについての質問など、多少の遅延が気にならない短いサイクルの作業がおすすめです。</li>
+            <li><b>週末</b>はどのタイムゾーンでも平日よりかなり空いています。</li>
+            <li>それでも Claude が遅い場合は、<a href={L('/is-claude-slow-right-now/')}>現在の負荷</a>と<a href="https://status.claude.com" rel="nofollow">公式ステータスページ</a>を確認してください。</li>
+          </ul>
+          <p class="small muted">時刻は現在の夏時間の状態を反映しており、サイトが再ビルドされるたびに再計算されます。</p>
+        </>
+      ),
+    })}
   </div>
 
-  <h2>{ru ? 'Другие часовые пояса' : 'Other time zones'}</h2>
+  <h2>{tr(lang, { en: 'Other time zones', ru: 'Другие часовые пояса', zh: '其他时区', ja: 'その他のタイムゾーン' })}</h2>
   <ZoneList lang={lang} exclude={zone.slug} />
   <I18nData lang={lang} />
 </Base>

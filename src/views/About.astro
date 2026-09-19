@@ -1,52 +1,92 @@
 ---
 import Base from '../layouts/Base.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { REPO_URL } from '../config';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('about');
 const L = (p: string) => localize(lang, p);
 ---
-<Base lang={lang} page={meta} crumbs={[{ name: ru ? 'О проекте' : 'About', path: meta.path }]}>
-  <h1>{ru ? 'О проекте и приватность' : 'About and privacy'}</h1>
-  {ru ? (
-    <div class="prose">
-      <p class="lead">Hourglyph — открытый проект сообщества, который помогает экономить лимиты Claude Code: он показывает, когда разработчики по всему миру работают в Claude Code, чтобы вы могли запускать работу в ненагруженные часы. Проект независимый и не связан с Anthropic.</p>
-      <h2>Что хранится</h2>
-      <p>Сообщения и токены сразу прибавляются к общим счётчикам по часам и странам — отдельной записи на каждое событие не создаётся. Для запуска сессии хранится короткая запись (время, час и день недели по UTC, источник, код страны), она удаляется через 30 дней. Больше ничего: ни текста сообщений и ответов, ни кода, ни путей и имён проектов, ни идентификаторов сессии или пользователя.</p>
-      <h2>Как считаются токены</h2>
-      <p>Скрипт hook’а читает файл переписки <b>на вашем компьютере</b> (Claude Code передаёт hook’у путь к нему), суммирует поля <code>usage</code> ответов за последний ход и отправляет только четыре итоговых числа. Сам файл никуда не отправляется.</p>
-      <h2>Страна</h2>
-      <p>Код страны (например, <code>DE</code>) определяет сетевая инфраструктура Supabase/Cloudflare по соединению и передаёт в заголовке запроса. Мы сохраняем только этот код — не IP и не город. Если вы работаете через VPN, будет записана страна VPN-сервера. Публично видны только суммы по странам за день.</p>
-      <h2>IP-адреса</h2>
-      <p>Чтобы защититься от накрутки, сервер ограничивает частоту событий из одной сети: до 8 запусков сессий и до 30 сообщений или ходов в минуту, кнопка на сайте — раз в 10 минут. IPv6-адреса считаются по подсети /64. Для этого на несколько минут хранится только необратимый хэш адреса с секретной солью, которая меняется каждый день. Сам IP нигде не сохраняется и не связывается с данными.</p>
-      <h2>Публичный доступ</h2>
-      <p>Сырые строки закрыты правилами доступа базы данных. Публично доступны только агрегаты — <a href={L('/data/')}>тепловая карта и общая статистика</a>.</p>
-      <h2>Как отказаться</h2>
-      <p>Удалите hook из <code>~/.claude/settings.json</code> — инструкция на странице <a href={L('/setup/')}>подключения</a>.</p>
-      <h2>Исходный код</h2>
-      <p>Сайт, схема базы и hook открыты: <a href={REPO_URL}>{REPO_URL.replace('https://', '')}</a>. Вопросы и предложения — через issues.</p>
-    </div>
-  ) : (
-    <div class="prose">
-      <p class="lead">Hourglyph is an open community project that helps you save Claude Code limits: it shows when developers around the world use Claude Code, so you can start work in off-peak hours. It is independent and not affiliated with Anthropic.</p>
-      <h2>What is stored</h2>
-      <p>Messages and tokens are added straight to hourly and per-country totals — no record is kept per event. A session start keeps a short record (time, UTC hour and weekday, source, country code) that is deleted after 30 days. Nothing else — no message or answer text, code, paths, project names, session or user identifiers.</p>
-      <h2>How tokens are counted</h2>
-      <p>The hook script reads the transcript <b>on your machine</b> (Claude Code passes its path to the hook), sums the <code>usage</code> fields of the last turn’s replies and sends only the four totals. The file itself never leaves your computer.</p>
-      <h2>Country</h2>
-      <p>The country code (e.g. <code>DE</code>) is determined by Supabase/Cloudflare’s network from the connection and passed in a request header. We keep only that code — not the IP, not the city. Behind a VPN, the VPN server’s country is recorded. Only per-day totals by country are public.</p>
-      <h2>IP addresses</h2>
-      <p>To prevent spam, the server limits events per network: up to 8 session starts and 30 messages or turns a minute, and the site’s button once per 10 minutes. IPv6 addresses count per /64 subnet. For that it keeps, for a few minutes, only a one-way hash of the address with a secret salt that rotates daily. The IP itself is never stored or linked to the data.</p>
-      <h2>Public access</h2>
-      <p>Raw rows are locked down by database access rules. Only aggregates are public — <a href={L('/data/')}>the heatmap and summary stats</a>.</p>
-      <h2>Opting out</h2>
-      <p>Remove the hook from <code>~/.claude/settings.json</code> — see <a href={L('/setup/')}>setup</a>.</p>
-      <h2>Source code</h2>
-      <p>The site, database schema and hook are open source: <a href={REPO_URL}>{REPO_URL.replace('https://', '')}</a>. Questions and ideas are welcome as issues.</p>
-    </div>
-  )}
+<Base lang={lang} page={meta} crumbs={[{ name: tr(lang, { en: 'About', ru: 'О проекте', zh: '关于', ja: 'このサイトについて' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'About and privacy', ru: 'О проекте и приватность', zh: '关于与隐私', ja: 'このサイトについて・プライバシー' })}</h1>
+  {tr(lang, {
+    en: (
+      <div class="prose">
+        <p class="lead">Hourglyph is an open community project that helps you save Claude Code limits: it shows when developers around the world use Claude Code, so you can start work in off-peak hours. It is independent and not affiliated with Anthropic.</p>
+        <h2>What is stored</h2>
+        <p>Messages and tokens are added straight to hourly and per-country totals — no record is kept per event. A session start keeps a short record (time, UTC hour and weekday, source, country code) that is deleted after 30 days. Nothing else — no message or answer text, code, paths, project names, session or user identifiers.</p>
+        <h2>How tokens are counted</h2>
+        <p>The hook script reads the transcript <b>on your machine</b> (Claude Code passes its path to the hook), sums the <code>usage</code> fields of the last turn’s replies and sends only the four totals. The file itself never leaves your computer.</p>
+        <h2>Country</h2>
+        <p>The country code (e.g. <code>DE</code>) is determined by Supabase/Cloudflare’s network from the connection and passed in a request header. We keep only that code — not the IP, not the city. Behind a VPN, the VPN server’s country is recorded. Only per-day totals by country are public.</p>
+        <h2>IP addresses</h2>
+        <p>To prevent spam, the server limits events per network: up to 8 session starts and 30 messages or turns a minute, and the site’s button once per 10 minutes. IPv6 addresses count per /64 subnet. For that it keeps, for a few minutes, only a one-way hash of the address with a secret salt that rotates daily. The IP itself is never stored or linked to the data.</p>
+        <h2>Public access</h2>
+        <p>Raw rows are locked down by database access rules. Only aggregates are public — <a href={L('/data/')}>the heatmap and summary stats</a>.</p>
+        <h2>Opting out</h2>
+        <p>Remove the hook from <code>~/.claude/settings.json</code> — see <a href={L('/setup/')}>setup</a>.</p>
+        <h2>Source code</h2>
+        <p>The site, database schema and hook are open source: <a href={REPO_URL}>{REPO_URL.replace('https://', '')}</a>. Questions and ideas are welcome as issues.</p>
+      </div>
+    ),
+    ru: (
+      <div class="prose">
+        <p class="lead">Hourglyph — открытый проект сообщества, который помогает экономить лимиты Claude Code: он показывает, когда разработчики по всему миру работают в Claude Code, чтобы вы могли запускать работу в ненагруженные часы. Проект независимый и не связан с Anthropic.</p>
+        <h2>Что хранится</h2>
+        <p>Сообщения и токены сразу прибавляются к общим счётчикам по часам и странам — отдельной записи на каждое событие не создаётся. Для запуска сессии хранится короткая запись (время, час и день недели по UTC, источник, код страны), она удаляется через 30 дней. Больше ничего: ни текста сообщений и ответов, ни кода, ни путей и имён проектов, ни идентификаторов сессии или пользователя.</p>
+        <h2>Как считаются токены</h2>
+        <p>Скрипт hook’а читает файл переписки <b>на вашем компьютере</b> (Claude Code передаёт hook’у путь к нему), суммирует поля <code>usage</code> ответов за последний ход и отправляет только четыре итоговых числа. Сам файл никуда не отправляется.</p>
+        <h2>Страна</h2>
+        <p>Код страны (например, <code>DE</code>) определяет сетевая инфраструктура Supabase/Cloudflare по соединению и передаёт в заголовке запроса. Мы сохраняем только этот код — не IP и не город. Если вы работаете через VPN, будет записана страна VPN-сервера. Публично видны только суммы по странам за день.</p>
+        <h2>IP-адреса</h2>
+        <p>Чтобы защититься от накрутки, сервер ограничивает частоту событий из одной сети: до 8 запусков сессий и до 30 сообщений или ходов в минуту, кнопка на сайте — раз в 10 минут. IPv6-адреса считаются по подсети /64. Для этого на несколько минут хранится только необратимый хэш адреса с секретной солью, которая меняется каждый день. Сам IP нигде не сохраняется и не связывается с данными.</p>
+        <h2>Публичный доступ</h2>
+        <p>Сырые строки закрыты правилами доступа базы данных. Публично доступны только агрегаты — <a href={L('/data/')}>тепловая карта и общая статистика</a>.</p>
+        <h2>Как отказаться</h2>
+        <p>Удалите hook из <code>~/.claude/settings.json</code> — инструкция на странице <a href={L('/setup/')}>подключения</a>.</p>
+        <h2>Исходный код</h2>
+        <p>Сайт, схема базы и hook открыты: <a href={REPO_URL}>{REPO_URL.replace('https://', '')}</a>. Вопросы и предложения — через issues.</p>
+      </div>
+    ),
+    zh: (
+      <div class="prose">
+        <p class="lead">Hourglyph 是一个开放的社区项目，帮你节省 Claude Code 额度：它展示全球开发者在什么时间使用 Claude Code，让你可以把工作安排在非高峰时段。本项目独立运营，与 Anthropic 没有关联。</p>
+        <h2>存储哪些数据</h2>
+        <p>消息和 token 会直接累加到按小时和按国家的总数里，不为每个事件单独保存记录。会话启动会保留一条简短记录（时间、UTC 小时和星期、来源、国家代码），30 天后删除。除此之外什么都不存：没有消息或回复文本、代码、路径、项目名，也没有会话或用户标识。</p>
+        <h2>token 是怎么统计的</h2>
+        <p>hook 脚本<b>在你的电脑上</b>读取会话记录文件（Claude Code 会把路径传给 hook），汇总上一轮回复中的 <code>usage</code> 字段，只发送四个合计数字。文件本身不会离开你的电脑。</p>
+        <h2>国家</h2>
+        <p>国家代码（例如 <code>DE</code>）由 Supabase/Cloudflare 的网络根据连接判断，并通过请求头传入。我们只保存这个代码——不存 IP，也不存城市。如果你使用 VPN，记录的是 VPN 服务器所在国家。公开的只有按国家、按天的合计。</p>
+        <h2>IP 地址</h2>
+        <p>为防止刷量，服务器会限制每个网络的事件频率：每分钟最多 8 次会话启动和 30 条消息或回合，网站按钮每 10 分钟一次。IPv6 地址按 /64 子网计算。为此，服务器只会在几分钟内保存地址的单向哈希，所用的密钥盐每天轮换。IP 本身从不存储，也不会与数据关联。</p>
+        <h2>公开访问</h2>
+        <p>原始数据行受数据库访问规则保护。公开的只有聚合数据——<a href={L('/data/')}>热力图和汇总统计</a>。</p>
+        <h2>如何退出</h2>
+        <p>从 <code>~/.claude/settings.json</code> 中删除 hook 即可——详见<a href={L('/setup/')}>安装页面</a>。</p>
+        <h2>源代码</h2>
+        <p>网站、数据库结构和 hook 全部开源：<a href={REPO_URL}>{REPO_URL.replace('https://', '')}</a>。欢迎通过 issue 提问和建议。</p>
+      </div>
+    ),
+    ja: (
+      <div class="prose">
+        <p class="lead">Hourglyph は、Claude Code の利用上限を節約するためのオープンなコミュニティプロジェクトです。世界中の開発者がいつ Claude Code を使っているかを示し、空いている時間帯に作業を始められるようにします。独立したプロジェクトで、Anthropic とは提携していません。</p>
+        <h2>保存するデータ</h2>
+        <p>メッセージとトークンは時間帯別・国別の合計にそのまま加算され、イベントごとの記録は残しません。セッション開始時だけ短い記録（時刻、UTC の時間と曜日、送信元、国コード）を保存し、30日後に削除します。それ以外は何も保存しません。メッセージや応答のテキスト、コード、パス、プロジェクト名、セッションやユーザーの識別子も保存しません。</p>
+        <h2>トークンの集計方法</h2>
+        <p>hook スクリプトは<b>あなたのコンピューター上で</b>トランスクリプトを読み（パスは Claude Code が hook に渡します）、直前のターンの応答の <code>usage</code> フィールドを合計して、4つの合計値だけを送信します。ファイル自体が外部に出ることはありません。</p>
+        <h2>国</h2>
+        <p>国コード（例：<code>DE</code>）は Supabase/Cloudflare のネットワークが接続元から判定し、リクエストヘッダーで渡します。保存するのはこのコードだけで、IP アドレスや都市は保存しません。VPN を使っている場合は VPN サーバーの国が記録されます。公開されるのは国別・日別の合計のみです。</p>
+        <h2>IP アドレス</h2>
+        <p>不正な水増しを防ぐため、サーバーはネットワークごとにイベント数を制限しています。1分間にセッション開始8回、メッセージまたはターン30件まで、サイトのボタンは10分に1回です。IPv6 アドレスは /64 サブネット単位で数えます。そのために、毎日変わる秘密のソルトを使ったアドレスの一方向ハッシュだけを数分間保持します。IP アドレス自体は保存せず、データと結び付けることもありません。</p>
+        <h2>公開範囲</h2>
+        <p>生データの行はデータベースのアクセスルールで保護されています。公開しているのは集計データ（<a href={L('/data/')}>ヒートマップと統計の概要</a>）だけです。</p>
+        <h2>参加をやめるには</h2>
+        <p><code>~/.claude/settings.json</code> から hook を削除してください。手順は<a href={L('/setup/')}>セットアップページ</a>にあります。</p>
+        <h2>ソースコード</h2>
+        <p>サイト、データベーススキーマ、hook はオープンソースです：<a href={REPO_URL}>{REPO_URL.replace('https://', '')}</a>。質問や提案は issue でお寄せください。</p>
+      </div>
+    ),
+  })}
 </Base>

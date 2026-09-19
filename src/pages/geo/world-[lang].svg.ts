@@ -35,6 +35,6 @@ export const GET: APIRoute = ({ params }) => {
     })
     .join('');
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${lang === 'ru' ? 'Карта мира' : 'World map'}">${paths}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${UI[lang].worldMap}">${paths}</svg>`;
   return new Response(svg, { headers: { 'Content-Type': 'image/svg+xml' } });
 };

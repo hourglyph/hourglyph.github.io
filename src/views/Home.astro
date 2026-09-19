@@ -5,106 +5,152 @@ import NowStatus from '../components/NowStatus.astro';
 import Insights from '../components/Insights.astro';
 import ZoneList from '../components/ZoneList.astro';
 import I18nData from '../components/I18nData.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { datasetJsonLd, websiteJsonLd } from '../lib/jsonld';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const snap = await getSnapshot();
 const L = (p: string) => localize(lang, p);
 ---
 <Base lang={lang} page={page('home')} jsonLd={[websiteJsonLd(lang), datasetJsonLd(lang, snap.stats)]}>
-  <p class="eyebrow">{ru ? 'Экономьте лимиты Claude Code' : 'Save your Claude Code limits'}</p>
-  <h1>{ru ? 'Когда Claude Code загружен сильнее всего?' : 'When is Claude Code busiest?'}</h1>
+  <p class="eyebrow">{tr(lang, { en: 'Save your Claude Code limits', ru: 'Экономьте лимиты Claude Code', zh: '节省你的 Claude Code 额度', ja: 'Claude Code の利用上限を節約' })}</p>
+  <h1>{tr(lang, { en: 'When is Claude Code busiest?', ru: 'Когда Claude Code загружен сильнее всего?', zh: 'Claude Code 什么时候最忙？', ja: 'Claude Code が最も混むのはいつ？' })}</h1>
   <p class="lead">
-    {ru
-      ? 'Hourglyph помогает экономить лимиты Claude Code: запускайте работу в ненагруженные часы. Живая карта сессий по часам, дням недели и странам в вашем часовом поясе показывает, когда наступает пик и в какие часы спокойнее запускать долгие задачи агента.'
-      : 'Hourglyph helps you save Claude Code limits by starting work in off-peak hours. A live map of sessions by hour, weekday and country, in your time zone, shows when the load peaks and which quiet hours are best for long agent runs.'}
+    {tr(lang, {
+      en: 'Hourglyph helps you save Claude Code limits by starting work in off-peak hours. A live map of sessions by hour, weekday and country, in your time zone, shows when the load peaks and which quiet hours are best for long agent runs.',
+      ru: 'Hourglyph помогает экономить лимиты Claude Code: запускайте работу в ненагруженные часы. Живая карта сессий по часам, дням недели и странам в вашем часовом поясе показывает, когда наступает пик и в какие часы спокойнее запускать долгие задачи агента.',
+      zh: 'Hourglyph 帮你在非高峰时段开工，节省 Claude Code 额度。这张按小时、星期和国家统计会话的实时地图会换算到你的时区，告诉你高峰何时到来、哪些空闲时段最适合跑耗时较长的智能体任务。',
+      ja: 'Hourglyph は、空いている時間に作業を始めることで Claude Code の利用上限を節約する手助けをします。時間帯・曜日・国別のセッションをあなたのタイムゾーンで表示するライブマップで、ピークがいつ来るのか、長いエージェント作業にはどの時間が向いているのかがわかります。',
+    })}
   </p>
 
   <div style="margin-top:32px"><NowStatus lang={lang} stats={snap.stats} /></div>
 
-  <h2>{ru ? 'Нагрузка по часам и дням недели' : 'Load by hour and weekday'}</h2>
+  <h2>{tr(lang, { en: 'Load by hour and weekday', ru: 'Нагрузка по часам и дням недели', zh: '按小时和星期查看负载', ja: '時間帯・曜日別の負荷' })}</h2>
   <LoadViews lang={lang} cells={snap.all} countries={snap.countries} tz="auto" />
   <p class="small muted" style="margin-top:12px">
-    {ru
-      ? <>Цвет показывает активность в этот час — сообщения, токены или сессии, смотря что выбрано, — относительно самого загруженного часа недели; обведённая ячейка — текущий час. Переключайтесь между видами: по часам суток, по дням недели или карта мира — откуда приходят отметки. Нужен конкретный пояс? <a href={L('/peak-hours/')}>Все часовые пояса</a>.</>
-      : <>Colour shows activity in each hour — messages, tokens or sessions, whichever is selected — relative to the busiest hour of the week; the outlined cell is the current hour. Switch views to see totals by hour of day, by weekday, or a world map of where check-ins come from. Need a specific zone? <a href={L('/peak-hours/')}>All time zones</a>.</>}
+    {tr(lang, {
+      en: <>Colour shows activity in each hour — messages, tokens or sessions, whichever is selected — relative to the busiest hour of the week; the outlined cell is the current hour. Switch views to see totals by hour of day, by weekday, or a world map of where check-ins come from. Need a specific zone? <a href={L('/peak-hours/')}>All time zones</a>.</>,
+      ru: <>Цвет показывает активность в этот час — сообщения, токены или сессии, смотря что выбрано, — относительно самого загруженного часа недели; обведённая ячейка — текущий час. Переключайтесь между видами: по часам суток, по дням недели или карта мира — откуда приходят отметки. Нужен конкретный пояс? <a href={L('/peak-hours/')}>Все часовые пояса</a>.</>,
+      zh: <>颜色表示每个小时的活跃度（按所选指标：消息、token 或会话），以一周中最忙的小时为基准；带边框的格子是当前小时。切换视图可以按一天中的小时、按星期查看合计，或在世界地图上看记录来自哪里。想看某个时区？<a href={L('/peak-hours/')}>所有时区</a>。</>,
+      ja: <>色は各時間の活動量（選択中のメッセージ・トークン・セッション）を、週で最も混む時間を基準に表しています。枠で囲まれたセルが現在の時間です。表示を切り替えると、時間帯別・曜日別の合計や、記録がどこから届いているかを示す世界地図を見られます。特定のタイムゾーンを見たい場合は<a href={L('/peak-hours/')}>タイムゾーン一覧</a>へ。</>,
+    })}
   </p>
 
-  <h2>{ru ? 'Что показывают данные' : 'What the data says'}</h2>
-  <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={ru ? 'по UTC' : 'in UTC'} />
+  <h2>{tr(lang, { en: 'What the data says', ru: 'Что показывают данные', zh: '数据告诉我们什么', ja: 'データからわかること' })}</h2>
+  <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={tr(lang, { en: 'in UTC', ru: 'по UTC', zh: 'UTC 时间', ja: 'UTC' })} />
 
-  <h2>{ru ? 'Как Hourglyph помогает экономить лимиты' : 'How Hourglyph helps you save limits'}</h2>
+  <h2>{tr(lang, { en: 'How Hourglyph helps you save limits', ru: 'Как Hourglyph помогает экономить лимиты', zh: 'Hourglyph 如何帮你节省额度', ja: 'Hourglyph で利用上限を節約できる理由' })}</h2>
   <div class="grid-3">
-    {ru ? (
-      <>
-        <div class="card">
-          <h3 style="margin-top:0">Лимиты привязаны ко времени</h3>
-          <p class="muted" style="margin:0">В марте 2026 года Anthropic сделала так, что в будничный пик 5-часовые лимиты расходовались быстрее. 6 мая 2026 года это отменили только для Claude Code на Pro и Max. Карта показывает, когда пик, чтобы вы не попадали на него без нужды. <a href={L('/claude-code-usage-limits/')}>Подробнее о лимитах</a>.</p>
-        </div>
-        <div class="card">
-          <h3 style="margin-top:0">Меньше повторных запусков</h3>
-          <p class="muted" style="margin:0">В часы пик чаще бывают медленные ответы и ошибки <code>overloaded</code>. Прерванную задачу агента приходится запускать заново — и лимит уходит на повтор, а не на работу.</p>
-        </div>
-        <div class="card">
-          <h3 style="margin-top:0">Окно лимита — в удобное время</h3>
-          <p class="muted" style="margin:0">5-часовое окно начинается с первого сообщения. Начните в спокойный час, и лимит сбросится до пика, а не посреди него. <a href={L('/best-time-to-use-claude-code/')}>Когда лучше работать</a>.</p>
-        </div>
-      </>
-    ) : (
-      <>
-        <div class="card">
-          <h3 style="margin-top:0">Limits depend on the clock</h3>
-          <p class="muted" style="margin:0">In March 2026 Anthropic made 5-hour limits drain faster during the weekday peak. On May 6, 2026 that was lifted only for Claude Code on Pro and Max. The map shows when the peak is, so you don’t land in it by accident. <a href={L('/claude-code-usage-limits/')}>More on limits</a>.</p>
-        </div>
-        <div class="card">
-          <h3 style="margin-top:0">Fewer wasted re-runs</h3>
-          <p class="muted" style="margin:0">Peak hours bring slower replies and <code>overloaded</code> errors. An interrupted agent task has to be started again, and your limit goes on the retry instead of the work.</p>
-        </div>
-        <div class="card">
-          <h3 style="margin-top:0">Time your limit window</h3>
-          <p class="muted" style="margin:0">The 5-hour window starts with your first message. Start in a quiet hour and it resets before the rush, not in the middle of it. <a href={L('/best-time-to-use-claude-code/')}>Best time to work</a>.</p>
-        </div>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0">Limits depend on the clock</h3>
+            <p class="muted" style="margin:0">In March 2026 Anthropic made 5-hour limits drain faster during the weekday peak. On May 6, 2026 that was lifted only for Claude Code on Pro and Max. The map shows when the peak is, so you don’t land in it by accident. <a href={L('/claude-code-usage-limits/')}>More on limits</a>.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Fewer wasted re-runs</h3>
+            <p class="muted" style="margin:0">Peak hours bring slower replies and <code>overloaded</code> errors. An interrupted agent task has to be started again, and your limit goes on the retry instead of the work.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Time your limit window</h3>
+            <p class="muted" style="margin:0">The 5-hour window starts with your first message. Start in a quiet hour and it resets before the rush, not in the middle of it. <a href={L('/best-time-to-use-claude-code/')}>Best time to work</a>.</p>
+          </div>
+        </>
+      ),
+      ru: (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0">Лимиты привязаны ко времени</h3>
+            <p class="muted" style="margin:0">В марте 2026 года Anthropic сделала так, что в будничный пик 5-часовые лимиты расходовались быстрее. 6 мая 2026 года это отменили только для Claude Code на Pro и Max. Карта показывает, когда пик, чтобы вы не попадали на него без нужды. <a href={L('/claude-code-usage-limits/')}>Подробнее о лимитах</a>.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Меньше повторных запусков</h3>
+            <p class="muted" style="margin:0">В часы пик чаще бывают медленные ответы и ошибки <code>overloaded</code>. Прерванную задачу агента приходится запускать заново — и лимит уходит на повтор, а не на работу.</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">Окно лимита — в удобное время</h3>
+            <p class="muted" style="margin:0">5-часовое окно начинается с первого сообщения. Начните в спокойный час, и лимит сбросится до пика, а не посреди него. <a href={L('/best-time-to-use-claude-code/')}>Когда лучше работать</a>.</p>
+          </div>
+        </>
+      ),
+      zh: (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0">额度与时间段有关</h3>
+            <p class="muted" style="margin:0">2026 年 3 月，Anthropic 让工作日高峰期间的 5 小时额度消耗得更快。2026 年 5 月 6 日起，这一限制仅对 Pro 和 Max 套餐的 Claude Code 取消。地图会标出高峰时段，避免你无意中撞上。<a href={L('/claude-code-usage-limits/')}>了解用量限制</a>。</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">减少无谓的重跑</h3>
+            <p class="muted" style="margin:0">高峰时段回复更慢，也更容易出现 <code>overloaded</code> 错误。被中断的智能体任务只能重新开始，额度花在了重试上，而不是真正的工作上。</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">规划好额度窗口</h3>
+            <p class="muted" style="margin:0">5 小时窗口从你发出第一条消息时开始计算。在空闲时段开工，额度会在高峰到来前重置，而不是在高峰中途。<a href={L('/best-time-to-use-claude-code/')}>最佳工作时间</a>。</p>
+          </div>
+        </>
+      ),
+      ja: (
+        <>
+          <div class="card">
+            <h3 style="margin-top:0">上限は時間帯に左右される</h3>
+            <p class="muted" style="margin:0">2026年3月、Anthropic は平日のピーク中に5時間上限の消費が早まるようにしました。2026年5月6日、この制限は Pro と Max の Claude Code に限って撤廃されました。マップでピークの時間がわかるので、うっかり重なるのを避けられます。<a href={L('/claude-code-usage-limits/')}>利用上限について詳しく</a>。</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">無駄な再実行を減らす</h3>
+            <p class="muted" style="margin:0">ピーク時間は応答が遅くなり、<code>overloaded</code> エラーも増えます。中断したエージェントのタスクはやり直しになり、上限が作業ではなく再実行に消えてしまいます。</p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">上限のウィンドウを計画する</h3>
+            <p class="muted" style="margin:0">5時間ウィンドウは最初のメッセージから始まります。空いている時間に始めれば、ピークの最中ではなくピーク前にリセットされます。<a href={L('/best-time-to-use-claude-code/')}>おすすめの作業時間</a>。</p>
+          </div>
+        </>
+      ),
+    })}
   </div>
 
-  <p style="margin-top:16px"><a class="btn btn-ghost" href={L('/save-claude-code-limits/')}>{ru ? 'Все способы экономить лимиты →' : 'All ways to save your limits →'}</a></p>
+  <p style="margin-top:16px"><a class="btn btn-ghost" href={L('/save-claude-code-limits/')}>{tr(lang, { en: 'All ways to save your limits →', ru: 'Все способы экономить лимиты →', zh: '查看所有节省额度的方法 →', ja: '上限を節約する方法をすべて見る →' })}</a></p>
 
-  <h2>{ru ? 'Как это работает' : 'How it works'}</h2>
+  <h2>{tr(lang, { en: 'How it works', ru: 'Как это работает', zh: '工作原理', ja: '仕組み' })}</h2>
   <div class="grid-2">
     <div class="card">
-      <h3 style="margin-top:0">{ru ? '1. Hooks отмечают сессии, сообщения и токены' : '1. Hooks record sessions, messages and tokens'}</h3>
+      <h3 style="margin-top:0">{tr(lang, { en: '1. Hooks record sessions, messages and tokens', ru: '1. Hooks отмечают сессии, сообщения и токены', zh: '1. Hooks 记录会话、消息和 token', ja: '1. Hooks がセッション・メッセージ・トークンを記録' })}</h3>
       <p class="muted" style="margin:0">
-        {ru
-          ? <>Три hook’а в <code>~/.claude/settings.json</code> анонимно отмечают запуск сессии, каждое отправленное сообщение и число токенов за ход — так видна нагрузка и внутри долгих сессий. Час и день недели сервер определяет сам. <a href={L('/setup/')}>Подключить</a>.</>
-          : <>Three hooks in <code>~/.claude/settings.json</code> anonymously record session starts, every message you send and the tokens used per turn — so load inside long sessions shows up too. The server stamps the hour and weekday itself. <a href={L('/setup/')}>Set it up</a>.</>}
+        {tr(lang, {
+          en: <>Three hooks in <code>~/.claude/settings.json</code> anonymously record session starts, every message you send and the tokens used per turn — so load inside long sessions shows up too. The server stamps the hour and weekday itself. <a href={L('/setup/')}>Set it up</a>.</>,
+          ru: <>Три hook’а в <code>~/.claude/settings.json</code> анонимно отмечают запуск сессии, каждое отправленное сообщение и число токенов за ход — так видна нагрузка и внутри долгих сессий. Час и день недели сервер определяет сам. <a href={L('/setup/')}>Подключить</a>.</>,
+          zh: <><code>~/.claude/settings.json</code> 中的三个 hook 会匿名记录会话启动、你发送的每条消息以及每轮使用的 token 数——长会话内部的负载也能体现出来。小时和星期由服务器自行记录。<a href={L('/setup/')}>立即设置</a>。</>,
+          ja: <><code>~/.claude/settings.json</code> に追加する3つの hook が、セッションの開始、送信した各メッセージ、ターンごとのトークン数を匿名で記録します。長いセッション中の負荷も見えるようになります。時間と曜日はサーバー側で付与します。<a href={L('/setup/')}>設定する</a>。</>,
+        })}
       </p>
     </div>
     <div class="card">
-      <h3 style="margin-top:0">{ru ? '2. Карта собирается из всех отметок' : '2. The map aggregates everyone'}</h3>
+      <h3 style="margin-top:0">{tr(lang, { en: '2. The map aggregates everyone', ru: '2. Карта собирается из всех отметок', zh: '2. 地图汇总所有人的数据', ja: '2. 全員のデータをマップに集計' })}</h3>
       <p class="muted" style="margin:0">
-        {ru
-          ? <>Хранятся только тип события, день недели, час UTC, страна (её определяет сеть по соединению) и числа токенов — ни текста, ни кода, ни IP. Агрегаты открыты: <a href={L('/data/')}>скачать JSON/CSV</a>.</>
-          : <>Only the event type, weekday, UTC hour, country (detected by the network) and token counts are stored — no text, code or IPs. The aggregates are open: <a href={L('/data/')}>download JSON/CSV</a>.</>}
+        {tr(lang, {
+          en: <>Only the event type, weekday, UTC hour, country (detected by the network) and token counts are stored — no text, code or IPs. The aggregates are open: <a href={L('/data/')}>download JSON/CSV</a>.</>,
+          ru: <>Хранятся только тип события, день недели, час UTC, страна (её определяет сеть по соединению) и числа токенов — ни текста, ни кода, ни IP. Агрегаты открыты: <a href={L('/data/')}>скачать JSON/CSV</a>.</>,
+          zh: <>只存储事件类型、星期、UTC 小时、国家（由网络根据连接判断）和 token 数——不存文本、代码或 IP。汇总数据完全公开：<a href={L('/data/')}>下载 JSON/CSV</a>。</>,
+          ja: <>保存するのはイベントの種類、曜日、UTC の時間、国（接続元からネットワークが判定）、トークン数だけです。テキスト、コード、IP は保存しません。集計データは公開しています：<a href={L('/data/')}>JSON/CSV をダウンロード</a>。</>,
+        })}
       </p>
     </div>
   </div>
 
-  <h2>{ru ? 'Пиковые часы в вашем часовом поясе' : 'Peak hours in your time zone'}</h2>
+  <h2>{tr(lang, { en: 'Peak hours in your time zone', ru: 'Пиковые часы в вашем часовом поясе', zh: '你所在时区的高峰时段', ja: 'あなたのタイムゾーンのピーク時間' })}</h2>
   <ZoneList lang={lang} />
 
-  <h2>{ru ? 'Полезное' : 'Guides'}</h2>
+  <h2>{tr(lang, { en: 'Guides', ru: 'Полезное', zh: '指南', ja: 'ガイド' })}</h2>
   <ul class="prose">
-    <li><a href={L('/save-claude-code-limits/')}>{ru ? 'Как экономить лимиты Claude Code' : 'How to save Claude Code limits'}</a></li>
-    <li><a href={L('/best-time-to-use-claude-code/')}>{ru ? 'Лучшее время для работы с Claude Code' : 'The best time to use Claude Code'}</a></li>
-    <li><a href={L('/is-claude-slow-right-now/')}>{ru ? 'Claude тормозит прямо сейчас — что делать' : 'Is Claude slow right now? What to do'}</a></li>
-    <li><a href={L('/claude-code-usage-limits/')}>{ru ? 'Лимиты Claude Code и пиковые часы' : 'Claude Code usage limits and peak hours'}</a></li>
-    <li><a href={L('/faq/')}>{ru ? 'Вопросы и ответы' : 'FAQ'}</a></li>
+    <li><a href={L('/save-claude-code-limits/')}>{tr(lang, { en: 'How to save Claude Code limits', ru: 'Как экономить лимиты Claude Code', zh: '如何节省 Claude Code 额度', ja: 'Claude Code の利用上限を節約する方法' })}</a></li>
+    <li><a href={L('/best-time-to-use-claude-code/')}>{tr(lang, { en: 'The best time to use Claude Code', ru: 'Лучшее время для работы с Claude Code', zh: 'Claude Code 最佳使用时间', ja: 'Claude Code を使うおすすめの時間' })}</a></li>
+    <li><a href={L('/is-claude-slow-right-now/')}>{tr(lang, { en: 'Is Claude slow right now? What to do', ru: 'Claude тормозит прямо сейчас — что делать', zh: 'Claude 现在很慢？该怎么办', ja: 'Claude が今遅い？対処法' })}</a></li>
+    <li><a href={L('/claude-code-usage-limits/')}>{tr(lang, { en: 'Claude Code usage limits and peak hours', ru: 'Лимиты Claude Code и пиковые часы', zh: 'Claude Code 用量限制与高峰时段', ja: 'Claude Code の利用上限とピーク時間' })}</a></li>
+    <li><a href={L('/faq/')}>{tr(lang, { en: 'FAQ', ru: 'Вопросы и ответы', zh: '常见问题', ja: 'よくある質問' })}</a></li>
   </ul>
   <I18nData lang={lang} />
 </Base>

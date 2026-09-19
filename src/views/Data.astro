@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import NowStatus from '../components/NowStatus.astro';
 import I18nData from '../components/I18nData.astro';
-import { type Lang } from '../i18n';
+import { tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { datasetJsonLd } from '../lib/jsonld';
@@ -10,59 +10,83 @@ import { SITE, SUPABASE_URL, SUPABASE_KEY } from '../config';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('data');
 const snap = await getSnapshot();
 const curl = `curl '${SUPABASE_URL}/rest/v1/heatmap?select=*' \\\n  -H 'apikey: ${SUPABASE_KEY}'`;
 const sample = JSON.stringify({ generated_at: snap.builtAt, license: 'CC-BY-4.0', weekday: '0=Sunday … 6=Saturday, UTC', stats: { total: snap.stats.total }, all: [{ utc_weekday: 2, utc_hour: 14, total: 0 }], last_30d: ['…'], countries: [{ country: 'DE', total: 0 }] }, null, 2);
 ---
-<Base lang={lang} page={meta} jsonLd={[datasetJsonLd(lang, snap.stats)]} crumbs={[{ name: ru ? 'Данные' : 'Data', path: meta.path }]}>
-  <h1>{ru ? 'Открытые данные' : 'Open data'}</h1>
+<Base lang={lang} page={meta} jsonLd={[datasetJsonLd(lang, snap.stats)]} crumbs={[{ name: tr(lang, { en: 'Data', ru: 'Данные', zh: '数据', ja: 'データ' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'Open data', ru: 'Открытые данные', zh: '开放数据', ja: 'オープンデータ' })}</h1>
   <p class="lead">
-    {ru
-      ? 'Все агрегаты Hourglyph открыты: сессии, сообщения и токены Claude Code, сгруппированные по дню недели, часу UTC и стране. Используйте в исследованиях, дашбордах и статьях — со ссылкой на источник.'
-      : 'All Hourglyph aggregates are open: Claude Code sessions, messages and tokens grouped by UTC weekday, hour and country. Use them in research, dashboards and articles — with a link back.'}
+    {tr(lang, {
+      en: 'All Hourglyph aggregates are open: Claude Code sessions, messages and tokens grouped by UTC weekday, hour and country. Use them in research, dashboards and articles — with a link back.',
+      ru: 'Все агрегаты Hourglyph открыты: сессии, сообщения и токены Claude Code, сгруппированные по дню недели, часу UTC и стране. Используйте в исследованиях, дашбордах и статьях — со ссылкой на источник.',
+      zh: 'Hourglyph 的全部聚合数据都是开放的：按 UTC 星期、小时和国家分组的 Claude Code 会话、消息和 token。欢迎用于研究、仪表盘和文章——请注明来源并附上链接。',
+      ja: 'Hourglyph の集計データはすべて公開しています。UTC の曜日・時間・国ごとにまとめた Claude Code のセッション、メッセージ、トークン数です。研究、ダッシュボード、記事などにご自由にお使いください（出典リンクをお願いします）。',
+    })}
   </p>
   <div style="margin:28px 0"><NowStatus lang={lang} stats={snap.stats} showButton={false} /></div>
 
-  <h2>{ru ? 'Скачать' : 'Download'}</h2>
+  <h2>{tr(lang, { en: 'Download', ru: 'Скачать', zh: '下载', ja: 'ダウンロード' })}</h2>
   <p style="display:flex;gap:10px;flex-wrap:wrap">
     <a class="btn btn-primary" href="/data/heatmap.json" download>heatmap.json</a>
     <a class="btn btn-ghost" href="/data/heatmap.csv" download>heatmap.csv</a>
     <a class="btn btn-ghost" href="/data/countries.csv" download>countries.csv</a>
   </p>
-  <p class="small muted">{ru ? 'Файлы пересобираются вместе с сайтом каждые 6 часов.' : 'Files are rebuilt with the site every 6 hours.'}</p>
+  <p class="small muted">{tr(lang, { en: 'Files are rebuilt with the site every 6 hours.', ru: 'Файлы пересобираются вместе с сайтом каждые 6 часов.', zh: '文件随网站每 6 小时重新生成一次。', ja: 'ファイルはサイトと一緒に6時間ごとに再生成されます。' })}</p>
 
-  <h2>{ru ? 'Формат' : 'Schema'}</h2>
+  <h2>{tr(lang, { en: 'Schema', ru: 'Формат', zh: '数据格式', ja: 'データ形式' })}</h2>
   <ul class="prose">
-    <li><code>utc_weekday</code> — {ru ? 'день недели по UTC, 0 = воскресенье … 6 = суббота' : 'UTC weekday, 0 = Sunday … 6 = Saturday'}</li>
-    <li><code>utc_hour</code> — {ru ? 'час по UTC, 0–23' : 'UTC hour, 0–23'}</li>
-    <li><code>total</code> / <code>sessions_*</code> — {ru ? 'запуски сессий' : 'session starts'}; <code>messages</code> — {ru ? 'отправленные сообщения' : 'messages sent'}; <code>tokens</code> — {ru ? 'все обработанные токены (вход, выход, запись и чтение кэша)' : 'all tokens processed (input, output, cache write and read)'}; {ru ? 'суффиксы' : 'suffixes'} <code>_all</code> / <code>_30d</code> — {ru ? 'за всё время / за 30 дней' : 'all time / last 30 days'}</li>
-    <li><code>incidents</code> / <code>incident_hours_*</code> — {ru ? 'часы с открытым инцидентом Anthropic по Claude, API или Claude Code (status.claude.com, синхронизация раз в час)' : 'hours with an open Anthropic incident for Claude, the API or Claude Code (status.claude.com, synced hourly)'}</li>
-    <li><code>country</code> — {ru ? 'код страны ISO 3166-1 alpha-2 (определяется сетью по соединению; IP не хранится)' : 'ISO 3166-1 alpha-2 country code (derived by the network from the connection; no IPs stored)'}</li>
+    <li><code>utc_weekday</code> — {tr(lang, { en: 'UTC weekday, 0 = Sunday … 6 = Saturday', ru: 'день недели по UTC, 0 = воскресенье … 6 = суббота', zh: 'UTC 星期，0 = 星期日 … 6 = 星期六', ja: 'UTC の曜日、0 = 日曜日 … 6 = 土曜日' })}</li>
+    <li><code>utc_hour</code> — {tr(lang, { en: 'UTC hour, 0–23', ru: 'час по UTC, 0–23', zh: 'UTC 小时，0–23', ja: 'UTC の時間、0〜23' })}</li>
+    <li><code>total</code> / <code>sessions_*</code> — {tr(lang, { en: 'session starts', ru: 'запуски сессий', zh: '会话启动次数', ja: 'セッション開始数' })}; <code>messages</code> — {tr(lang, { en: 'messages sent', ru: 'отправленные сообщения', zh: '发送的消息数', ja: '送信されたメッセージ数' })}; <code>tokens</code> — {tr(lang, { en: 'all tokens processed (input, output, cache write and read)', ru: 'все обработанные токены (вход, выход, запись и чтение кэша)', zh: '处理的全部 token（输入、输出、缓存写入和读取）', ja: '処理された全トークン（入力・出力・キャッシュの書き込みと読み取り）' })}; {tr(lang, { en: 'suffixes', ru: 'суффиксы', zh: '后缀', ja: '接尾辞' })} <code>_all</code> / <code>_30d</code> — {tr(lang, { en: 'all time / last 30 days', ru: 'за всё время / за 30 дней', zh: '全部时间 / 最近 30 天', ja: '全期間 / 過去30日' })}</li>
+    <li><code>incidents</code> / <code>incident_hours_*</code> — {tr(lang, { en: 'hours with an open Anthropic incident for Claude, the API or Claude Code (status.claude.com, synced hourly)', ru: 'часы с открытым инцидентом Anthropic по Claude, API или Claude Code (status.claude.com, синхронизация раз в час)', zh: 'Anthropic 对 Claude、API 或 Claude Code 存在未关闭事件的小时数（status.claude.com，每小时同步）', ja: 'Claude・API・Claude Code について Anthropic の障害が発生中だった時間（status.claude.com、1時間ごとに同期）' })}</li>
+    <li><code>country</code> — {tr(lang, { en: 'ISO 3166-1 alpha-2 country code (derived by the network from the connection; no IPs stored)', ru: 'код страны ISO 3166-1 alpha-2 (определяется сетью по соединению; IP не хранится)', zh: 'ISO 3166-1 alpha-2 国家代码（由网络根据连接判断；不存储 IP）', ja: 'ISO 3166-1 alpha-2 の国コード（接続元からネットワークが判定。IP は保存しません）' })}</li>
   </ul>
   <pre><code>{sample}</code></pre>
 
-  <h2>{ru ? 'Живой API' : 'Live API'}</h2>
-  <p>{ru ? 'Представления heatmap, heatmap_30d, countries, countries_30d, claude_incidents и stats доступны напрямую через REST (только чтение):' : 'The heatmap, heatmap_30d, countries, countries_30d, claude_incidents and stats views are readable directly over REST:'}</p>
+  <h2>{tr(lang, { en: 'Live API', ru: 'Живой API', zh: '实时 API', ja: 'ライブ API' })}</h2>
+  <p>{tr(lang, {
+    en: 'The heatmap, heatmap_30d, countries, countries_30d, claude_incidents and stats views are readable directly over REST:',
+    ru: 'Представления heatmap, heatmap_30d, countries, countries_30d, claude_incidents и stats доступны напрямую через REST (только чтение):',
+    zh: 'heatmap、heatmap_30d、countries、countries_30d、claude_incidents 和 stats 视图可以直接通过 REST 读取（只读）：',
+    ja: 'heatmap・heatmap_30d・countries・countries_30d・claude_incidents・stats の各ビューは REST で直接読み取れます（読み取り専用）：',
+  })}</p>
   <pre><code>{curl}</code></pre>
 
-  <h2>{ru ? 'Ограничения данных' : 'Caveats'}</h2>
+  <h2>{tr(lang, { en: 'Caveats', ru: 'Ограничения данных', zh: '数据局限', ja: 'データの注意点' })}</h2>
   <ul class="prose">
-    {ru ? (
-      <>
-        <li>Это добровольная выборка: данные отражают тех, кто подключил hook, а не всех пользователей Claude Code.</li>
-        <li>Сессия отмечается при запуске, сообщение — при отправке, токены — по завершении хода. Токены подагентов не учитываются.</li>
-        <li>Из одной сети (IPv6 — по подсети /64): до 8 запусков сессий и 30 сообщений или ходов в минуту; кнопка на сайте — раз в 10 минут.</li>
-      </>
-    ) : (
-      <>
-        <li>This is a volunteer sample: it reflects people who installed the hook, not every Claude Code user.</li>
-        <li>A session is recorded when it starts, a message when it’s sent, tokens when a turn finishes. Subagent tokens aren’t counted.</li>
-        <li>Per network (IPv6 per /64): up to 8 session starts and 30 messages or turns a minute; the site’s button once per 10 minutes.</li>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <li>This is a volunteer sample: it reflects people who installed the hook, not every Claude Code user.</li>
+          <li>A session is recorded when it starts, a message when it’s sent, tokens when a turn finishes. Subagent tokens aren’t counted.</li>
+          <li>Per network (IPv6 per /64): up to 8 session starts and 30 messages or turns a minute; the site’s button once per 10 minutes.</li>
+        </>
+      ),
+      ru: (
+        <>
+          <li>Это добровольная выборка: данные отражают тех, кто подключил hook, а не всех пользователей Claude Code.</li>
+          <li>Сессия отмечается при запуске, сообщение — при отправке, токены — по завершении хода. Токены подагентов не учитываются.</li>
+          <li>Из одной сети (IPv6 — по подсети /64): до 8 запусков сессий и 30 сообщений или ходов в минуту; кнопка на сайте — раз в 10 минут.</li>
+        </>
+      ),
+      zh: (
+        <>
+          <li>这是志愿者样本：只反映安装了 hook 的用户，而不是所有 Claude Code 用户。</li>
+          <li>会话在启动时记录，消息在发送时记录，token 在一轮结束时记录。子智能体的 token 不计入。</li>
+          <li>每个网络（IPv6 按 /64 子网）：每分钟最多 8 次会话启动和 30 条消息或回合；网站按钮每 10 分钟一次。</li>
+        </>
+      ),
+      ja: (
+        <>
+          <li>これは有志によるサンプルです。hook を導入した人の利用を反映しており、Claude Code の全ユーザーではありません。</li>
+          <li>セッションは開始時、メッセージは送信時、トークンはターン終了時に記録されます。サブエージェントのトークンは含まれません。</li>
+          <li>1つのネットワークあたり（IPv6 は /64 単位）：1分間にセッション開始8回、メッセージまたはターン30件まで。サイトのボタンは10分に1回です。</li>
+        </>
+      ),
+    })}
   </ul>
-  <p>{ru ? 'Лицензия' : 'License'}: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a> · {ru ? 'Цитирование' : 'Cite as'}: <code>Hourglyph, {SITE}</code></p>
+  <p>{tr(lang, { en: 'License', ru: 'Лицензия', zh: '许可', ja: 'ライセンス' })}: <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC BY 4.0</a> · {tr(lang, { en: 'Cite as', ru: 'Цитирование', zh: '引用格式', ja: '引用表記' })}: <code>Hourglyph, {SITE}</code></p>
   <I18nData lang={lang} />
 </Base>

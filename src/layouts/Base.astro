@@ -32,7 +32,7 @@ const ld: object[] = [
     url,
     name: page.title[lang],
     description: page.description[lang],
-    inLanguage: lang,
+    inLanguage: t.htmlLang,
     dateModified: new Date().toISOString(),
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE + '/' },
   },
@@ -49,7 +49,7 @@ if (crumbs.length) {
 const trail = crumbs.length ? [{ name: t.breadcrumbsHome, path: '/' }, ...crumbs] : [];
 ---
 <!doctype html>
-<html lang={lang}>
+<html lang={t.htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import NowStatus from '../components/NowStatus.astro';
 import I18nData from '../components/I18nData.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { articleJsonLd } from '../lib/jsonld';
@@ -10,80 +10,147 @@ import { fmtHour, officialPeakIn } from '../lib/heatmap';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('save');
 const snap = await getSnapshot();
 const L = (p: string) => localize(lang, p);
 const ANN = 'https://www.anthropic.com/news/higher-limits-spacex';
-const msk = officialPeakIn('Europe/Moscow');
-const mskPeak = `${fmtHour(msk.start.h, msk.start.m, 'ru')}–${fmtHour(msk.end.h, msk.end.m, 'ru')}`;
+/** Anthropic's weekday peak (5–11 AM Pacific) in a local zone, 24-hour clock. */
+const peakIn = (tz: string) => {
+  const o = officialPeakIn(tz);
+  return `${fmtHour(o.start.h, o.start.m, 'ru')}–${fmtHour(o.end.h, o.end.m, 'ru')}`;
+};
+const mskPeak = peakIn('Europe/Moscow');
+const bjPeak = peakIn('Asia/Shanghai');
+const jpPeak = peakIn('Asia/Tokyo');
 ---
-<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Экономия лимитов' : 'Save limits', path: meta.path }]}>
-  <h1>{ru ? 'Как экономить лимиты Claude Code' : 'How to save your Claude Code limits'}</h1>
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: tr(lang, { en: 'Save limits', ru: 'Экономия лимитов', zh: '节省额度', ja: '上限を節約' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'How to save your Claude Code limits', ru: 'Как экономить лимиты Claude Code', zh: '如何节省 Claude Code 额度', ja: 'Claude Code の利用上限を節約する方法' })}</h1>
   <p class="lead">
-    {ru
-      ? 'Главный приём — запускать работу в ненагруженные часы. Hourglyph показывает, когда Claude Code загружен меньше всего в вашем часовом поясе, а ниже — остальные способы растянуть лимит.'
-      : 'The main trick is to start work in off-peak hours. Hourglyph shows when Claude Code is least busy in your time zone; below are the other ways to stretch your limit.'}
+    {tr(lang, {
+      en: 'The main trick is to start work in off-peak hours. Hourglyph shows when Claude Code is least busy in your time zone; below are the other ways to stretch your limit.',
+      ru: 'Главный приём — запускать работу в ненагруженные часы. Hourglyph показывает, когда Claude Code загружен меньше всего в вашем часовом поясе, а ниже — остальные способы растянуть лимит.',
+      zh: '最有效的办法是在非高峰时段开工。Hourglyph 会显示你所在时区 Claude Code 最空闲的时间；下面还有其他让额度用得更久的方法。',
+      ja: '一番のコツは、空いている時間に作業を始めることです。Hourglyph はあなたのタイムゾーンで Claude Code が最も空いている時間を示します。以下に、利用上限を長持ちさせるほかの方法もまとめました。',
+    })}
   </p>
 
   <div style="margin:28px 0"><NowStatus lang={lang} stats={snap.stats} showButton={false} /></div>
 
   <div class="prose">
-    {ru ? (
-      <>
-        <h2>1. Запускайте работу в ненагруженные часы</h2>
-        <p>Будничный пик нагрузки — с 5:00 до 11:00 по тихоокеанскому времени, это <b>{mskPeak} по Москве</b>. В эти часы чаще бывают медленные ответы и ошибки <code>overloaded</code>, а прерванную задачу агента приходится запускать заново — лимит уходит на повтор, а не на работу.</p>
-        <p>Время тоже влияло на сам расход лимита: в марте 2026 года Anthropic сделала так, что в будничный пик 5-часовые лимиты расходовались быстрее. 6 мая 2026 года это <a href={ANN} rel="nofollow">отменили для Claude Code на Pro и Max</a>. Узнать, когда в вашем поясе спокойно, можно на <a href={L('/')}>живой карте</a> и на <a href={L('/peak-hours/')}>страницах часовых поясов</a>.</p>
+    {tr(lang, {
+      en: (
+        <>
+          <h2>1. Start work in off-peak hours</h2>
+          <p>The weekday peak is 5–11 AM Pacific (8 AM–2 PM Eastern). That’s when slow replies and <code>overloaded</code> errors are most common, and an interrupted agent task has to be run again — so your limit pays for the retry instead of the work.</p>
+          <p>The clock has also affected the limit itself: in March 2026 Anthropic made 5-hour limits drain faster during the weekday peak. On May 6, 2026 that was <a href={ANN} rel="nofollow">lifted for Claude Code on Pro and Max</a>. See when it’s quiet in your zone on the <a href={L('/')}>live heatmap</a> and the <a href={L('/peak-hours/')}>time-zone pages</a>.</p>
 
-        <h2>2. Планируйте 5-часовое окно</h2>
-        <p>Окно лимита начинается с первого сообщения, а не по расписанию. Начните работу в спокойный час, и лимит обновится до пика, а не посреди него. Одно короткое сообщение утром запускает отсчёт заранее.</p>
+          <h2>2. Time your 5-hour window</h2>
+          <p>The limit window starts with your first message, not on a fixed schedule. Start in a quiet hour and it resets before the rush rather than in the middle of it. One short message in the morning starts the clock early.</p>
 
-        <h2>3. Не тратьте лимит на повторы</h2>
-        <ul>
-          <li>Если ответ идёт медленно, не отправляйте запрос заново: это только удлиняет очередь.</li>
-          <li>Ошибка <code>529 overloaded</code> — временная нехватка мощностей; подождите минуту. Сообщение о лимите (<code>429</code>) повтором не лечится.</li>
-          <li>Большие задачи разбивайте на шаги с проверкой: откатить неудачный огромный запуск дороже, чем поправить маленький.</li>
-        </ul>
+          <h2>3. Don’t spend your limit on retries</h2>
+          <ul>
+            <li>If a reply is slow, don’t resend the prompt — it only makes the queue longer.</li>
+            <li><code>529 overloaded</code> means capacity is briefly short; wait a minute. A usage-limit message (<code>429</code>) won’t go away by retrying.</li>
+            <li>Split big tasks into checked steps: rolling back one huge failed run costs more than fixing a small one.</li>
+          </ul>
 
-        <h2>4. Держите контекст компактным</h2>
-        <p>Длинный контекст расходует лимит быстрее. Используйте <code>/clear</code> между несвязанными задачами и <code>/compact</code> в длинных сессиях.</p>
+          <h2>4. Keep context lean</h2>
+          <p>Long context uses more of your limit. Use <code>/clear</code> between unrelated tasks and <code>/compact</code> in long sessions.</p>
 
-        <h2>5. Подбирайте модель под задачу</h2>
-        <p>Команда <code>/model</code> переключает модель. Для рутинных правок и простых вопросов не нужна самая мощная модель — оставьте её для сложных задач.</p>
+          <h2>5. Match the model to the task</h2>
+          <p><code>/model</code> switches models. Routine edits and simple questions rarely need the largest model — save it for the hard problems.</p>
 
-        <h2>6. Тяжёлое — ночью и без вас</h2>
-        <p>Задачи, которые не требуют вашего участия, можно запускать через <code>claude -p "…"</code> из скрипта или по расписанию (cron, CI) на спокойные часы.</p>
+          <h2>6. Heavy work at night, without you</h2>
+          <p>Jobs that don’t need you can run headless with <code>claude -p "…"</code> from a script or on a schedule (cron, CI) during quiet hours.</p>
 
-        <p class="notice" style="margin-top:32px">Hourglyph — независимый проект. Он не меняет ваши лимиты, а помогает выбрать время, когда работа идёт ровнее. Официальные значения лимитов — в <a href="https://support.claude.com" rel="nofollow">справке Claude</a>; подробности — на странице <a href={L('/claude-code-usage-limits/')}>о лимитах Claude Code</a>.</p>
-      </>
-    ) : (
-      <>
-        <h2>1. Start work in off-peak hours</h2>
-        <p>The weekday peak is 5–11 AM Pacific (8 AM–2 PM Eastern). That’s when slow replies and <code>overloaded</code> errors are most common, and an interrupted agent task has to be run again — so your limit pays for the retry instead of the work.</p>
-        <p>The clock has also affected the limit itself: in March 2026 Anthropic made 5-hour limits drain faster during the weekday peak. On May 6, 2026 that was <a href={ANN} rel="nofollow">lifted for Claude Code on Pro and Max</a>. See when it’s quiet in your zone on the <a href={L('/')}>live heatmap</a> and the <a href={L('/peak-hours/')}>time-zone pages</a>.</p>
+          <p class="notice" style="margin-top:32px">Hourglyph is independent. It doesn’t change your limits — it helps you pick the hours when work runs smoother. Official limit values are in the <a href="https://support.claude.com" rel="nofollow">Claude Help Center</a>; more detail on <a href={L('/claude-code-usage-limits/')}>Claude Code usage limits</a>.</p>
+        </>
+      ),
+      ru: (
+        <>
+          <h2>1. Запускайте работу в ненагруженные часы</h2>
+          <p>Будничный пик нагрузки — с 5:00 до 11:00 по тихоокеанскому времени, это <b>{mskPeak} по Москве</b>. В эти часы чаще бывают медленные ответы и ошибки <code>overloaded</code>, а прерванную задачу агента приходится запускать заново — лимит уходит на повтор, а не на работу.</p>
+          <p>Время тоже влияло на сам расход лимита: в марте 2026 года Anthropic сделала так, что в будничный пик 5-часовые лимиты расходовались быстрее. 6 мая 2026 года это <a href={ANN} rel="nofollow">отменили для Claude Code на Pro и Max</a>. Узнать, когда в вашем поясе спокойно, можно на <a href={L('/')}>живой карте</a> и на <a href={L('/peak-hours/')}>страницах часовых поясов</a>.</p>
 
-        <h2>2. Time your 5-hour window</h2>
-        <p>The limit window starts with your first message, not on a fixed schedule. Start in a quiet hour and it resets before the rush rather than in the middle of it. One short message in the morning starts the clock early.</p>
+          <h2>2. Планируйте 5-часовое окно</h2>
+          <p>Окно лимита начинается с первого сообщения, а не по расписанию. Начните работу в спокойный час, и лимит обновится до пика, а не посреди него. Одно короткое сообщение утром запускает отсчёт заранее.</p>
 
-        <h2>3. Don’t spend your limit on retries</h2>
-        <ul>
-          <li>If a reply is slow, don’t resend the prompt — it only makes the queue longer.</li>
-          <li><code>529 overloaded</code> means capacity is briefly short; wait a minute. A usage-limit message (<code>429</code>) won’t go away by retrying.</li>
-          <li>Split big tasks into checked steps: rolling back one huge failed run costs more than fixing a small one.</li>
-        </ul>
+          <h2>3. Не тратьте лимит на повторы</h2>
+          <ul>
+            <li>Если ответ идёт медленно, не отправляйте запрос заново: это только удлиняет очередь.</li>
+            <li>Ошибка <code>529 overloaded</code> — временная нехватка мощностей; подождите минуту. Сообщение о лимите (<code>429</code>) повтором не лечится.</li>
+            <li>Большие задачи разбивайте на шаги с проверкой: откатить неудачный огромный запуск дороже, чем поправить маленький.</li>
+          </ul>
 
-        <h2>4. Keep context lean</h2>
-        <p>Long context uses more of your limit. Use <code>/clear</code> between unrelated tasks and <code>/compact</code> in long sessions.</p>
+          <h2>4. Держите контекст компактным</h2>
+          <p>Длинный контекст расходует лимит быстрее. Используйте <code>/clear</code> между несвязанными задачами и <code>/compact</code> в длинных сессиях.</p>
 
-        <h2>5. Match the model to the task</h2>
-        <p><code>/model</code> switches models. Routine edits and simple questions rarely need the largest model — save it for the hard problems.</p>
+          <h2>5. Подбирайте модель под задачу</h2>
+          <p>Команда <code>/model</code> переключает модель. Для рутинных правок и простых вопросов не нужна самая мощная модель — оставьте её для сложных задач.</p>
 
-        <h2>6. Heavy work at night, without you</h2>
-        <p>Jobs that don’t need you can run headless with <code>claude -p "…"</code> from a script or on a schedule (cron, CI) during quiet hours.</p>
+          <h2>6. Тяжёлое — ночью и без вас</h2>
+          <p>Задачи, которые не требуют вашего участия, можно запускать через <code>claude -p "…"</code> из скрипта или по расписанию (cron, CI) на спокойные часы.</p>
 
-        <p class="notice" style="margin-top:32px">Hourglyph is independent. It doesn’t change your limits — it helps you pick the hours when work runs smoother. Official limit values are in the <a href="https://support.claude.com" rel="nofollow">Claude Help Center</a>; more detail on <a href={L('/claude-code-usage-limits/')}>Claude Code usage limits</a>.</p>
-      </>
-    )}
+          <p class="notice" style="margin-top:32px">Hourglyph — независимый проект. Он не меняет ваши лимиты, а помогает выбрать время, когда работа идёт ровнее. Официальные значения лимитов — в <a href="https://support.claude.com" rel="nofollow">справке Claude</a>; подробности — на странице <a href={L('/claude-code-usage-limits/')}>о лимитах Claude Code</a>.</p>
+        </>
+      ),
+      zh: (
+        <>
+          <h2>1. 在非高峰时段开工</h2>
+          <p>工作日高峰是太平洋时间 5:00–11:00，也就是<b>北京时间 {bjPeak}</b>（跨到次日凌晨）。这段时间最容易出现回复变慢和 <code>overloaded</code> 错误，被中断的智能体任务只能重跑——额度花在了重试上，而不是真正的工作上。</p>
+          <p>时间段也曾直接影响额度消耗：2026 年 3 月，Anthropic 让工作日高峰期间的 5 小时额度消耗得更快。2026 年 5 月 6 日，Pro 和 Max 套餐的 Claude Code <a href={ANN} rel="nofollow">取消了这一限制</a>。你所在时区什么时候空闲，可以看<a href={L('/')}>实时热力图</a>和<a href={L('/peak-hours/')}>各时区页面</a>。</p>
+
+          <h2>2. 规划好 5 小时窗口</h2>
+          <p>额度窗口从你发出第一条消息时开始计算，而不是按固定时间表。在空闲时段开工，额度会在高峰到来前重置，而不是在高峰中途。早上先发一条简短消息，就能提前开始计时。</p>
+
+          <h2>3. 别把额度浪费在重试上</h2>
+          <ul>
+            <li>回复慢的时候不要重复发送同一个请求——这只会让队列更长。</li>
+            <li><code>529 overloaded</code> 表示算力暂时不足，等一分钟再试。用量限制提示（<code>429</code>）靠重试是解决不了的。</li>
+            <li>把大任务拆成可检查的小步骤：回滚一次失败的大型运行，比修正一个小步骤代价高得多。</li>
+          </ul>
+
+          <h2>4. 保持上下文精简</h2>
+          <p>上下文越长，消耗的额度越多。不相关的任务之间用 <code>/clear</code>，长会话中用 <code>/compact</code>。</p>
+
+          <h2>5. 按任务选择模型</h2>
+          <p><code>/model</code> 可以切换模型。日常修改和简单问题很少需要最强的模型——把它留给真正困难的问题。</p>
+
+          <h2>6. 繁重任务放到夜里自动跑</h2>
+          <p>不需要你参与的任务，可以在空闲时段通过脚本或定时任务（cron、CI）以 <code>claude -p "…"</code> 无人值守地运行。</p>
+
+          <p class="notice" style="margin-top:32px">Hourglyph 是独立项目。它不会改变你的额度，只是帮你挑选工作更顺畅的时段。官方额度数值请见 <a href="https://support.claude.com" rel="nofollow">Claude 帮助中心</a>；更多细节见 <a href={L('/claude-code-usage-limits/')}>Claude Code 用量限制</a>。</p>
+        </>
+      ),
+      ja: (
+        <>
+          <h2>1. 空いている時間に作業を始める</h2>
+          <p>平日のピークは太平洋時間 5:00〜11:00、<b>日本時間では {jpPeak}</b>（翌日未明まで）です。この時間帯は応答の遅れや <code>overloaded</code> エラーが起きやすく、中断したエージェントのタスクはやり直しになります。利用上限が作業ではなく再実行に消えてしまうのです。</p>
+          <p>時間帯は上限の消費そのものにも影響してきました。2026年3月、Anthropic は平日のピーク中に5時間上限の消費が早まるようにしました。2026年5月6日、Pro と Max の Claude Code では<a href={ANN} rel="nofollow">この制限が撤廃</a>されています。あなたのタイムゾーンで空いている時間は、<a href={L('/')}>ライブヒートマップ</a>と<a href={L('/peak-hours/')}>タイムゾーン別ページ</a>で確認できます。</p>
+
+          <h2>2. 5時間ウィンドウを計画する</h2>
+          <p>上限のウィンドウは決まった時刻ではなく、最初のメッセージから始まります。空いている時間に始めれば、ピークの最中ではなくピーク前にリセットされます。朝に短いメッセージを1通送っておけば、早めにカウントを始められます。</p>
+
+          <h2>3. 再実行で上限を無駄にしない</h2>
+          <ul>
+            <li>応答が遅くても、同じプロンプトを送り直さないでください。キューが長くなるだけです。</li>
+            <li><code>529 overloaded</code> は一時的な処理能力不足です。1分ほど待ちましょう。利用上限のメッセージ（<code>429</code>）は再試行しても解消しません。</li>
+            <li>大きなタスクは確認しながら進める小さなステップに分けましょう。大規模な実行の失敗を巻き戻すほうが、小さなステップを直すよりずっと高くつきます。</li>
+          </ul>
+
+          <h2>4. コンテキストを軽く保つ</h2>
+          <p>コンテキストが長いほど上限を多く消費します。関係のないタスクの間では <code>/clear</code>、長いセッションでは <code>/compact</code> を使いましょう。</p>
+
+          <h2>5. タスクに合ったモデルを選ぶ</h2>
+          <p><code>/model</code> でモデルを切り替えられます。日常的な修正や簡単な質問に最上位モデルはほとんど不要です。難しい問題のために取っておきましょう。</p>
+
+          <h2>6. 重い作業は夜間に自動で</h2>
+          <p>あなたの操作が不要な作業は、空いている時間にスクリプトやスケジュール（cron、CI）から <code>claude -p "…"</code> で無人実行できます。</p>
+
+          <p class="notice" style="margin-top:32px">Hourglyph は独立したプロジェクトです。利用上限を変えるものではなく、作業がスムーズに進む時間を選ぶ手助けをします。公式の上限値は <a href="https://support.claude.com" rel="nofollow">Claude ヘルプセンター</a>を、詳しくは <a href={L('/claude-code-usage-limits/')}>Claude Code の利用上限</a>をご覧ください。</p>
+        </>
+      ),
+    })}
   </div>
   <I18nData lang={lang} />
 </Base>

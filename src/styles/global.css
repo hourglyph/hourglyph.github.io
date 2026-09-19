@@ -105,6 +105,14 @@ main { padding: 40px 0 80px; }
 .icon-btn:hover { border-color: var(--border-strong); }
 .icon-btn svg { width: 18px; height: 18px; }
 .header-tools { display: flex; gap: 8px; }
+.lang-menu { position: relative; }
+.lang-menu > summary { list-style: none; width: auto; min-width: 36px; padding: 0 8px; white-space: nowrap; font: 600 0.8rem var(--sans); }
+.lang-menu > summary::after, .lang-menu[open] > summary::after { content: none; }
+.lang-menu > summary::-webkit-details-marker { display: none; }
+.lang-menu ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; margin: 0; padding: 6px; list-style: none; min-width: 150px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.08); }
+.lang-menu a { display: block; padding: 7px 10px; border-radius: 8px; color: var(--text-2); text-decoration: none; font-size: 0.925rem; }
+.lang-menu a:hover { background: var(--bg-sunk); }
+.lang-menu a[aria-current='true'] { color: var(--text); background: var(--bg-sunk); }
 @media (max-width: 860px) {
   .site-header .wrap { flex-wrap: wrap; padding-top: 10px; padding-bottom: 6px; }
   .header-tools { margin-left: auto; }
@@ -297,3 +305,15 @@ details p:first-of-type { margin-top: 10px; }
 .status-line[data-band='busy']::before { background: var(--hm-4); }
 .status-line[data-band='peak']::before { background: #b3261e; }
 .snippet pre { padding-top: 48px; }
+
+/* CJK: Latin text keeps Inter / Source Serif; Han and kana fall back to native system faces. */
+:lang(zh) {
+  --serif: 'Source Serif 4', 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
+  --sans: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+}
+:lang(ja) {
+  --serif: 'Source Serif 4', 'Hiragino Mincho ProN', 'Noto Serif JP', 'Yu Mincho', serif;
+  --sans: 'Inter', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif;
+}
+:lang(zh) h1, :lang(zh) h2, :lang(zh) h3, :lang(ja) h1, :lang(ja) h2, :lang(ja) h3 { letter-spacing: 0; }
+:lang(zh) body, :lang(ja) body { line-break: strict; }

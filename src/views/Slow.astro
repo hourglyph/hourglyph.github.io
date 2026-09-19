@@ -4,54 +4,80 @@ import Heatmap from '../components/Heatmap.astro';
 import NowStatus from '../components/NowStatus.astro';
 import StatusPanel from '../components/StatusPanel.astro';
 import I18nData from '../components/I18nData.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { articleJsonLd } from '../lib/jsonld';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('slow');
 const snap = await getSnapshot();
 const L = (p: string) => localize(lang, p);
 ---
-<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Claude тормозит?' : 'Is Claude slow?', path: meta.path }]}>
-  <h1>{ru ? 'Claude тормозит прямо сейчас?' : 'Is Claude slow right now?'}</h1>
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: tr(lang, { en: 'Is Claude slow?', ru: 'Claude тормозит?', zh: 'Claude 变慢了？', ja: 'Claude が遅い？' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'Is Claude slow right now?', ru: 'Claude тормозит прямо сейчас?', zh: 'Claude 现在很慢吗？', ja: 'Claude は今遅い？' })}</h1>
   <p class="lead">
-    {ru
-      ? 'Сравните текущий час с обычной неделей: если сейчас пик — медленные ответы ожидаемы. Если нет — стоит проверить статус-страницу Anthropic.'
-      : 'Compare the current hour with a normal week: if it’s peak time, slower responses are expected. If it isn’t, check Anthropic’s status page.'}
+    {tr(lang, {
+      en: 'Compare the current hour with a normal week: if it’s peak time, slower responses are expected. If it isn’t, check Anthropic’s status page.',
+      ru: 'Сравните текущий час с обычной неделей: если сейчас пик — медленные ответы ожидаемы. Если нет — стоит проверить статус-страницу Anthropic.',
+      zh: '把当前这个小时和平常的一周对比一下：如果正值高峰，回复变慢在意料之中；如果不是，就去看看 Anthropic 的状态页。',
+      ja: '今の時間を普段の1週間と比べてみましょう。ピーク時間なら応答が遅いのは想定内です。そうでなければ、Anthropic のステータスページを確認してください。',
+    })}
   </p>
   <div style="margin-top:28px"><NowStatus lang={lang} stats={snap.stats} /></div>
   <div style="margin-top:16px"><StatusPanel lang={lang} incidents={snap.incidents} /></div>
 
-  <h2>{ru ? 'Что делать по шагам' : 'What to do, step by step'}</h2>
+  <h2>{tr(lang, { en: 'What to do, step by step', ru: 'Что делать по шагам', zh: '分步应对', ja: '対処の手順' })}</h2>
   <ol class="prose">
-    {ru ? (
-      <>
-        <li><b>Проверьте инциденты</b> на <a href="https://status.claude.com" rel="nofollow">status.claude.com</a> — там отмечаются сбои Claude, API и Claude Code.</li>
-        <li><b>Посмотрите на текущий час</b> на карте выше: будничное окно 5:00–11:00 по тихоокеанскому времени — самое загруженное.</li>
-        <li><b>Различайте ошибки.</b> <code>529 overloaded</code> — у Anthropic временно не хватает мощностей, помогает повтор через минуту. <code>429</code> или сообщение о лимите — исчерпан лимит вашего тарифа, повтор не поможет до сброса окна.</li>
-        <li><b>Смените модель</b> командой <code>/model</code>: при перегрузке одной модели другая может отвечать быстрее.</li>
-        <li><b>Отложите тяжёлые задачи</b> на <a href={L('/best-time-to-use-claude-code/')}>спокойные часы</a>, а сейчас работайте короткими итерациями.</li>
-      </>
-    ) : (
-      <>
-        <li><b>Check for incidents</b> on <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, which covers Claude, the API and Claude Code.</li>
-        <li><b>Look at the current hour</b> on the map: weekday 5–11 AM Pacific is the busiest window.</li>
-        <li><b>Tell the errors apart.</b> <code>529 overloaded</code> means Anthropic is temporarily out of capacity — retrying in a minute usually works. A <code>429</code> or a usage-limit message means your plan’s limit is used up, and retrying won’t help until the window resets.</li>
-        <li><b>Switch models</b> with <code>/model</code>: when one model is overloaded, another may respond faster.</li>
-        <li><b>Move heavy work</b> to <a href={L('/best-time-to-use-claude-code/')}>quiet hours</a> and stick to short loops for now.</li>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <li><b>Check for incidents</b> on <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, which covers Claude, the API and Claude Code.</li>
+          <li><b>Look at the current hour</b> on the map: weekday 5–11 AM Pacific is the busiest window.</li>
+          <li><b>Tell the errors apart.</b> <code>529 overloaded</code> means Anthropic is temporarily out of capacity — retrying in a minute usually works. A <code>429</code> or a usage-limit message means your plan’s limit is used up, and retrying won’t help until the window resets.</li>
+          <li><b>Switch models</b> with <code>/model</code>: when one model is overloaded, another may respond faster.</li>
+          <li><b>Move heavy work</b> to <a href={L('/best-time-to-use-claude-code/')}>quiet hours</a> and stick to short loops for now.</li>
+        </>
+      ),
+      ru: (
+        <>
+          <li><b>Проверьте инциденты</b> на <a href="https://status.claude.com" rel="nofollow">status.claude.com</a> — там отмечаются сбои Claude, API и Claude Code.</li>
+          <li><b>Посмотрите на текущий час</b> на карте выше: будничное окно 5:00–11:00 по тихоокеанскому времени — самое загруженное.</li>
+          <li><b>Различайте ошибки.</b> <code>529 overloaded</code> — у Anthropic временно не хватает мощностей, помогает повтор через минуту. <code>429</code> или сообщение о лимите — исчерпан лимит вашего тарифа, повтор не поможет до сброса окна.</li>
+          <li><b>Смените модель</b> командой <code>/model</code>: при перегрузке одной модели другая может отвечать быстрее.</li>
+          <li><b>Отложите тяжёлые задачи</b> на <a href={L('/best-time-to-use-claude-code/')}>спокойные часы</a>, а сейчас работайте короткими итерациями.</li>
+        </>
+      ),
+      zh: (
+        <>
+          <li><b>检查是否有故障</b>：<a href="https://status.claude.com" rel="nofollow">status.claude.com</a> 会公布 Claude、API 和 Claude Code 的事件。</li>
+          <li><b>看看地图上的当前时段</b>：工作日太平洋时间 5:00–11:00（北京时间 20:00–次日 02:00，美国冬令时为 21:00–03:00）是最繁忙的窗口。</li>
+          <li><b>区分错误类型。</b><code>529 overloaded</code> 表示 Anthropic 暂时算力不足，一分钟后重试通常就能恢复。<code>429</code> 或用量限制提示说明你的套餐额度已用完，在窗口重置前重试也没用。</li>
+          <li><b>切换模型</b>：用 <code>/model</code> 换一个模型，某个模型过载时，另一个可能响应更快。</li>
+          <li><b>把繁重任务挪到</b><a href={L('/best-time-to-use-claude-code/')}>非高峰时段</a>，眼下先做简短的迭代。</li>
+        </>
+      ),
+      ja: (
+        <>
+          <li><b>障害を確認する</b>：<a href="https://status.claude.com" rel="nofollow">status.claude.com</a> に Claude・API・Claude Code の障害が掲載されます。</li>
+          <li><b>マップで今の時間を見る</b>：平日の太平洋時間 5:00〜11:00（日本時間 21:00〜翌 3:00、米国の冬時間中は 22:00〜翌 4:00）が最も混む時間帯です。</li>
+          <li><b>エラーを見分ける。</b><code>529 overloaded</code> は Anthropic 側の一時的な処理能力不足で、1分ほど待って再試行すればたいてい解決します。<code>429</code> や利用上限のメッセージはプランの上限に達したという意味で、ウィンドウがリセットされるまで再試行しても変わりません。</li>
+          <li><b>モデルを切り替える</b>：<code>/model</code> で別のモデルにすると、混雑していないモデルが速く応答することがあります。</li>
+          <li><b>重い作業は</b><a href={L('/best-time-to-use-claude-code/')}>空いている時間</a>に回し、今は短い作業を繰り返しましょう。</li>
+        </>
+      ),
+    })}
   </ol>
 
-  <h2>{ru ? 'Когда обычно случаются сбои' : 'When incidents usually happen'}</h2>
+  <h2>{tr(lang, { en: 'When incidents usually happen', ru: 'Когда обычно случаются сбои', zh: '故障通常发生在什么时候', ja: '障害が起きやすい時間帯' })}</h2>
   <p>
-    {ru
-      ? <>Часы, когда на <a href="https://status.claude.com" rel="nofollow">статус-странице Anthropic</a> был открыт инцидент по Claude, API или Claude Code, — в вашем часовом поясе. Если сейчас яркая ячейка, медленные ответы и ошибки ожидаемы. Данные обновляются ежечасно.</>
-      : <>Hours when <a href="https://status.claude.com" rel="nofollow">Anthropic’s status page</a> had an open incident for Claude, the API or Claude Code — in your time zone. If the current hour is a bright cell, slow replies and errors are expected. Synced hourly.</>}
+    {tr(lang, {
+      en: <>Hours when <a href="https://status.claude.com" rel="nofollow">Anthropic’s status page</a> had an open incident for Claude, the API or Claude Code — in your time zone. If the current hour is a bright cell, slow replies and errors are expected. Synced hourly.</>,
+      ru: <>Часы, когда на <a href="https://status.claude.com" rel="nofollow">статус-странице Anthropic</a> был открыт инцидент по Claude, API или Claude Code, — в вашем часовом поясе. Если сейчас яркая ячейка, медленные ответы и ошибки ожидаемы. Данные обновляются ежечасно.</>,
+      zh: <>按你的时区显示 <a href="https://status.claude.com" rel="nofollow">Anthropic 状态页</a>上 Claude、API 或 Claude Code 存在未关闭事件的小时。如果当前时段是颜色较深的格子，回复变慢和报错都在意料之中。每小时同步。</>,
+      ja: <><a href="https://status.claude.com" rel="nofollow">Anthropic のステータスページ</a>で Claude・API・Claude Code の障害が発生中だった時間を、あなたのタイムゾーンで表示しています。今の時間のセルが濃い色なら、応答の遅れやエラーは想定内です。1時間ごとに同期。</>,
+    })}
   </p>
   <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" metric="incidents" /></div>
   <I18nData lang={lang} />

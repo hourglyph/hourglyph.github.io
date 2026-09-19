@@ -22,8 +22,10 @@ export const GET: APIRoute = async () => {
     `- [heatmap.csv](${SITE}/data/heatmap.csv): same as CSV`,
     `- [countries.csv](${SITE}/data/countries.csv): check-ins by country (ISO 3166-1 alpha-2)`,
     '',
-    '## Russian',
+    '## Other languages',
     `- [Русская версия](${SITE}/ru/)`,
+    `- [简体中文](${SITE}/zh/)`,
+    `- [日本語](${SITE}/ja/)`,
     '',
   ];
   return new Response(lines.join('\n'), { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });

@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import ZoneList from '../components/ZoneList.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { ZONES, zoneAbbr } from '../lib/timezones';
 import { fmtHour, fmtOffset, offsetMinutes, officialPeakIn } from '../lib/heatmap';
@@ -9,25 +9,27 @@ import { articleJsonLd } from '../lib/jsonld';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('zones');
 ---
-<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Часовые пояса' : 'Time zones', path: meta.path }]}>
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: tr(lang, { en: 'Time zones', ru: 'Часовые пояса', zh: '时区', ja: 'タイムゾーン' }), path: meta.path }]}>
   <h1>{meta.title[lang]}</h1>
   <p class="lead">
-    {ru
-      ? 'Claude Code используют по всему миру, но пик нагрузки у всех один — будничное утро в США, совпадающее с европейским днём. Выберите свой часовой пояс, чтобы увидеть карту и пиковые часы в местном времени.'
-      : 'Claude Code is used worldwide, but everyone shares the same peak: weekday mornings in the US overlapping the European afternoon. Pick your time zone to see the heatmap and peak hours in local time.'}
+    {tr(lang, {
+      en: 'Claude Code is used worldwide, but everyone shares the same peak: weekday mornings in the US overlapping the European afternoon. Pick your time zone to see the heatmap and peak hours in local time.',
+      ru: 'Claude Code используют по всему миру, но пик нагрузки у всех один — будничное утро в США, совпадающее с европейским днём. Выберите свой часовой пояс, чтобы увидеть карту и пиковые часы в местном времени.',
+      zh: '全世界都在用 Claude Code，但大家共享同一个高峰：美国工作日上午与欧洲下午重叠的时段。选择你的时区，即可按当地时间查看热力图和 Claude Code 高峰时段。',
+      ja: 'Claude Code は世界中で使われていますが、ピーク時間はどこでも同じです。米国の平日の午前とヨーロッパの午後が重なる時間帯です。タイムゾーンを選ぶと、ヒートマップとピーク時間を現地時間で確認できます。',
+    })}
   </p>
   <ZoneList lang={lang} />
 
-  <h2>{ru ? 'Будничный пик в каждом поясе' : 'The weekday peak in each zone'}</h2>
+  <h2>{tr(lang, { en: 'The weekday peak in each zone', ru: 'Будничный пик в каждом поясе', zh: '各时区的工作日高峰', ja: '各タイムゾーンの平日ピーク' })}</h2>
   <div class="card table-card">
     <table class="data-table">
       <thead><tr>
-        <th scope="col">{ru ? 'Часовой пояс' : 'Time zone'}</th>
+        <th scope="col">{tr(lang, { en: 'Time zone', ru: 'Часовой пояс', zh: '时区', ja: 'タイムゾーン' })}</th>
         <th scope="col" class="hide-sm">UTC</th>
-        <th scope="col">{ru ? 'Пик (будни)' : 'Peak (weekdays)'}</th>
+        <th scope="col">{tr(lang, { en: 'Peak (weekdays)', ru: 'Пик (будни)', zh: '高峰（工作日）', ja: 'ピーク（平日）' })}</th>
       </tr></thead>
       <tbody>
         {ZONES.map((z) => {
@@ -44,8 +46,11 @@ const meta = page('zones');
     </table>
   </div>
   <p class="small muted" style="margin-top:12px">
-    {ru
-      ? 'Окно 5:00–11:00 по тихоокеанскому времени, которое Anthropic назвала пиковым в марте 2026 года, в пересчёте на каждый пояс с учётом текущего летнего/зимнего времени.'
-      : 'The 5–11 AM Pacific window Anthropic named as peak in March 2026, converted to each zone with the current daylight-saving state.'}
+    {tr(lang, {
+      en: 'The 5–11 AM Pacific window Anthropic named as peak in March 2026, converted to each zone with the current daylight-saving state.',
+      ru: 'Окно 5:00–11:00 по тихоокеанскому времени, которое Anthropic назвала пиковым в марте 2026 года, в пересчёте на каждый пояс с учётом текущего летнего/зимнего времени.',
+      zh: 'Anthropic 在 2026 年 3 月公布的高峰窗口（太平洋时间 5:00–11:00），已按当前夏令时状态换算到各时区。',
+      ja: 'Anthropic が2026年3月にピークとして示した太平洋時間 5:00〜11:00 の時間帯を、現在の夏時間の状態に合わせて各タイムゾーンに換算しています。',
+    })}
   </p>
 </Base>

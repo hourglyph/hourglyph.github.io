@@ -1,6 +1,6 @@
 ---
 import { MIN_SAMPLE } from '../config';
-import { UI, type Lang } from '../i18n';
+import { UI, localize, tr, type Lang } from '../i18n';
 import { analyze, fmtHour, fmtWindow, fromCells, loadMetric, offsetMinutes, officialPeakIn, plural, toZone, type CellLike } from '../lib/heatmap';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 }
 const { lang, cells, tz, zonePhrase } = Astro.props;
 const t = UI[lang];
-const ru = lang === 'ru';
+const L = (p: string) => localize(lang, p);
 const metric = loadMetric(cells);
 const { grid, minute } = toZone(fromCells(cells, metric), offsetMinutes(tz));
 const count = (n: number) => `${n.toLocaleString(t.locale)} ${plural(n, lang, t.metricUnits[metric])}`;
@@ -30,47 +30,59 @@ const incEnough = inc.total >= 20;
   <div>
     {enough ? (
       <ul class="facts">
-        <li><span>{ru ? 'Пик в будни' : 'Weekday peak'}</span><b>{fmtWindow(a.workdayPeakStart, minute, lang)}</b></li>
-        <li><span>{ru ? 'Самые спокойные часы' : 'Quietest hours'}</span><b>{fmtWindow(a.quietStart, minute, lang)}</b></li>
-        <li><span>{ru ? 'Самый загруженный день' : 'Busiest day'}</span><b>{t.daysLong[a.busiestDay]}</b></li>
-        <li><span>{ru ? 'Самый спокойный день' : 'Quietest day'}</span><b>{t.daysLong[a.quietestDay]}</b></li>
-        <li><span>{ru ? 'Доля выходных' : 'Weekend share'}</span><b>{pct(a.weekendShare)}</b></li>
+        <li><span>{tr(lang, { en: 'Weekday peak', ru: 'Пик в будни', zh: '工作日高峰', ja: '平日のピーク' })}</span><b>{fmtWindow(a.workdayPeakStart, minute, lang)}</b></li>
+        <li><span>{tr(lang, { en: 'Quietest hours', ru: 'Самые спокойные часы', zh: '最空闲时段', ja: '最も空いている時間' })}</span><b>{fmtWindow(a.quietStart, minute, lang)}</b></li>
+        <li><span>{tr(lang, { en: 'Busiest day', ru: 'Самый загруженный день', zh: '最忙的一天', ja: '最も混む曜日' })}</span><b>{t.daysLong[a.busiestDay]}</b></li>
+        <li><span>{tr(lang, { en: 'Quietest day', ru: 'Самый спокойный день', zh: '最空闲的一天', ja: '最も空いている曜日' })}</span><b>{t.daysLong[a.quietestDay]}</b></li>
+        <li><span>{tr(lang, { en: 'Weekend share', ru: 'Доля выходных', zh: '周末占比', ja: '週末の割合' })}</span><b>{pct(a.weekendShare)}</b></li>
       </ul>
     ) : (
       <p class="notice">
-        {ru
-          ? <>Карта только начала собирать данные: {count(a.total)} из {MIN_SAMPLE} нужных для надёжных выводов. Как только выборка вырастет, здесь автоматически появятся пиковые и спокойные часы {zonePhrase}. Ускорить можно, <a href="/ru/setup/">подключив hook</a>.</>
-          : <>The map has just started collecting data: {count(a.total)} of the {MIN_SAMPLE} needed for reliable conclusions. Peak and quiet hours {zonePhrase} will appear here automatically as the sample grows. You can speed it up by <a href="/setup/">adding the hook</a>.</>}
+        {tr(lang, {
+          en: <>The map has just started collecting data: {count(a.total)} of the {MIN_SAMPLE} needed for reliable conclusions. Peak and quiet hours {zonePhrase} will appear here automatically as the sample grows. You can speed it up by <a href={L('/setup/')}>adding the hook</a>.</>,
+          ru: <>Карта только начала собирать данные: {count(a.total)} из {MIN_SAMPLE} нужных для надёжных выводов. Как только выборка вырастет, здесь автоматически появятся пиковые и спокойные часы {zonePhrase}. Ускорить можно, <a href={L('/setup/')}>подключив hook</a>.</>,
+          zh: <>这张地图刚开始收集数据：已有 {count(a.total)}，得出可靠结论需要 {MIN_SAMPLE}。样本足够后，这里会自动显示{zonePhrase}的高峰和空闲时段。<a href={L('/setup/')}>安装 hook</a> 可以帮它更快成形。</>,
+          ja: <>このマップはデータを集め始めたばかりです：現在 {count(a.total)}、信頼できる結論には {MIN_SAMPLE} 必要です。サンプルが増えると、{zonePhrase}のピークと空き時間がここに自動で表示されます。<a href={L('/setup/')}>hook を追加</a>すると早く集まります。</>,
+        })}
       </p>
     )}
     <p class="small muted" style="margin-top:12px">
-      {ru
-        ? <>Выводы — по данным сообщества ({count(a.total)}), окна по {3} часа, {zonePhrase}.</>
-        : <>Based on community data ({count(a.total)}), 3-hour windows, {zonePhrase}.</>}
+      {tr(lang, {
+        en: <>Based on community data ({count(a.total)}), 3-hour windows, {zonePhrase}.</>,
+        ru: <>Выводы — по данным сообщества ({count(a.total)}), окна по {3} часа, {zonePhrase}.</>,
+        zh: <>基于社区数据（{count(a.total)}），以 3 小时为窗口，{zonePhrase}。</>,
+        ja: <>コミュニティのデータ（{count(a.total)}）に基づく3時間単位の集計、{zonePhrase}。</>,
+      })}
     </p>
     {incEnough && (
       <>
-        <p class="eyebrow" style="margin:24px 0 8px">{ru ? 'Сбои по данным Anthropic' : 'Incidents per Anthropic’s status page'}</p>
+        <p class="eyebrow" style="margin:24px 0 8px">{tr(lang, { en: 'Incidents per Anthropic’s status page', ru: 'Сбои по данным Anthropic', zh: 'Anthropic 状态页记录的故障', ja: 'Anthropic のステータスページによる障害' })}</p>
         <ul class="facts">
-          <li><span>{ru ? 'Чаще всего сбои' : 'Most incidents'}</span><b>{fmtWindow(inc.peakStart, minute, lang)}</b></li>
-          <li><span>{ru ? 'Реже всего сбои' : 'Fewest incidents'}</span><b>{fmtWindow(inc.quietStart, minute, lang)}</b></li>
-          <li><span>{ru ? 'Самый проблемный день' : 'Most incident-prone day'}</span><b>{t.daysLong[inc.busiestDay]}</b></li>
+          <li><span>{tr(lang, { en: 'Most incidents', ru: 'Чаще всего сбои', zh: '故障最多', ja: '障害が最も多い時間' })}</span><b>{fmtWindow(inc.peakStart, minute, lang)}</b></li>
+          <li><span>{tr(lang, { en: 'Fewest incidents', ru: 'Реже всего сбои', zh: '故障最少', ja: '障害が最も少ない時間' })}</span><b>{fmtWindow(inc.quietStart, minute, lang)}</b></li>
+          <li><span>{tr(lang, { en: 'Most incident-prone day', ru: 'Самый проблемный день', zh: '故障最多的一天', ja: '障害が最も多い曜日' })}</span><b>{t.daysLong[inc.busiestDay]}</b></li>
         </ul>
         <p class="small muted" style="margin-top:12px">
-          {ru
-            ? <>{inc.total} {plural(inc.total, lang, t.metricUnits.incidents)} с открытым инцидентом по Claude, API или Claude Code, {zonePhrase}. Источник: <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, обновляется ежечасно.</>
-            : <>{inc.total} {plural(inc.total, lang, t.metricUnits.incidents)} with an open incident for Claude, the API or Claude Code, {zonePhrase}. Source: <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, synced hourly.</>}
+          {tr(lang, {
+            en: <>{inc.total} {plural(inc.total, lang, t.metricUnits.incidents)} with an open incident for Claude, the API or Claude Code, {zonePhrase}. Source: <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, synced hourly.</>,
+            ru: <>{inc.total} {plural(inc.total, lang, t.metricUnits.incidents)} с открытым инцидентом по Claude, API или Claude Code, {zonePhrase}. Источник: <a href="https://status.claude.com" rel="nofollow">status.claude.com</a>, обновляется ежечасно.</>,
+            zh: <>共 {inc.total} {plural(inc.total, lang, t.metricUnits.incidents)}（Claude、API 或 Claude Code 存在未关闭事件），{zonePhrase}。来源：<a href="https://status.claude.com" rel="nofollow">status.claude.com</a>，每小时同步。</>,
+            ja: <>Claude・API・Claude Code の障害が発生中だった時間は計 {inc.total} {plural(inc.total, lang, t.metricUnits.incidents)}（{zonePhrase}）。出典：<a href="https://status.claude.com" rel="nofollow">status.claude.com</a>（1時間ごとに同期）。</>,
+          })}
         </p>
       </>
     )}
   </div>
   <div class="card" style="padding:20px">
-    <p class="eyebrow">{ru ? 'Официальное окно пиковой нагрузки' : 'Anthropic’s stated peak window'}</p>
-    <p style="font:500 1.6rem/1.2 var(--serif);margin:0 0 8px">{offText}{off.crossesMidnight ? (ru ? ' (через полночь)' : ' (past midnight)') : ''}</p>
+    <p class="eyebrow">{tr(lang, { en: 'Anthropic’s stated peak window', ru: 'Официальное окно пиковой нагрузки', zh: 'Anthropic 公布的高峰窗口', ja: 'Anthropic が示すピーク時間帯' })}</p>
+    <p style="font:500 1.6rem/1.2 var(--serif);margin:0 0 8px">{offText}{off.crossesMidnight ? tr(lang, { en: ' (past midnight)', ru: ' (через полночь)', zh: '（跨午夜）', ja: '（日付をまたぐ）' }) : ''}</p>
     <p class="small muted" style="margin:0">
-      {ru
-        ? <>Будни, 5:00–11:00 по тихоокеанскому времени, {zonePhrase}. В марте 2026 года Anthropic сообщила, что в эти часы 5-часовые лимиты расходуются быстрее; 6 мая 2026 года это снижение для Claude Code на Pro и Max <a href="/ru/claude-code-usage-limits/">отменили</a>, но нагрузка в эти часы по-прежнему самая высокая.</>
-        : <>Weekdays, 5–11 AM Pacific, shown {zonePhrase}. In March 2026 Anthropic said 5-hour limits drain faster during these hours; on May 6, 2026 that reduction was <a href="/claude-code-usage-limits/">removed for Claude Code on Pro and Max</a>, but it remains the busiest part of the day.</>}
+      {tr(lang, {
+        en: <>Weekdays, 5–11 AM Pacific, shown {zonePhrase}. In March 2026 Anthropic said 5-hour limits drain faster during these hours; on May 6, 2026 that reduction was <a href={L('/claude-code-usage-limits/')}>removed for Claude Code on Pro and Max</a>, but it remains the busiest part of the day.</>,
+        ru: <>Будни, 5:00–11:00 по тихоокеанскому времени, {zonePhrase}. В марте 2026 года Anthropic сообщила, что в эти часы 5-часовые лимиты расходуются быстрее; 6 мая 2026 года это снижение для Claude Code на Pro и Max <a href={L('/claude-code-usage-limits/')}>отменили</a>, но нагрузка в эти часы по-прежнему самая высокая.</>,
+        zh: <>工作日太平洋时间 5:00–11:00，此处显示为{zonePhrase}。2026 年 3 月 Anthropic 表示这段时间 5 小时额度消耗更快；2026 年 5 月 6 日起，Pro 和 Max 套餐的 Claude Code <a href={L('/claude-code-usage-limits/')}>取消了这一限制</a>，但这仍是一天中最繁忙的时段。</>,
+        ja: <>平日の太平洋時間 5:00〜11:00 を{zonePhrase}で表示しています。2026年3月、Anthropic はこの時間帯に5時間上限の消費が早まると発表しました。2026年5月6日、Pro と Max の Claude Code では<a href={L('/claude-code-usage-limits/')}>この制限が撤廃</a>されましたが、今も1日で最も混む時間帯です。</>,
+      })}
     </p>
   </div>
 </div>

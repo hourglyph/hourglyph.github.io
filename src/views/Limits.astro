@@ -1,71 +1,129 @@
 ---
 import Base from '../layouts/Base.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { articleJsonLd } from '../lib/jsonld';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('limits');
 const L = (p: string) => localize(lang, p);
 const ANN = 'https://www.anthropic.com/news/higher-limits-spacex';
 ---
-<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Лимиты' : 'Limits', path: meta.path }]}>
-  <h1>{ru ? 'Лимиты Claude Code и пиковые часы' : 'Claude Code usage limits and peak hours'}</h1>
-  {ru ? (
-    <div class="prose">
-      <p class="lead">Как устроены 5-часовые и недельные лимиты подписки Claude, что меняли в 2026 году с пиковыми часами и что действует сейчас.</p>
-      <p class="notice">Коротко: с 6 мая 2026 года 5-часовые лимиты Claude Code на Pro, Max, Team и Enterprise (по местам) удвоены, а ускоренный расход лимита в пиковые часы для Pro и Max отменён. Недельные лимиты по-прежнему действуют.</p>
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: tr(lang, { en: 'Limits', ru: 'Лимиты', zh: '用量限制', ja: '利用上限' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'Claude Code usage limits and peak hours', ru: 'Лимиты Claude Code и пиковые часы', zh: 'Claude Code 用量限制与高峰时段', ja: 'Claude Code の利用上限とピーク時間' })}</h1>
+  {tr(lang, {
+    en: (
+      <div class="prose">
+        <p class="lead">How Claude’s 5-hour and weekly subscription limits work, what changed around peak hours in 2026, and what applies today.</p>
+        <p class="notice">In short: since May 6, 2026, Claude Code’s 5-hour limits are doubled on Pro, Max, Team and seat-based Enterprise plans, and the faster peak-hour drain for Pro and Max is gone. Weekly limits still apply.</p>
 
-      <h2>Два уровня лимитов</h2>
-      <p><b>5-часовое окно.</b> Лимит сессии считается в скользящем окне длиной пять часов. Окно начинается с первого сообщения, а не по фиксированному расписанию: начали в 10:00 — лимит обновится в 15:00.</p>
-      <p><b>Недельный лимит.</b> С конца августа 2025 года поверх 5-часового окна действует ещё и недельный лимит — он ограничивает непрерывную круглосуточную нагрузку.</p>
-      <p>Лимиты общие для Claude в браузере, приложениях и Claude Code в рамках одного аккаунта. Точные объёмы зависят от тарифа, модели и длины контекста — актуальные значения смотрите в <a href="https://support.claude.com" rel="nofollow">справке Claude</a>.</p>
+        <h2>Two layers of limits</h2>
+        <p><b>The 5-hour window.</b> Session usage is measured in a rolling five-hour window that starts with your first message, not on a fixed clock: start at 10 AM and it resets at 3 PM.</p>
+        <p><b>The weekly limit.</b> Since late August 2025 a weekly cap sits on top of the 5-hour window to curb continuous, around-the-clock usage.</p>
+        <p>Limits are shared between Claude on the web, the apps and Claude Code on the same account. Exact amounts depend on your plan, model and context length — see the <a href="https://support.claude.com" rel="nofollow">Claude Help Center</a> for current numbers.</p>
 
-      <h2>Что происходило с пиковыми часами в 2026 году</h2>
-      <ul>
-        <li><b>Март 2026.</b> Anthropic сообщила, что в будни с 5:00 до 11:00 по тихоокеанскому времени 5-часовые лимиты расходуются быстрее из-за роста спроса. Недельные лимиты при этом не менялись.</li>
-        <li><b>6 мая 2026.</b> В <a href={ANN} rel="nofollow">анонсе</a> Anthropic удвоила 5-часовые лимиты Claude Code для Pro, Max, Team и Enterprise (по местам) и убрала снижение лимита в пиковые часы для Claude Code на Pro и Max.</li>
-      </ul>
-      <p>Итог: сами лимиты в пик больше не «сгорают» быстрее, но нагрузка на сервис в это окно по-прежнему самая высокая — это видно на <a href={L('/')}>карте</a>. Поэтому пиковые часы всё ещё влияют на скорость ответов и частоту ошибок <code>overloaded</code>.</p>
+        <h2>Peak hours in 2026: what happened</h2>
+        <ul>
+          <li><b>March 2026.</b> Anthropic said that on weekdays from 5 to 11 AM Pacific, 5-hour limits would drain faster because of rising demand. Weekly limits were unchanged.</li>
+          <li><b>May 6, 2026.</b> In an <a href={ANN} rel="nofollow">announcement</a>, Anthropic doubled Claude Code’s 5-hour limits for Pro, Max, Team and seat-based Enterprise, and removed the peak-hours limit reduction for Claude Code on Pro and Max.</li>
+        </ul>
+        <p>The upshot: your limit no longer drains faster at peak, but the service is still under the most load in that window — you can see it on the <a href={L('/')}>heatmap</a>. Peak hours still affect response speed and how often you see <code>overloaded</code> errors.</p>
 
-      <h2>Как успевать больше в рамках лимита</h2>
-      <ul>
-        <li><b>Держите контекст компактным:</b> <code>/clear</code> между несвязанными задачами и <code>/compact</code> в длинных сессиях — длинный контекст расходует лимит быстрее.</li>
-        <li><b>Подбирайте модель под задачу</b> через <code>/model</code>: для рутинных правок не нужна самая мощная модель.</li>
-        <li><b>Планируйте окно:</b> первое сообщение запускает 5-часовой отсчёт — начните в <a href={L('/best-time-to-use-claude-code/')}>спокойное время</a>, и сброс придётся на удобный момент.</li>
-        <li><b>Не отправляйте запрос повторно</b>, если ответ идёт медленно.</li>
-      </ul>
-      <p>Все способы собраны на странице <a href={L('/save-claude-code-limits/')}>как экономить лимиты Claude Code</a>.</p>
-      <p class="small muted">Страница основана на публичных заявлениях Anthropic. Hourglyph — независимый проект и не имеет доступа к внутренним данным о лимитах.</p>
-    </div>
-  ) : (
-    <div class="prose">
-      <p class="lead">How Claude’s 5-hour and weekly subscription limits work, what changed around peak hours in 2026, and what applies today.</p>
-      <p class="notice">In short: since May 6, 2026, Claude Code’s 5-hour limits are doubled on Pro, Max, Team and seat-based Enterprise plans, and the faster peak-hour drain for Pro and Max is gone. Weekly limits still apply.</p>
+        <h2>Getting more done within your limit</h2>
+        <ul>
+          <li><b>Keep context lean:</b> <code>/clear</code> between unrelated tasks and <code>/compact</code> in long sessions — long context uses more of your limit.</li>
+          <li><b>Match the model to the task</b> with <code>/model</code>: routine edits rarely need the largest model.</li>
+          <li><b>Plan your window:</b> your first message starts the 5-hour clock — begin in <a href={L('/best-time-to-use-claude-code/')}>a quiet period</a> so the reset lands when you need it.</li>
+          <li><b>Don’t resend a prompt</b> just because a reply is slow.</li>
+        </ul>
+        <p>Everything in one place: <a href={L('/save-claude-code-limits/')}>how to save Claude Code limits</a>.</p>
+        <p class="small muted">This page summarises Anthropic’s public statements. Hourglyph is independent and has no access to internal limit data.</p>
+      </div>
+    ),
+    ru: (
+      <div class="prose">
+        <p class="lead">Как устроены 5-часовые и недельные лимиты подписки Claude, что меняли в 2026 году с пиковыми часами и что действует сейчас.</p>
+        <p class="notice">Коротко: с 6 мая 2026 года 5-часовые лимиты Claude Code на Pro, Max, Team и Enterprise (по местам) удвоены, а ускоренный расход лимита в пиковые часы для Pro и Max отменён. Недельные лимиты по-прежнему действуют.</p>
 
-      <h2>Two layers of limits</h2>
-      <p><b>The 5-hour window.</b> Session usage is measured in a rolling five-hour window that starts with your first message, not on a fixed clock: start at 10 AM and it resets at 3 PM.</p>
-      <p><b>The weekly limit.</b> Since late August 2025 a weekly cap sits on top of the 5-hour window to curb continuous, around-the-clock usage.</p>
-      <p>Limits are shared between Claude on the web, the apps and Claude Code on the same account. Exact amounts depend on your plan, model and context length — see the <a href="https://support.claude.com" rel="nofollow">Claude Help Center</a> for current numbers.</p>
+        <h2>Два уровня лимитов</h2>
+        <p><b>5-часовое окно.</b> Лимит сессии считается в скользящем окне длиной пять часов. Окно начинается с первого сообщения, а не по фиксированному расписанию: начали в 10:00 — лимит обновится в 15:00.</p>
+        <p><b>Недельный лимит.</b> С конца августа 2025 года поверх 5-часового окна действует ещё и недельный лимит — он ограничивает непрерывную круглосуточную нагрузку.</p>
+        <p>Лимиты общие для Claude в браузере, приложениях и Claude Code в рамках одного аккаунта. Точные объёмы зависят от тарифа, модели и длины контекста — актуальные значения смотрите в <a href="https://support.claude.com" rel="nofollow">справке Claude</a>.</p>
 
-      <h2>Peak hours in 2026: what happened</h2>
-      <ul>
-        <li><b>March 2026.</b> Anthropic said that on weekdays from 5 to 11 AM Pacific, 5-hour limits would drain faster because of rising demand. Weekly limits were unchanged.</li>
-        <li><b>May 6, 2026.</b> In an <a href={ANN} rel="nofollow">announcement</a>, Anthropic doubled Claude Code’s 5-hour limits for Pro, Max, Team and seat-based Enterprise, and removed the peak-hours limit reduction for Claude Code on Pro and Max.</li>
-      </ul>
-      <p>The upshot: your limit no longer drains faster at peak, but the service is still under the most load in that window — you can see it on the <a href={L('/')}>heatmap</a>. Peak hours still affect response speed and how often you see <code>overloaded</code> errors.</p>
+        <h2>Что происходило с пиковыми часами в 2026 году</h2>
+        <ul>
+          <li><b>Март 2026.</b> Anthropic сообщила, что в будни с 5:00 до 11:00 по тихоокеанскому времени 5-часовые лимиты расходуются быстрее из-за роста спроса. Недельные лимиты при этом не менялись.</li>
+          <li><b>6 мая 2026.</b> В <a href={ANN} rel="nofollow">анонсе</a> Anthropic удвоила 5-часовые лимиты Claude Code для Pro, Max, Team и Enterprise (по местам) и убрала снижение лимита в пиковые часы для Claude Code на Pro и Max.</li>
+        </ul>
+        <p>Итог: сами лимиты в пик больше не «сгорают» быстрее, но нагрузка на сервис в это окно по-прежнему самая высокая — это видно на <a href={L('/')}>карте</a>. Поэтому пиковые часы всё ещё влияют на скорость ответов и частоту ошибок <code>overloaded</code>.</p>
 
-      <h2>Getting more done within your limit</h2>
-      <ul>
-        <li><b>Keep context lean:</b> <code>/clear</code> between unrelated tasks and <code>/compact</code> in long sessions — long context uses more of your limit.</li>
-        <li><b>Match the model to the task</b> with <code>/model</code>: routine edits rarely need the largest model.</li>
-        <li><b>Plan your window:</b> your first message starts the 5-hour clock — begin in <a href={L('/best-time-to-use-claude-code/')}>a quiet period</a> so the reset lands when you need it.</li>
-        <li><b>Don’t resend a prompt</b> just because a reply is slow.</li>
-      </ul>
-      <p>Everything in one place: <a href={L('/save-claude-code-limits/')}>how to save Claude Code limits</a>.</p>
-      <p class="small muted">This page summarises Anthropic’s public statements. Hourglyph is independent and has no access to internal limit data.</p>
-    </div>
-  )}
+        <h2>Как успевать больше в рамках лимита</h2>
+        <ul>
+          <li><b>Держите контекст компактным:</b> <code>/clear</code> между несвязанными задачами и <code>/compact</code> в длинных сессиях — длинный контекст расходует лимит быстрее.</li>
+          <li><b>Подбирайте модель под задачу</b> через <code>/model</code>: для рутинных правок не нужна самая мощная модель.</li>
+          <li><b>Планируйте окно:</b> первое сообщение запускает 5-часовой отсчёт — начните в <a href={L('/best-time-to-use-claude-code/')}>спокойное время</a>, и сброс придётся на удобный момент.</li>
+          <li><b>Не отправляйте запрос повторно</b>, если ответ идёт медленно.</li>
+        </ul>
+        <p>Все способы собраны на странице <a href={L('/save-claude-code-limits/')}>как экономить лимиты Claude Code</a>.</p>
+        <p class="small muted">Страница основана на публичных заявлениях Anthropic. Hourglyph — независимый проект и не имеет доступа к внутренним данным о лимитах.</p>
+      </div>
+    ),
+    zh: (
+      <div class="prose">
+        <p class="lead">Claude 订阅的 5 小时限制和每周限制如何运作，2026 年围绕高峰时段发生了哪些变化，以及现在的规则。</p>
+        <p class="notice">简而言之：自 2026 年 5 月 6 日起，Pro、Max、Team 和按席位计费的 Enterprise 套餐的 Claude Code 5 小时额度翻倍，Pro 和 Max 在高峰时段额度加速消耗的规定也已取消。每周限制仍然有效。</p>
+
+        <h2>两层限制</h2>
+        <p><b>5 小时窗口。</b>会话用量按滚动的 5 小时窗口计算，窗口从你发送第一条消息开始，而不是固定的整点：10:00 开始，15:00 重置。</p>
+        <p><b>每周限制。</b>自 2025 年 8 月底起，在 5 小时窗口之上还有每周上限，用来限制全天候不间断的使用。</p>
+        <p>同一账号下，网页版 Claude、各应用和 Claude Code 共享额度。具体额度取决于套餐、模型和上下文长度——最新数值请查看 <a href="https://support.claude.com" rel="nofollow">Claude 帮助中心</a>。</p>
+
+        <h2>2026 年高峰时段发生了什么</h2>
+        <ul>
+          <li><b>2026 年 3 月。</b>Anthropic 表示，由于需求增长，工作日太平洋时间 5:00–11:00（北京时间 20:00–次日 02:00）5 小时额度会消耗得更快。每周限制不变。</li>
+          <li><b>2026 年 5 月 6 日。</b>Anthropic 在一份<a href={ANN} rel="nofollow">公告</a>中将 Pro、Max、Team 和按席位 Enterprise 的 Claude Code 5 小时额度翻倍，并取消了 Pro 和 Max 上 Claude Code 在高峰时段的额度削减。</li>
+        </ul>
+        <p>结论：高峰时段额度不再加速消耗，但这段时间服务负载依然最高——在<a href={L('/')}>热力图</a>上一目了然。高峰时段仍然会影响响应速度，以及 <code>overloaded</code> 错误出现的频率。</p>
+
+        <h2>在额度内完成更多工作</h2>
+        <ul>
+          <li><b>保持上下文精简：</b>不相关的任务之间用 <code>/clear</code>，长会话中用 <code>/compact</code>——上下文越长，额度消耗越快。</li>
+          <li><b>按任务选模型：</b>用 <code>/model</code> 切换，日常小改动很少需要最强的模型。</li>
+          <li><b>规划你的窗口：</b>第一条消息启动 5 小时计时——在<a href={L('/best-time-to-use-claude-code/')}>空闲时段</a>开工，重置就会落在你需要的时候。</li>
+          <li><b>回复慢时不要重复发送</b>同一个提示。</li>
+        </ul>
+        <p>所有方法汇总：<a href={L('/save-claude-code-limits/')}>如何节省 Claude Code 额度</a>。</p>
+        <p class="small muted">本页内容基于 Anthropic 的公开声明。Hourglyph 是独立项目，无法获取任何内部额度数据。</p>
+      </div>
+    ),
+    ja: (
+      <div class="prose">
+        <p class="lead">Claude サブスクリプションの5時間上限と週間上限の仕組み、2026年にピーク時間をめぐって何が変わったか、そして現在のルール。</p>
+        <p class="notice">要点：2026年5月6日から、Pro・Max・Team・シート制 Enterprise の Claude Code の5時間上限は2倍になり、Pro と Max でピーク時間に上限の消費が早まる仕組みも廃止されました。週間上限は引き続き適用されます。</p>
+
+        <h2>2段階の上限</h2>
+        <p><b>5時間ウィンドウ。</b>セッションの利用量は、最初のメッセージから始まる5時間のローリングウィンドウで計測されます。決まった時刻ではありません。10:00 に始めれば 15:00 にリセットされます。</p>
+        <p><b>週間上限。</b>2025年8月末から、5時間ウィンドウに加えて週単位の上限があり、24時間続く連続利用を抑えています。</p>
+        <p>同じアカウントでは、Web 版 Claude、各アプリ、Claude Code で上限を共有します。具体的な量はプラン、モデル、コンテキストの長さによって異なります。最新の数値は <a href="https://support.claude.com" rel="nofollow">Claude ヘルプセンター</a> をご確認ください。</p>
+
+        <h2>2026年のピーク時間に起きたこと</h2>
+        <ul>
+          <li><b>2026年3月。</b>Anthropic は需要の増加により、平日の太平洋時間 5:00〜11:00（日本時間 21:00〜翌 03:00）は5時間上限の消費が早まると発表しました。週間上限は変わりませんでした。</li>
+          <li><b>2026年5月6日。</b>Anthropic は<a href={ANN} rel="nofollow">発表</a>の中で、Pro・Max・Team・シート制 Enterprise の Claude Code の5時間上限を2倍にし、Pro と Max の Claude Code についてピーク時間の上限削減を廃止しました。</li>
+        </ul>
+        <p>つまり、ピーク時に上限が早く減ることはなくなりましたが、この時間帯のサービス負荷は依然として最も高く、<a href={L('/')}>ヒートマップ</a>でも確認できます。ピーク時間は今も応答速度や <code>overloaded</code> エラーの頻度に影響します。</p>
+
+        <h2>上限の範囲でより多くこなすには</h2>
+        <ul>
+          <li><b>コンテキストを軽く保つ：</b>関係のない作業の間では <code>/clear</code>、長いセッションでは <code>/compact</code> を使いましょう。コンテキストが長いほど上限を多く消費します。</li>
+          <li><b>作業に合ったモデルを選ぶ：</b><code>/model</code> で切り替えます。日常的な修正に最大のモデルはほとんど必要ありません。</li>
+          <li><b>ウィンドウを計画する：</b>最初のメッセージで5時間のカウントが始まります。<a href={L('/best-time-to-use-claude-code/')}>空いている時間</a>に始めれば、都合のよいタイミングでリセットされます。</li>
+          <li><b>返答が遅くてもプロンプトを再送しない</b>ようにしましょう。</li>
+        </ul>
+        <p>方法のまとめ：<a href={L('/save-claude-code-limits/')}>Claude Code の利用上限を節約する方法</a>。</p>
+        <p class="small muted">このページは Anthropic の公開情報をまとめたものです。Hourglyph は独立したプロジェクトで、上限に関する内部データにはアクセスできません。</p>
+      </div>
+    ),
+  })}
 </Base>

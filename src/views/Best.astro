@@ -3,58 +3,92 @@ import Base from '../layouts/Base.astro';
 import Heatmap from '../components/Heatmap.astro';
 import Insights from '../components/Insights.astro';
 import I18nData from '../components/I18nData.astro';
-import { localize, type Lang } from '../i18n';
+import { localize, tr, type Lang } from '../i18n';
 import { page } from '../lib/pages';
 import { getSnapshot } from '../lib/snapshot';
 import { articleJsonLd } from '../lib/jsonld';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const ru = lang === 'ru';
 const meta = page('best');
 const snap = await getSnapshot();
 const L = (p: string) => localize(lang, p);
 ---
-<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: ru ? 'Лучшее время' : 'Best time', path: meta.path }]}>
-  <h1>{ru ? 'Лучшее время для работы с Claude Code' : 'The best time to use Claude Code'}</h1>
+<Base lang={lang} page={meta} jsonLd={[articleJsonLd(lang, meta)]} crumbs={[{ name: tr(lang, { en: 'Best time', ru: 'Лучшее время', zh: '最佳时间', ja: 'おすすめの時間' }), path: meta.path }]}>
+  <h1>{tr(lang, { en: 'The best time to use Claude Code', ru: 'Лучшее время для работы с Claude Code', zh: '使用 Claude Code 的最佳时间', ja: 'Claude Code を使うおすすめの時間' })}</h1>
   <p class="lead">
-    {ru
-      ? 'Короткий ответ: вне будничного окна 5:00–11:00 по тихоокеанскому времени (15:00–21:00 по Москве летом, 16:00–22:00 зимой). В ненагруженные часы работа идёт ровнее, меньше сбоев и повторов — и лимиты тратятся экономнее. Ниже — карта по реальным сессиям в вашем часовом поясе и советы, как планировать работу.'
-      : 'Short answer: outside the weekday 5–11 AM Pacific window (8 AM–2 PM Eastern, 2–8 PM in Central Europe). Off-peak, work runs smoother with fewer failures and retries — so your limits go further. Below is a heatmap of real sessions in your time zone and practical advice for planning your work.'}
+    {tr(lang, {
+      en: 'Short answer: outside the weekday 5–11 AM Pacific window (8 AM–2 PM Eastern, 2–8 PM in Central Europe). Off-peak, work runs smoother with fewer failures and retries — so your limits go further. Below is a heatmap of real sessions in your time zone and practical advice for planning your work.',
+      ru: 'Короткий ответ: вне будничного окна 5:00–11:00 по тихоокеанскому времени (15:00–21:00 по Москве летом, 16:00–22:00 зимой). В ненагруженные часы работа идёт ровнее, меньше сбоев и повторов — и лимиты тратятся экономнее. Ниже — карта по реальным сессиям в вашем часовом поясе и советы, как планировать работу.',
+      zh: '简短回答：避开工作日太平洋时间 5:00–11:00 的高峰窗口（北京时间 20:00–次日 02:00，美国冬令时期间为 21:00–03:00）。在非高峰时段工作更顺畅，失败和重跑更少，额度也就用得更久。下面是按你的时区显示的真实会话热力图，以及安排工作的实用建议。',
+      ja: '結論：平日の太平洋時間 5:00〜11:00 を避けることです（日本時間では 21:00〜翌 03:00、米国の冬時間中は 22:00〜翌 04:00）。空いている時間帯は動作が安定し、失敗や再実行が減るため、利用上限も長持ちします。以下は、あなたのタイムゾーンで表示した実際のセッションのヒートマップと、作業計画のヒントです。',
+    })}
   </p>
 
-  <h2>{ru ? 'Карта в вашем часовом поясе' : 'Heatmap in your time zone'}</h2>
+  <h2>{tr(lang, { en: 'Heatmap in your time zone', ru: 'Карта в вашем часовом поясе', zh: '你所在时区的热力图', ja: 'あなたのタイムゾーンのヒートマップ' })}</h2>
   <div class="card"><Heatmap lang={lang} cells={snap.all} tz="auto" /></div>
 
-  <h2>{ru ? 'Пиковые и спокойные окна' : 'Peak and quiet windows'}</h2>
-  <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={ru ? 'по UTC' : 'in UTC'} />
-  <p class="small muted" style="margin-top:12px">{ru ? <>Нужен местный пояс? <a href={L('/peak-hours/')}>Выберите свой</a>.</> : <>Want it in local time? <a href={L('/peak-hours/')}>Pick your zone</a>.</>}</p>
+  <h2>{tr(lang, { en: 'Peak and quiet windows', ru: 'Пиковые и спокойные окна', zh: '高峰与空闲时段', ja: 'ピークと空いている時間帯' })}</h2>
+  <Insights lang={lang} cells={snap.all} tz="UTC" zonePhrase={tr(lang, { en: 'in UTC', ru: 'по UTC', zh: 'UTC 时间', ja: 'UTC' })} />
+  <p class="small muted" style="margin-top:12px">{tr(lang, {
+    en: <>Want it in local time? <a href={L('/peak-hours/')}>Pick your zone</a>.</>,
+    ru: <>Нужен местный пояс? <a href={L('/peak-hours/')}>Выберите свой</a>.</>,
+    zh: <>想看当地时间？<a href={L('/peak-hours/')}>选择你的时区</a>。</>,
+    ja: <>現地時間で見たい場合は<a href={L('/peak-hours/')}>タイムゾーンを選択</a>してください。</>,
+  })}</p>
 
-  <h2>{ru ? 'Как спланировать работу' : 'How to plan around the peak'}</h2>
+  <h2>{tr(lang, { en: 'How to plan around the peak', ru: 'Как спланировать работу', zh: '如何避开高峰安排工作', ja: 'ピークを避けた作業の計画' })}</h2>
   <div class="prose">
-    {ru ? (
-      <>
-        <h3>Тяжёлые задачи — в спокойные часы</h3>
-        <p>Многошаговые задачи агента — рефакторинг модуля, миграция, генерация тестов — делают много запросов подряд. В пиковое окно они дольше выполняются и чаще упираются в ошибки перегрузки. Запускайте их утром по европейскому времени, поздно вечером или в выходные.</p>
-        <h3>В пик — короткие итерации</h3>
-        <p>Ревью диффа, точечные правки и вопросы по коду переносят задержки легче. Если ответ задерживается, не отправляйте запрос повторно — это только увеличивает очередь и расход лимита.</p>
-        <h3>Неинтерактивные запуски — ночью</h3>
-        <p>Задачи, не требующие вашего участия, можно запускать через <code>claude -p "…"</code> из скрипта или по расписанию (cron, CI) на спокойные часы.</p>
-        <h3>Следите за лимитами, а не только за часами</h3>
-        <p>5-часовое окно лимита начинается с первого сообщения. Начав работу в спокойное время, вы и обновление лимита получите раньше пика. Подробнее — в разделе <a href={L('/claude-code-usage-limits/')}>о лимитах Claude Code</a>.</p>
-      </>
-    ) : (
-      <>
-        <h3>Heavy work in quiet hours</h3>
-        <p>Multi-step agent tasks — refactoring a module, running a migration, generating tests — fire many requests in a row. During the peak they take longer and are more likely to hit overload errors. Run them in the European morning, late evening in the Americas, or at the weekend.</p>
-        <h3>Short loops during the peak</h3>
-        <p>Reviewing a diff, targeted edits and questions about code tolerate latency better. If a reply is slow, don’t resend the prompt — it only lengthens the queue and burns your limit.</p>
-        <h3>Unattended runs at night</h3>
-        <p>Jobs that don’t need you can run headless with <code>claude -p "…"</code> from a script or on a schedule (cron, CI) during quiet hours.</p>
-        <h3>Watch your limit window, not just the clock</h3>
-        <p>The 5-hour limit window starts with your first message. Starting in a quiet period means your window also resets before the next peak. More in <a href={L('/claude-code-usage-limits/')}>Claude Code usage limits explained</a>.</p>
-      </>
-    )}
+    {tr(lang, {
+      en: (
+        <>
+          <h3>Heavy work in quiet hours</h3>
+          <p>Multi-step agent tasks — refactoring a module, running a migration, generating tests — fire many requests in a row. During the peak they take longer and are more likely to hit overload errors. Run them in the European morning, late evening in the Americas, or at the weekend.</p>
+          <h3>Short loops during the peak</h3>
+          <p>Reviewing a diff, targeted edits and questions about code tolerate latency better. If a reply is slow, don’t resend the prompt — it only lengthens the queue and burns your limit.</p>
+          <h3>Unattended runs at night</h3>
+          <p>Jobs that don’t need you can run headless with <code>claude -p "…"</code> from a script or on a schedule (cron, CI) during quiet hours.</p>
+          <h3>Watch your limit window, not just the clock</h3>
+          <p>The 5-hour limit window starts with your first message. Starting in a quiet period means your window also resets before the next peak. More in <a href={L('/claude-code-usage-limits/')}>Claude Code usage limits explained</a>.</p>
+        </>
+      ),
+      ru: (
+        <>
+          <h3>Тяжёлые задачи — в спокойные часы</h3>
+          <p>Многошаговые задачи агента — рефакторинг модуля, миграция, генерация тестов — делают много запросов подряд. В пиковое окно они дольше выполняются и чаще упираются в ошибки перегрузки. Запускайте их утром по европейскому времени, поздно вечером или в выходные.</p>
+          <h3>В пик — короткие итерации</h3>
+          <p>Ревью диффа, точечные правки и вопросы по коду переносят задержки легче. Если ответ задерживается, не отправляйте запрос повторно — это только увеличивает очередь и расход лимита.</p>
+          <h3>Неинтерактивные запуски — ночью</h3>
+          <p>Задачи, не требующие вашего участия, можно запускать через <code>claude -p "…"</code> из скрипта или по расписанию (cron, CI) на спокойные часы.</p>
+          <h3>Следите за лимитами, а не только за часами</h3>
+          <p>5-часовое окно лимита начинается с первого сообщения. Начав работу в спокойное время, вы и обновление лимита получите раньше пика. Подробнее — в разделе <a href={L('/claude-code-usage-limits/')}>о лимитах Claude Code</a>.</p>
+        </>
+      ),
+      zh: (
+        <>
+          <h3>繁重任务放在空闲时段</h3>
+          <p>多步骤的智能体任务——重构模块、执行迁移、生成测试——会连续发出大量请求。在高峰时段，它们耗时更长，也更容易遇到过载错误。可以安排在欧洲早晨、美洲深夜或周末运行；对中国用户来说，白天和上午通常更空闲。</p>
+          <h3>高峰时段做短循环</h3>
+          <p>审阅 diff、定点修改、询问代码问题，这类工作对延迟更宽容。如果回复变慢，不要重复发送提示——这只会让队列更长，还会白白消耗额度。</p>
+          <h3>无人值守的任务放在夜间</h3>
+          <p>不需要你参与的任务，可以用 <code>claude -p "…"</code> 以无界面模式从脚本或定时任务（cron、CI）在空闲时段运行。</p>
+          <h3>关注额度窗口，而不只是时钟</h3>
+          <p>5 小时额度窗口从你发送第一条消息开始计时。在空闲时段开工，额度也会在下一个高峰到来之前重置。详见 <a href={L('/claude-code-usage-limits/')}>Claude Code 用量限制详解</a>。</p>
+        </>
+      ),
+      ja: (
+        <>
+          <h3>重い作業は空いている時間に</h3>
+          <p>モジュールのリファクタリング、マイグレーション、テスト生成といった複数ステップのエージェント作業は、連続して多くのリクエストを送ります。ピーク時間帯には時間がかかり、過負荷エラーにも遭いやすくなります。ヨーロッパの朝、米国の深夜、または週末に実行しましょう。日本では日中から夕方にかけてが比較的空いています。</p>
+          <h3>ピーク中は短いサイクルで</h3>
+          <p>差分のレビュー、ピンポイントの修正、コードについての質問は、多少の遅延があっても支障が少ない作業です。返答が遅くてもプロンプトを再送しないでください。キューが長くなり、上限を無駄に消費するだけです。</p>
+          <h3>無人で回す作業は夜間に</h3>
+          <p>あなたの操作が不要な作業は、<code>claude -p "…"</code> を使ってスクリプトやスケジュール（cron、CI）から空いている時間にヘッドレスで実行できます。</p>
+          <h3>時計だけでなく上限のウィンドウを意識する</h3>
+          <p>5時間の上限ウィンドウは最初のメッセージから始まります。空いている時間に作業を始めれば、次のピーク前にリセットされます。詳しくは <a href={L('/claude-code-usage-limits/')}>Claude Code の利用上限の解説</a> をご覧ください。</p>
+        </>
+      ),
+    })}
   </div>
   <I18nData lang={lang} />
 </Base>
